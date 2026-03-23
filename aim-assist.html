@@ -7,169 +7,74 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --bg: #fafaf8;
-      --bg2: #f3f2ee;
-      --bg3: #eceae4;
-      --border: #e0ddd6;
-      --text: #1a1916;
-      --text2: #6b6860;
-      --text3: #a8a59e;
-      --purple-dark: #4b30a8;
-      --purple-mid: #6c4fd4;
-      --purple-light: #9b82e8;
-      --accent-bg: #f0ecfd;
-      --accent-bg2: #e4dcfb;
-      --accent-border: #c4b5f4;
-      --font-sans: 'Syne', sans-serif;
-      --font-mono: 'DM Mono', monospace;
+      --bg: #fafaf8; --bg2: #f3f2ee; --bg3: #eceae4;
+      --border: #e0ddd6; --border2: #ccc9c0;
+      --text: #1a1916; --text2: #6b6860; --text3: #a8a59e;
+      --purple-dark: #4b30a8; --purple-mid: #6c4fd4; --purple-light: #9b82e8;
+      --accent-bg: #f0ecfd; --accent-bg2: #e4dcfb; --accent-border: #c4b5f4;
+      --font-sans: 'Syne', sans-serif; --font-mono: 'DM Mono', monospace;
       --max-w: 820px;
     }
-
     html { scroll-behavior: smooth; }
-
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--font-sans);
-      font-size: 16px;
-      min-height: 100vh;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
-
+    body { background: var(--bg); color: var(--text); font-family: var(--font-sans); font-size: 16px; min-height: 100vh; -webkit-font-smoothing: antialiased; }
     .bg-orbs { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
     .orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.28; }
     .orb-1 { width: 600px; height: 600px; top: -150px; left: -150px; background: radial-gradient(circle, #c4b5f4, transparent); }
     .orb-2 { width: 450px; height: 450px; top: 300px; right: -100px; background: radial-gradient(circle, #9b82e8, transparent); }
     .orb-3 { width: 400px; height: 400px; bottom: 0; left: 30%; background: radial-gradient(circle, #ddd6fe, transparent); }
-
     .page { position: relative; z-index: 1; }
     .container { max-width: var(--max-w); margin: 0 auto; padding: 0 2rem; }
-
-    /* Back link */
-    .back {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      font-family: var(--font-mono);
-      font-size: 12px;
-      color: var(--text3);
-      text-decoration: none;
-      padding: 2rem 0 0;
-      transition: color 0.15s;
-    }
+    .back { display: inline-flex; align-items: center; gap: 0.4rem; font-family: var(--font-mono); font-size: 12px; color: var(--text3); text-decoration: none; padding: 2rem 0 0; transition: color 0.15s; }
     .back:hover { color: var(--purple-mid); }
-
-    /* Header */
     .project-header { padding: 2rem 0 2.5rem; }
-    .project-tag {
-      font-family: var(--font-mono);
-      font-size: 10px;
-      color: var(--purple-dark);
-      background: var(--accent-bg2);
-      border: 0.5px solid var(--accent-border);
-      padding: 2px 10px;
-      border-radius: 2px;
-      display: inline-block;
-      margin-bottom: 1rem;
-    }
-    .project-title {
-      font-size: clamp(2rem, 5vw, 3rem);
-      font-weight: 700;
-      line-height: 1.1;
-      letter-spacing: -0.03em;
-      color: var(--text);
-    }
-    .project-sub {
-      margin-top: 1rem;
-      font-size: 15px;
-      color: var(--text2);
-      line-height: 1.75;
-      max-width: 580px;
-    }
-    .project-chips {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-      margin-top: 1.25rem;
-    }
+    .project-tag { font-family: var(--font-mono); font-size: 10px; color: var(--purple-dark); background: var(--accent-bg2); border: 0.5px solid var(--accent-border); padding: 2px 10px; border-radius: 2px; display: inline-block; margin-bottom: 1rem; }
+    .project-title { font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; line-height: 1.1; letter-spacing: -0.03em; color: var(--text); }
+    .project-sub { margin-top: 1rem; font-size: 15px; color: var(--text2); line-height: 1.75; max-width: 580px; }
+    .project-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 1.25rem; }
     .chip { font-family: var(--font-mono); font-size: 10px; color: var(--text2); background: var(--bg3); padding: 3px 10px; border-radius: 2px; }
     .chip-accent { font-family: var(--font-mono); font-size: 10px; color: var(--purple-dark); background: var(--accent-bg2); border: 0.5px solid var(--accent-border); padding: 3px 10px; border-radius: 2px; }
-
     .divider { border: none; border-top: 0.5px solid var(--border); margin: 0; }
-
-    /* Content sections */
     .section { padding: 2.5rem 0; }
     .section-label { font-family: var(--font-mono); font-size: 11px; color: var(--text3); letter-spacing: 0.12em; margin-bottom: 1.5rem; }
 
-    /* Placeholder image slots */
-    .image-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 1rem;
+    /* Schematic */
+    .schematic-wrap {
+      width: 100%; aspect-ratio: 4/3;
+      background: #f8f7f3;
+      border: 0.5px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+      cursor: grab;
+      user-select: none;
     }
-    .image-placeholder {
-      aspect-ratio: 16/10;
-      background: var(--bg2);
-      border: 0.5px dashed var(--border2);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .image-placeholder span {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      color: var(--text3);
-    }
+    .schematic-wrap:active { cursor: grabbing; }
+    .schematic-hint { position: absolute; bottom: 12px; right: 14px; font-family: var(--font-mono); font-size: 10px; color: var(--text3); pointer-events: none; z-index: 10; }
+    .zoom-controls { position: absolute; top: 12px; right: 14px; display: flex; flex-direction: column; gap: 4px; z-index: 10; }
+    .zoom-btn { width: 28px; height: 28px; border-radius: 4px; border: 0.5px solid var(--border2); background: rgba(255,255,255,0.85); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; font-size: 15px; color: var(--text2); cursor: pointer; line-height: 1; transition: background 0.15s; font-family: var(--font-sans); }
+    .zoom-btn:hover { background: var(--accent-bg); color: var(--purple-mid); }
+    #schematic-svg { width: 100%; height: 100%; transform-origin: 0 0; display: block; }
+    .s-tooltip { position: absolute; background: white; border: 0.5px solid var(--accent-border); border-radius: 8px; padding: 9px 13px; font-family: var(--font-mono); font-size: 11px; color: var(--text2); pointer-events: none; opacity: 0; transition: opacity 0.15s; z-index: 20; max-width: 210px; line-height: 1.65; box-shadow: 0 4px 20px rgba(108,79,212,0.12); }
+    .s-tooltip.visible { opacity: 1; }
+    .s-tooltip strong { color: var(--purple-dark); display: block; margin-bottom: 3px; font-size: 11px; }
+    .comp { cursor: pointer; }
+    .comp:hover rect, .comp:hover circle { filter: brightness(0.96); }
 
-    /* Placeholder text blocks */
-    .content-placeholder {
-      background: var(--bg2);
-      border: 0.5px dashed var(--border2);
-      border-radius: 8px;
-      padding: 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .content-placeholder span {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      color: var(--text3);
-    }
-
-    /* Links row */
-    .links-row {
-      display: flex;
-      gap: 0.75rem;
-      flex-wrap: wrap;
-    }
-    .project-link {
-      font-family: var(--font-mono);
-      font-size: 12px;
-      color: var(--purple-dark);
-      border: 0.5px solid var(--accent-border);
-      background: var(--accent-bg);
-      padding: 7px 16px;
-      border-radius: 2px;
-      text-decoration: none;
-      transition: background 0.15s;
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    /* Bottom spacing */
+    /* Other sections */
+    .image-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
+    .image-placeholder { aspect-ratio: 16/10; background: var(--bg2); border: 0.5px dashed var(--border2); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+    .image-placeholder span { font-family: var(--font-mono); font-size: 11px; color: var(--text3); }
+    .content-placeholder { background: var(--bg2); border: 0.5px dashed var(--border2); border-radius: 8px; padding: 2rem; display: flex; align-items: center; justify-content: center; }
+    .content-placeholder span { font-family: var(--font-mono); font-size: 11px; color: var(--text3); }
+    .links-row { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    .project-link { font-family: var(--font-mono); font-size: 12px; color: var(--purple-dark); border: 0.5px solid var(--accent-border); background: var(--accent-bg); padding: 7px 16px; border-radius: 2px; text-decoration: none; opacity: 0.5; cursor: not-allowed; }
     .bottom-space { height: 5rem; }
   </style>
 </head>
 <body>
-
   <div class="bg-orbs">
     <div class="orb orb-1"></div>
     <div class="orb orb-2"></div>
@@ -178,33 +83,30 @@
 
   <div class="page">
     <div class="container">
-
       <a href="index.html" class="back">&#8592; back</a>
 
       <header class="project-header">
         <div class="project-tag">HARDWARE</div>
         <h1 class="project-title">AI-Powered Aim Assist System</h1>
-        <p class="project-sub">
-          Jetson Orin Nano + global shutter camera + EMS actuators. Dual-mode PID controller running at 1kHz and SPI digital potentiometers for precise muscle stimulation control, achieving a 15ms pixel-to-stimulation response time.
-        </p>
-        <div class="project-chips">
-          <span class="chip">Python</span>
-          <span class="chip">SPI</span>
-          <span class="chip">PID</span>
-          <span class="chip">Jetson Orin Nano</span>
-          <span class="chip">EMS</span>
-          <span class="chip-accent">3rd place @ CMU HackberryPi</span>
-        </div>
+        <p class="project-sub">Jetson Orin Nano + global shutter camera + EMS actuators. Dual-mode PID controller running at 1kHz and SPI digital potentiometers for precise muscle stimulation control, achieving a 15ms pixel-to-stimulation response time.</p>
       </header>
 
       <hr class="divider" />
 
       <section class="section">
-        <p class="section-label">images</p>
-        <div class="image-grid">
-          <div class="image-placeholder"><span>photo / diagram placeholder</span></div>
-          <div class="image-placeholder"><span>photo / diagram placeholder</span></div>
-          <div class="image-placeholder"><span>photo / diagram placeholder</span></div>
+        <p class="section-label">overview</p>
+        <img src="autoreflex.png" alt="AutoReflex system overview" style="width:100%;border-radius:8px;border:0.5px solid var(--border);display:block;" />
+        <div class="project-chips" style="margin-top:1rem;">
+          <span class="chip">Python</span>
+          <span class="chip">C++</span>
+          <span class="chip">SPI</span>
+          <span class="chip">PID Control</span>
+          <span class="chip">YOLO11n</span>
+          <span class="chip">OpenCV</span>
+          <span class="chip">TENS</span>
+          <span class="chip">Jetson Orin Nano</span>
+          <span class="chip">EMS / TENS</span>
+          <span class="chip-accent">3rd place @ CMU HackberryPi</span>
         </div>
       </section>
 
@@ -212,8 +114,253 @@
 
       <section class="section">
         <p class="section-label">overview</p>
-        <div class="content-placeholder" style="min-height: 120px;">
-          <span>project description placeholder</span>
+        <img src="autoreflex.png" alt="AutoReflex system overview" style="width:100%;border-radius:8px;border:0.5px solid var(--border);display:block;" />
+        <div class="project-chips" style="margin-top:1rem;">
+          <span class="chip">Python</span>
+          <span class="chip">C++</span>
+          <span class="chip">SPI</span>
+          <span class="chip">PID Control</span>
+          <span class="chip">YOLO11n</span>
+          <span class="chip">OpenCV</span>
+          <span class="chip">TENS</span>
+          <span class="chip">Jetson Orin Nano</span>
+          <span class="chip">EMS / TENS</span>
+          <span class="chip-accent">3rd place @ CMU HackberryPi</span>
+        </div>
+      </section>
+
+      <hr class="divider" />
+
+      <section class="section">
+        <p class="section-label">system schematic</p>
+        <div class="schematic-wrap" id="schematic-wrap">
+          <div class="zoom-controls">
+            <button class="zoom-btn" id="zoom-in">+</button>
+            <button class="zoom-btn" id="zoom-out">−</button>
+            <button class="zoom-btn" id="zoom-reset" style="font-size:11px;">⌂</button>
+          </div>
+          <div class="schematic-hint">scroll to zoom · drag to pan</div>
+          <div class="s-tooltip" id="s-tooltip"></div>
+
+          <svg id="schematic-svg" viewBox="0 0 960 720" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="sgrid" width="24" height="24" patternUnits="userSpaceOnUse">
+                <path d="M 24 0 L 0 0 0 24" fill="none" stroke="#e5e2d8" stroke-width="0.6"/>
+              </pattern>
+              <marker id="arr"        markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0,0 L0,7 L7,3.5 z" fill="#8a7cc8"/></marker>
+              <marker id="arr-red"    markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0,0 L0,7 L7,3.5 z" fill="#c0524a"/></marker>
+              <marker id="arr-orange" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0,0 L0,7 L7,3.5 z" fill="#c47c30"/></marker>
+              <marker id="arr-gray"   markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0,0 L0,7 L7,3.5 z" fill="#888"/></marker>
+              <marker id="arr-green"  markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0,0 L0,7 L7,3.5 z" fill="#5a9e6f"/></marker>
+            </defs>
+
+            <!-- grid -->
+            <rect width="960" height="720" fill="url(#sgrid)"/>
+
+            <!-- ===== WIRES ===== -->
+            <!-- Camera → Jetson -->
+            <line x1="128" y1="252" x2="182" y2="252" stroke="#c47c30" stroke-width="2" marker-end="url(#arr-orange)"/>
+
+            <!-- Jetson → RPi (Eth) -->
+            <line x1="294" y1="252" x2="340" y2="252" stroke="#8a7cc8" stroke-width="2" marker-end="url(#arr)"/>
+            <text x="305" y="245" font-family="DM Mono,monospace" font-size="9" fill="#8a7cc8">Eth</text>
+
+            <!-- RPi 5V/SDI1/SDI2/CLK → TENS CH1 -->
+            <polyline points="460,218 510,218 510,192 556,192" fill="none" stroke="#c47c30" stroke-width="1.6" marker-end="url(#arr-orange)"/>
+            <text x="464" y="213" font-family="DM Mono,monospace" font-size="8" fill="#c47c30">5V</text>
+            <polyline points="460,232 510,232 510,212 556,212" fill="none" stroke="#c47c30" stroke-width="1.6"/>
+            <text x="464" y="228" font-family="DM Mono,monospace" font-size="8" fill="#c47c30">SDI1</text>
+            <polyline points="460,248 510,248 510,232 556,232" fill="none" stroke="#c47c30" stroke-width="1.6"/>
+            <text x="464" y="244" font-family="DM Mono,monospace" font-size="8" fill="#c47c30">SDI2</text>
+            <polyline points="460,264 510,264 510,252 556,252" fill="none" stroke="#c47c30" stroke-width="1.6"/>
+            <text x="464" y="260" font-family="DM Mono,monospace" font-size="8" fill="#c47c30">CLK</text>
+
+            <!-- Same lines to TENS CH2 -->
+            <polyline points="510,192 680,192" fill="none" stroke="#c47c30" stroke-width="1.6" marker-end="url(#arr-orange)"/>
+            <polyline points="510,252 680,252" fill="none" stroke="#c47c30" stroke-width="1.6" marker-end="url(#arr-orange)"/>
+
+            <!-- RPi SC/MC/GND → resistors → mosfet -->
+            <line x1="340" y1="340" x2="500" y2="340" stroke="#888" stroke-width="1.6"/>
+            <text x="344" y="334" font-family="DM Mono,monospace" font-size="8" fill="#888">GND</text>
+            <line x1="340" y1="358" x2="500" y2="358" stroke="#888" stroke-width="1.6"/>
+            <text x="344" y="353" font-family="DM Mono,monospace" font-size="8" fill="#888">SC</text>
+            <line x1="340" y1="376" x2="500" y2="376" stroke="#888" stroke-width="1.6"/>
+            <text x="344" y="372" font-family="DM Mono,monospace" font-size="8" fill="#888">MC</text>
+
+            <!-- motor below RPi -->
+            <line x1="400" y1="400" x2="400" y2="450" stroke="#888" stroke-width="1.6" marker-end="url(#arr-gray)"/>
+            <line x1="400" y1="510" x2="400" y2="530" stroke="#888" stroke-width="1.6" marker-end="url(#arr-gray)"/>
+
+            <!-- MOSFET gate → Relay -->
+            <line x1="610" y1="360" x2="648" y2="360" stroke="#888" stroke-width="1.6" marker-end="url(#arr-gray)"/>
+
+            <!-- Relay → HID -->
+            <line x1="762" y1="354" x2="800" y2="354" stroke="#8a7cc8" stroke-width="2" marker-end="url(#arr)"/>
+
+            <!-- 1N5819 flyback wires -->
+            <polyline points="762,315 800,315 800,354" fill="none" stroke="#888" stroke-width="1.4"/>
+
+            <!-- 12V Source Vt → relay/motor top -->
+            <polyline points="500,556 500,536 590,536 590,400" fill="none" stroke="#c0524a" stroke-width="2"/>
+            <!-- 12V GND -->
+            <line x1="460" y1="582" x2="460" y2="600" stroke="#888" stroke-width="1.5" marker-end="url(#arr-gray)"/>
+
+            <!-- 5V Source Vt → HID + RPi right -->
+            <polyline points="500,640 500,620 870,620 870,354" fill="none" stroke="#c0524a" stroke-width="2"/>
+            <!-- 5V GND -->
+            <line x1="460" y1="666" x2="460" y2="684" stroke="#888" stroke-width="1.5" marker-end="url(#arr-gray)"/>
+
+            <!-- ===== COMPONENTS ===== -->
+
+            <!-- Camera -->
+            <g class="comp" data-tip="Camera" data-desc="Global shutter Arducam. Captures real-time frames. Feeds into Jetson Orin Nano for YOLO-11 target detection and HSV color filtering.">
+              <rect x="62" y="224" width="66" height="56" rx="7" fill="#f3f2ee" stroke="#ccc9c0" stroke-width="1.5"/>
+              <circle cx="95" cy="252" r="16" fill="none" stroke="#6b6860" stroke-width="1.5"/>
+              <circle cx="95" cy="252" r="7" fill="#e0ddd6"/>
+              <line x1="62" y1="240" x2="128" y2="240" stroke="#ccc9c0" stroke-width="0.8"/>
+              <text x="95" y="272" text-anchor="middle" font-family="DM Mono,monospace" font-size="8" fill="#888">camera</text>
+            </g>
+
+            <!-- Jetson Orin Nano -->
+            <g class="comp" data-tip="Jetson Orin Nano" data-desc="Runs fine-tuned YOLO-11 model for real-time enemy detection. Applies HSV color filtering and dynamic PID adjustment. Sends control coordinates to Raspberry Pi via Ethernet.">
+              <rect x="182" y="210" width="112" height="84" rx="7" fill="#edf7f0" stroke="#a8d5b5" stroke-width="1.5"/>
+              <text x="238" y="245" text-anchor="middle" font-family="Syne,sans-serif" font-size="12" font-weight="700" fill="#5a9e6f">Jetson</text>
+              <text x="238" y="262" text-anchor="middle" font-family="Syne,sans-serif" font-size="12" font-weight="700" fill="#5a9e6f">Orin Nano</text>
+              <text x="238" y="284" text-anchor="middle" font-family="DM Mono,monospace" font-size="8" fill="#5a9e6f">YOLO-11 · HSV</text>
+            </g>
+
+            <!-- Raspberry Pi -->
+            <g class="comp" data-tip="Raspberry Pi 4" data-desc="Receives target coords from Jetson via Ethernet. Runs 1kHz dual-mode PID loop. Sends SPI to TENS potentiometers for EMS control, and SC/MC signals to the motor driver for wrist actuation.">
+              <rect x="340" y="200" width="120" height="200" rx="7" fill="#eaf1fb" stroke="#a8c4e8" stroke-width="1.5"/>
+              <text x="400" y="234" text-anchor="middle" font-family="Syne,sans-serif" font-size="12" font-weight="700" fill="#4a7fb5">Raspberry</text>
+              <text x="400" y="252" text-anchor="middle" font-family="Syne,sans-serif" font-size="12" font-weight="700" fill="#4a7fb5">Pi 4</text>
+              <text x="400" y="275" text-anchor="middle" font-family="DM Mono,monospace" font-size="8.5" fill="#4a7fb5">PID · 1kHz</text>
+              <line x1="340" y1="290" x2="460" y2="290" stroke="#a8c4e8" stroke-width="0.7" stroke-dasharray="4,3"/>
+              <text x="352" y="308" font-family="DM Mono,monospace" font-size="8" fill="#4a7fb5">→ 5V  SDI1</text>
+              <text x="352" y="322" font-family="DM Mono,monospace" font-size="8" fill="#4a7fb5">→ SDI2  CLK</text>
+              <text x="352" y="344" font-family="DM Mono,monospace" font-size="8" fill="#888">← GND</text>
+              <text x="352" y="358" font-family="DM Mono,monospace" font-size="8" fill="#888">← SC</text>
+              <text x="352" y="372" font-family="DM Mono,monospace" font-size="8" fill="#888">← MC</text>
+            </g>
+
+            <!-- TENS CH1 -->
+            <g class="comp" data-tip="TENS7000 CH1" data-desc="MCP4131 digital potentiometer controlled via SPI. Modulates EMS pulse intensity on arm muscle group 1. Amplitude adjusted in real-time by the 1kHz PID loop.">
+              <rect x="556" y="170" width="114" height="75" rx="7" fill="#eaf1fb" stroke="#a8c4e8" stroke-width="1.5"/>
+              <text x="613" y="198" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" fill="#4a7fb5">TENS7000</text>
+              <text x="613" y="214" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" fill="#4a7fb5">CH1</text>
+              <rect x="576" y="222" width="54" height="16" rx="3" fill="none" stroke="#4a7fb5" stroke-width="1.2"/>
+              <line x1="556" y1="230" x2="576" y2="230" stroke="#4a7fb5" stroke-width="1.2"/>
+              <line x1="630" y1="230" x2="650" y2="230" stroke="#4a7fb5" stroke-width="1.2" marker-end="url(#arr-orange)"/>
+            </g>
+
+            <!-- TENS CH2 -->
+            <g class="comp" data-tip="TENS7000 CH2" data-desc="MCP4131 digital potentiometer controlled via SPI. Modulates EMS pulse intensity on arm muscle group 2. Controls a second independent muscle for orthogonal directional correction.">
+              <rect x="680" y="170" width="114" height="75" rx="7" fill="#eaf1fb" stroke="#a8c4e8" stroke-width="1.5"/>
+              <text x="737" y="198" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" fill="#4a7fb5">TENS7000</text>
+              <text x="737" y="214" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" fill="#4a7fb5">CH2</text>
+              <rect x="700" y="222" width="54" height="16" rx="3" fill="none" stroke="#4a7fb5" stroke-width="1.2"/>
+              <line x1="680" y1="230" x2="700" y2="230" stroke="#4a7fb5" stroke-width="1.2"/>
+              <line x1="754" y1="230" x2="774" y2="230" stroke="#4a7fb5" stroke-width="1.2" marker-end="url(#arr-orange)"/>
+            </g>
+
+            <!-- Arm Control brace -->
+            <text x="672" y="156" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#4a7fb5">Arm Control ▼</text>
+
+            <!-- 1kΩ resistors -->
+            <g class="comp" data-tip="1kΩ Resistors (×2)" data-desc="Current limiting resistors between the Raspberry Pi GPIO output and the MOSFET gate / motor driver input. Protects GPIO pins from overcurrent.">
+              <rect x="500" y="332" width="40" height="16" rx="3" fill="#f3f2ee" stroke="#ccc9c0" stroke-width="1.2"/>
+              <text x="520" y="344" text-anchor="middle" font-family="DM Mono,monospace" font-size="8" fill="#888">1kΩ</text>
+              <rect x="500" y="356" width="40" height="16" rx="3" fill="#f3f2ee" stroke="#ccc9c0" stroke-width="1.2"/>
+              <text x="520" y="368" text-anchor="middle" font-family="DM Mono,monospace" font-size="8" fill="#888">1kΩ</text>
+            </g>
+
+            <!-- Motor / Wrist Control -->
+            <g class="comp" data-tip="Servo Motor (Wrist Control)" data-desc="Feetech ST3215 servo. Driven by SC/MC signals from Raspberry Pi through 1kΩ resistors. Provides physical wrist movement for secondary aim correction mode. GND shared with main rail.">
+              <circle cx="400" cy="480" r="30" fill="#f3f2ee" stroke="#ccc9c0" stroke-width="1.5"/>
+              <circle cx="400" cy="480" r="20" fill="none" stroke="#888" stroke-width="1.2"/>
+              <text x="400" y="485" text-anchor="middle" font-family="Syne,sans-serif" font-size="15" font-weight="700" fill="#6b6860">M</text>
+              <path d="M 388,468 A 14,14 0 0,1 412,468" fill="none" stroke="#888" stroke-width="1.2"/>
+              <text x="400" y="522" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#888">Wrist Control</text>
+            </g>
+
+            <!-- MOSFET -->
+            <g class="comp" data-tip="N-Channel MOSFET" data-desc="Acts as a low-side switch between the RPi GPIO and the relay coil. Gate driven by RPi GPIO. Allows the 3.3V GPIO to switch the relay's higher-current 12V coil safely.">
+              <!-- body -->
+              <line x1="590" y1="335" x2="590" y2="390" stroke="#888" stroke-width="2"/>
+              <!-- gate -->
+              <line x1="574" y1="348" x2="574" y2="378" stroke="#888" stroke-width="2.5"/>
+              <line x1="558" y1="362" x2="574" y2="362" stroke="#888" stroke-width="1.6"/>
+              <!-- drain/source -->
+              <line x1="590" y1="348" x2="648" y2="348" stroke="#888" stroke-width="1.6"/>
+              <line x1="590" y1="378" x2="590" y2="410" stroke="#888" stroke-width="1.6" marker-end="url(#arr-gray)"/>
+              <text x="594" y="424" font-family="DM Mono,monospace" font-size="8" fill="#888">GND</text>
+              <!-- arrow on MOSFET channel -->
+              <polygon points="582,362 590,356 590,368" fill="#888"/>
+            </g>
+
+            <!-- Relay -->
+            <g class="comp" data-tip="Relay" data-desc="Electrically-controlled switch. RPi triggers via MOSFET. Switches the 12V line to the HID solenoid. DC+/DC− are the coil pins; Com/NC are the switched contacts. 1N5819 flyback diode protects the MOSFET from back-EMF.">
+              <rect x="648" y="318" width="114" height="72" rx="7" fill="#fdf0ef" stroke="#e8b8b5" stroke-width="1.5"/>
+              <text x="705" y="342" text-anchor="middle" font-family="Syne,sans-serif" font-size="12" font-weight="700" fill="#c0524a">Relay</text>
+              <text x="656" y="362" font-family="DM Mono,monospace" font-size="8" fill="#c0524a">DC+  DC−</text>
+              <text x="700" y="362" font-family="DM Mono,monospace" font-size="8" fill="#c0524a">Com</text>
+              <text x="738" y="362" font-family="DM Mono,monospace" font-size="8" fill="#c0524a">NC</text>
+              <text x="705" y="380" text-anchor="middle" font-family="DM Mono,monospace" font-size="7.5" fill="#c0524a">in</text>
+            </g>
+
+            <!-- 1N5819 flyback diode -->
+            <g class="comp" data-tip="1N5819 Flyback Diode" data-desc="Schottky diode placed across the relay coil to clamp the voltage spike when the coil de-energises. Protects the MOSFET from back-EMF inductive kickback.">
+              <polygon points="790,305 790,325 804,315" fill="#888"/>
+              <line x1="804" y1="304" x2="804" y2="326" stroke="#888" stroke-width="2"/>
+              <line x1="770" y1="315" x2="790" y2="315" stroke="#888" stroke-width="1.4"/>
+              <line x1="804" y1="315" x2="820" y2="315" stroke="#888" stroke-width="1.4"/>
+              <text x="790" y="298" text-anchor="middle" font-family="DM Mono,monospace" font-size="8" fill="#888">1N5819</text>
+            </g>
+
+            <!-- HID -->
+            <g class="comp" data-tip="HID Solenoid (Mouse Trigger)" data-desc="Solenoid-driven mouse trigger acting as a Human Input Device. Powered from the 5V/3A rail via the relay. When the PID loop confirms alignment, the relay closes and fires the solenoid, physically clicking the mouse.">
+              <circle cx="835" cy="354" r="34" fill="#f0ecfd" stroke="#c4b5f4" stroke-width="1.5"/>
+              <path d="M808,354 Q816,340 824,354 Q832,368 840,354 Q848,340 856,354 Q864,368 872,354" fill="none" stroke="#6c4fd4" stroke-width="1.8"/>
+              <text x="835" y="400" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" font-weight="500" fill="#6c4fd4">HID</text>
+              <line x1="835" y1="388" x2="835" y2="405" stroke="#888" stroke-width="1.4" marker-end="url(#arr-gray)"/>
+            </g>
+
+            <!-- 12V Source -->
+            <g class="comp" data-tip="12V, 2A Power Source" data-desc="Primary power rail powering the relay coil and solenoid actuation circuit. GND shared with logic ground.">
+              <rect x="400" y="536" width="130" height="56" rx="7" fill="#fdf0ef" stroke="#e8b8b5" stroke-width="1.5"/>
+              <text x="465" y="562" text-anchor="middle" font-family="Syne,sans-serif" font-size="13" font-weight="700" fill="#c0524a">12V, 2A</text>
+              <text x="465" y="580" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#c0524a">Source</text>
+              <text x="400" y="530" font-family="DM Mono,monospace" font-size="8" fill="#c0524a">Vt</text>
+            </g>
+
+            <!-- 5V Source -->
+            <g class="comp" data-tip="5V, 3A Power Source" data-desc="Secondary power rail. Supplies power to Raspberry Pi, HID solenoid, and TENS unit logic. 3A rating to handle all peripheral current draw.">
+              <rect x="400" y="620" width="130" height="56" rx="7" fill="#fdf0ef" stroke="#e8b8b5" stroke-width="1.5"/>
+              <text x="465" y="646" text-anchor="middle" font-family="Syne,sans-serif" font-size="13" font-weight="700" fill="#c0524a">5V, 3A</text>
+              <text x="465" y="664" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#c0524a">Source</text>
+              <text x="400" y="614" font-family="DM Mono,monospace" font-size="8" fill="#c0524a">Vt</text>
+            </g>
+
+            <!-- Annotation sidebar -->
+            <text x="52" y="330" font-family="DM Mono,monospace" font-size="9" fill="#5a9e6f">Valorant /</text>
+            <text x="52" y="344" font-family="DM Mono,monospace" font-size="9" fill="#5a9e6f">YOLO-11</text>
+            <text x="52" y="372" font-family="DM Mono,monospace" font-size="9" fill="#5a9e6f">HSV color</text>
+            <text x="52" y="386" font-family="DM Mono,monospace" font-size="9" fill="#5a9e6f">filtering</text>
+            <text x="52" y="414" font-family="DM Mono,monospace" font-size="9" fill="#5a9e6f">Dynamic</text>
+            <text x="52" y="428" font-family="DM Mono,monospace" font-size="9" fill="#5a9e6f">adjustment</text>
+            <line x1="160" y1="380" x2="182" y2="260" stroke="#5a9e6f" stroke-width="0.8" stroke-dasharray="4,3" opacity="0.45"/>
+          </svg>
+        </div>
+      </section>
+
+      <hr class="divider" />
+
+      <section class="section">
+        <p class="section-label">images</p>
+        <div class="image-grid">
+          <div class="image-placeholder"><span>photo placeholder</span></div>
+          <div class="image-placeholder"><span>photo placeholder</span></div>
+          <div class="image-placeholder"><span>photo placeholder</span></div>
         </div>
       </section>
 
@@ -221,9 +368,7 @@
 
       <section class="section">
         <p class="section-label">technical details</p>
-        <div class="content-placeholder" style="min-height: 160px;">
-          <span>hardware breakdown, architecture, key decisions placeholder</span>
-        </div>
+        <div class="content-placeholder" style="min-height:160px;"><span>hardware breakdown, architecture, key decisions placeholder</span></div>
       </section>
 
       <hr class="divider" />
@@ -241,5 +386,65 @@
     <div class="bottom-space"></div>
   </div>
 
+  <script>
+    const wrap = document.getElementById('schematic-wrap');
+    const svg  = document.getElementById('schematic-svg');
+    const tip  = document.getElementById('s-tooltip');
+
+    let scale = 1, tx = 0, ty = 0;
+    let dragging = false, startX, startY, startTx, startTy;
+
+    function applyTransform() {
+      svg.style.transform = `translate(${tx}px,${ty}px) scale(${scale})`;
+    }
+
+    document.getElementById('zoom-in').addEventListener('click', () => { scale = Math.min(scale * 1.3, 5); applyTransform(); });
+    document.getElementById('zoom-out').addEventListener('click', () => { scale = Math.max(scale / 1.3, 0.35); applyTransform(); });
+    document.getElementById('zoom-reset').addEventListener('click', () => { scale = 1; tx = 0; ty = 0; applyTransform(); });
+
+    wrap.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const rect = wrap.getBoundingClientRect();
+      const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+      const delta = e.deltaY > 0 ? 0.88 : 1.14;
+      const ns = Math.min(Math.max(scale * delta, 0.35), 5);
+      tx = mx - (mx - tx) * (ns / scale);
+      ty = my - (my - ty) * (ns / scale);
+      scale = ns;
+      applyTransform();
+    }, { passive: false });
+
+    wrap.addEventListener('pointerdown', (e) => {
+      if (e.target.closest('.zoom-btn')) return;
+      dragging = true;
+      startX = e.clientX; startY = e.clientY;
+      startTx = tx; startTy = ty;
+      wrap.setPointerCapture(e.pointerId);
+    });
+    wrap.addEventListener('pointermove', (e) => {
+      if (!dragging) return;
+      tx = startTx + (e.clientX - startX);
+      ty = startTy + (e.clientY - startY);
+      applyTransform();
+    });
+    wrap.addEventListener('pointerup', () => { dragging = false; });
+
+    document.querySelectorAll('.comp').forEach(el => {
+      el.addEventListener('mouseenter', (e) => {
+        tip.innerHTML = `<strong>${el.dataset.tip}</strong>${el.dataset.desc}`;
+        tip.classList.add('visible');
+      });
+      el.addEventListener('mousemove', (e) => {
+        const rect = wrap.getBoundingClientRect();
+        let x = e.clientX - rect.left + 14;
+        let y = e.clientY - rect.top + 14;
+        if (x + 220 > rect.width) x -= 230;
+        if (y + 100 > rect.height) y -= 110;
+        tip.style.left = x + 'px';
+        tip.style.top = y + 'px';
+      });
+      el.addEventListener('mouseleave', () => tip.classList.remove('visible'));
+    });
+  </script>
 </body>
 </html>
