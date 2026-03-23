@@ -21,7 +21,7 @@
     html { scroll-behavior: smooth; }
     body { background: var(--bg); color: var(--text); font-family: var(--font-sans); font-size: 16px; min-height: 100vh; -webkit-font-smoothing: antialiased; }
     .bg-orbs { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
-    .orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.08; }
+    .orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.28; }
     .orb-1 { width: 600px; height: 600px; top: -150px; left: -150px; background: radial-gradient(circle, #c4b5f4, transparent); }
     .orb-2 { width: 450px; height: 450px; top: 300px; right: -100px; background: radial-gradient(circle, #9b82e8, transparent); }
     .orb-3 { width: 400px; height: 400px; bottom: 0; left: 30%; background: radial-gradient(circle, #ddd6fe, transparent); }
@@ -98,6 +98,10 @@
     .data-table tr.highlight td { background: var(--accent-bg); }
     .data-table tr.highlight td:first-child { color: var(--purple-dark); }
     .table-wrap { border: 0.5px solid var(--border); border-radius: 8px; overflow: hidden; margin: 0.5rem 0; }
+
+    @media (max-width: 768px) {
+      .orb { opacity: 0.08; }
+    }
   </style>
 </head>
 <body>
