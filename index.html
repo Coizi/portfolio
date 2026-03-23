@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Joshua Taylor — ECE @ CMU</title>
-
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -24,10 +23,9 @@
       --accent: #6c4fd4;
       --accent-bg: #f0ecfd;
       --accent-border: #c4b5f4;
-      --glass-bg: rgba(255,255,255,0.45);
-      --glass-border: rgba(255,255,255,0.75);
       --font-sans: 'Syne', sans-serif;
       --font-mono: 'DM Mono', monospace;
+      --max-w: 680px;
     }
 
     html { scroll-behavior: smooth; }
@@ -42,35 +40,22 @@
       -moz-osx-font-smoothing: grayscale;
     }
 
-    .bg-orbs {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
-      overflow: hidden;
-    }
-    .orb {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(80px);
-      opacity: 0.32;
-    }
-    .orb-1 { width: 500px; height: 500px; top: -100px; left: -100px; background: radial-gradient(circle, #c4b5f4, transparent); }
-    .orb-2 { width: 400px; height: 400px; top: 200px; right: -80px; background: radial-gradient(circle, #a78bfa, transparent); }
-    .orb-3 { width: 350px; height: 350px; bottom: 100px; left: 20%; background: radial-gradient(circle, #ddd6fe, transparent); }
+    /* Orbs */
+    .bg-orbs { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+    .orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.28; }
+    .orb-1 { width: 600px; height: 600px; top: -150px; left: -150px; background: radial-gradient(circle, #c4b5f4, transparent); }
+    .orb-2 { width: 450px; height: 450px; top: 300px; right: -100px; background: radial-gradient(circle, #a78bfa, transparent); }
+    .orb-3 { width: 400px; height: 400px; bottom: 0; left: 30%; background: radial-gradient(circle, #ddd6fe, transparent); }
 
     .svg-filters { position: absolute; width: 0; height: 0; overflow: hidden; }
 
+    /* Glass */
     .glass {
-      background: var(--glass-bg);
-      backdrop-filter: url(#liquid-glass) blur(12px) saturate(1.5);
-      -webkit-backdrop-filter: blur(12px) saturate(1.5);
-      border: 1px solid var(--glass-border);
-      box-shadow:
-        0 1px 0 rgba(255,255,255,0.9) inset,
-        0 -1px 0 rgba(255,255,255,0.3) inset,
-        0 8px 32px rgba(108,79,212,0.08),
-        0 2px 8px rgba(0,0,0,0.06);
+      background: rgba(255,255,255,0.5);
+      backdrop-filter: blur(16px) saturate(1.6);
+      -webkit-backdrop-filter: blur(16px) saturate(1.6);
+      border: 1px solid rgba(255,255,255,0.8);
+      box-shadow: 0 1px 0 rgba(255,255,255,0.9) inset, 0 4px 24px rgba(108,79,212,0.07), 0 1px 4px rgba(0,0,0,0.05);
       position: relative;
     }
     .glass::before {
@@ -78,22 +63,27 @@
       position: absolute;
       inset: 0;
       border-radius: inherit;
-      background: linear-gradient(135deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.25) 100%);
+      background: linear-gradient(135deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.05) 60%, rgba(255,255,255,0.2) 100%);
       pointer-events: none;
     }
 
-    .page { position: relative; z-index: 1; padding-bottom: 4rem; }
+    /* Layout */
+    .page { position: relative; z-index: 1; }
+    .container { max-width: var(--max-w); margin: 0 auto; padding: 0 1.5rem; }
 
+    /* Nav */
     nav {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1.25rem 2rem;
       position: sticky;
       top: 0;
       z-index: 100;
-      border-bottom: 0.5px solid rgba(224,221,214,0.6);
+      border-bottom: 0.5px solid rgba(224,221,214,0.5);
       border-radius: 0;
+      padding: 1rem 0;
+    }
+    nav .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
     .nav-logo {
       font-family: var(--font-mono);
@@ -114,43 +104,38 @@
     .nav-cta {
       color: var(--accent) !important;
       border: 0.5px solid var(--accent-border) !important;
-      background: rgba(240,236,253,0.7) !important;
+      background: rgba(240,236,253,0.8) !important;
       padding: 4px 14px;
       border-radius: 3px;
     }
 
-    .hero { padding: 4rem 2rem 2rem; }
+    /* Hero */
+    .hero { padding: 5rem 0 3.5rem; }
     .hero-eyebrow {
       font-family: var(--font-mono);
       font-size: 12px;
       color: var(--text3);
       letter-spacing: 0.1em;
-      margin-bottom: 0.75rem;
+      margin-bottom: 1rem;
     }
     .hero-title {
       font-family: var(--font-sans);
-      font-size: clamp(2.4rem, 6vw, 4rem);
+      font-size: clamp(2.6rem, 7vw, 3.6rem);
       font-weight: 700;
       line-height: 1.05;
       letter-spacing: -0.03em;
-      max-width: 700px;
     }
-    .hero-title .muted {
-      font-family: var(--font-sans);
-      color: var(--text2);
-      font-weight: 400;
-    }
+    .hero-title .muted { color: var(--text2); font-weight: 400; }
     .hero-sub {
-      font-family: var(--font-sans);
       margin-top: 1.25rem;
-      font-size: 14px;
+      font-size: 15px;
       color: var(--text2);
-      max-width: 480px;
-      line-height: 1.7;
+      line-height: 1.75;
+      max-width: 520px;
     }
     .hero-badges {
       display: flex;
-      gap: 0.75rem;
+      gap: 0.6rem;
       margin-top: 2rem;
       flex-wrap: wrap;
     }
@@ -159,11 +144,9 @@
       font-size: 11px;
       color: var(--accent);
       border: 0.5px solid var(--accent-border);
-      background: rgba(240,236,253,0.7);
+      background: rgba(240,236,253,0.75);
       padding: 4px 12px;
       border-radius: 2px;
-      backdrop-filter: blur(4px);
-      position: relative;
     }
     .badge-ghost {
       font-family: var(--font-mono);
@@ -175,63 +158,85 @@
       border-radius: 2px;
     }
 
-    .section { padding: 2.5rem 2rem 0; }
+    /* Divider */
+    .divider { border: none; border-top: 0.5px solid var(--border); margin: 0; }
+
+    /* Section */
+    .section { padding: 3rem 0; }
     .section-label {
       font-family: var(--font-mono);
       font-size: 11px;
       color: var(--text3);
-      letter-spacing: 0.1em;
-      margin-bottom: 1.5rem;
-      border-bottom: 0.5px solid var(--border);
-      padding-bottom: 0.75rem;
+      letter-spacing: 0.12em;
+      margin-bottom: 1.75rem;
     }
 
-    .projects-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1px;
-      background: var(--border);
+    /* Experience */
+    .exp-list { display: flex; flex-direction: column; gap: 1.75rem; }
+    .exp-item { display: flex; gap: 1.25rem; align-items: flex-start; }
+    .exp-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-border);
+      margin-top: 6px;
+      flex-shrink: 0;
     }
+    .exp-role {
+      font-family: var(--font-sans);
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text);
+    }
+    .exp-company {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--accent);
+      margin-top: 2px;
+    }
+    .exp-date {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text3);
+      margin-top: 2px;
+    }
+
+    /* Project cards */
+    .projects-list { display: flex; flex-direction: column; gap: 1px; background: var(--border); border-radius: 8px; overflow: hidden; }
     .project-card {
       background: var(--bg);
-      padding: 1.5rem;
+      padding: 1.25rem 1.5rem;
       display: flex;
       flex-direction: column;
-      gap: 0.75rem;
+      gap: 0.5rem;
       cursor: pointer;
       transition: background 0.15s;
       text-decoration: none;
       color: inherit;
-      position: relative;
     }
-    .project-card:hover {
-      background: rgba(240,236,253,0.35);
-      backdrop-filter: blur(12px) saturate(1.4);
-      -webkit-backdrop-filter: blur(12px) saturate(1.4);
-    }
-    .card-header {
+    .project-card:hover { background: rgba(240,236,253,0.3); }
+    .card-top {
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
+      align-items: center;
     }
+    .card-title {
+      font-family: var(--font-sans);
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text);
+    }
+    .card-right { display: flex; align-items: center; gap: 0.75rem; }
     .card-tag {
       font-family: var(--font-mono);
       font-size: 10px;
       color: var(--accent);
-      letter-spacing: 0.08em;
       background: var(--accent-bg);
       border: 0.5px solid var(--accent-border);
       padding: 2px 8px;
       border-radius: 2px;
     }
-    .card-arrow { font-size: 15px; color: var(--text3); }
-    .card-title {
-      font-family: var(--font-sans);
-      font-size: 16px;
-      font-weight: 500;
-      line-height: 1.3;
-      color: var(--text);
-    }
+    .card-arrow { font-size: 14px; color: var(--text3); }
     .card-desc {
       font-family: var(--font-sans);
       font-size: 13px;
@@ -240,11 +245,9 @@
     }
     .card-chips {
       display: flex;
-      gap: 6px;
+      gap: 5px;
       flex-wrap: wrap;
-      margin-top: auto;
-      padding-top: 0.75rem;
-      border-top: 0.5px solid var(--border);
+      margin-top: 0.25rem;
     }
     .chip {
       font-family: var(--font-mono);
@@ -264,10 +267,11 @@
       border-radius: 2px;
     }
 
+    /* Stack */
     .stack-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 1.5rem;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2rem 3rem;
     }
     .stack-label {
       font-family: var(--font-mono);
@@ -283,17 +287,16 @@
       line-height: 2.1;
     }
 
+    /* Contact */
     .contact-strip {
-      margin: 2.5rem 2rem 0;
-      border-radius: 3px;
+      border-radius: 8px;
       padding: 1.5rem 1.75rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
       gap: 1rem;
-      border: 0.5px solid var(--accent-border);
-      background: var(--accent-bg);
+      margin-bottom: 3rem;
     }
     .contact-title {
       font-family: var(--font-sans);
@@ -326,11 +329,11 @@
 
   <svg class="svg-filters" xmlns="http://www.w3.org/2000/svg">
     <defs>
-      <filter id="liquid-glass" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">
-        <feTurbulence type="fractalNoise" baseFrequency="0.65 0.65" numOctaves="3" seed="2" result="noise" />
-        <feDisplacementMap in="SourceGraphic" in2="noise" scale="4" xChannelSelector="R" yChannelSelector="G" result="displaced" />
-        <feGaussianBlur in="displaced" stdDeviation="0.4" result="blurred" />
-        <feComposite in="blurred" in2="SourceGraphic" operator="in" />
+      <filter id="lg" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">
+        <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" seed="2" result="noise" />
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="4" xChannelSelector="R" yChannelSelector="G" result="d" />
+        <feGaussianBlur in="d" stdDeviation="0.4" result="b" />
+        <feComposite in="b" in2="SourceGraphic" operator="in" />
       </filter>
     </defs>
   </svg>
@@ -344,127 +347,176 @@
   <div class="page">
 
     <nav class="glass">
-      <a href="#" class="nav-logo">jtaylor3</a>
-      <div class="nav-links">
-        <a href="#projects">work</a>
-        <a href="#stack">stack</a>
-        <a href="#contact">resume</a>
-        <a href="#contact" class="nav-cta">contact</a>
+      <div class="container">
+        <a href="#" class="nav-logo">jtaylor3</a>
+        <div class="nav-links">
+          <a href="#projects">work</a>
+          <a href="#stack">stack</a>
+          <a href="#contact" class="nav-cta">contact</a>
+        </div>
       </div>
     </nav>
 
-    <section class="hero">
-      <p class="hero-eyebrow">ECE @ Carnegie Mellon &middot; 2028</p>
-      <h1 class="hero-title">
-        Joshua Taylor<br>
-        <span class="muted">Hardware &amp; Software</span>
-      </h1>
-      <p class="hero-sub">
-        Building systems at the boundary of silicon and software &mdash; verification, embedded, and the things in between.
-      </p>
-      <div class="hero-badges">
-        <span class="badge">Ford SWE &middot; Summer 2026</span>
-        <span class="badge">BWXT IT Architecture &middot; Summer 2025</span>
-        <span class="badge-ghost">github: Coizi</span>
-      </div>
-    </section>
+    <div class="container">
 
-    <section class="section" id="projects">
-      <p class="section-label">selected builds</p>
-      <div class="projects-grid">
-
-        <div class="project-card">
-          <div class="card-header">
-            <span class="card-tag">HARDWARE</span>
-            <span class="card-arrow">&#8599;</span>
-          </div>
-          <h3 class="card-title">AI-Powered Aim Assist System</h3>
-          <p class="card-desc">Jetson Orin Nano + global shutter camera + EMS actuators. Dual-mode PID controller and SPI digital potentiometers for precise muscle stimulation control.</p>
-          <div class="card-chips">
-            <span class="chip">Python</span>
-            <span class="chip">SPI</span>
-            <span class="chip">PID</span>
-            <span class="chip-accent">3rd place</span>
-          </div>
+      <!-- Hero -->
+      <section class="hero">
+        <p class="hero-eyebrow">ECE @ Carnegie Mellon &middot; 2028</p>
+        <h1 class="hero-title">
+          Joshua Taylor<br>
+          <span class="muted">Hardware &amp; Software</span>
+        </h1>
+        <p class="hero-sub">
+          Building systems at the boundary of silicon and software &mdash; verification, embedded, and the things in between.
+        </p>
+        <div class="hero-badges">
+          <span class="badge">Ford SWE &middot; Summer 2026</span>
+          <span class="badge">BWXT IT Architecture &middot; Summer 2025</span>
+          <span class="badge-ghost">github: Coizi</span>
         </div>
+      </section>
 
-        <div class="project-card">
-          <div class="card-header">
-            <span class="card-tag">FPGA / RTL</span>
-            <span class="card-arrow">&#8599;</span>
+      <hr class="divider" />
+
+      <!-- Experience -->
+      <section class="section" id="experience">
+        <p class="section-label">experience</p>
+        <div class="exp-list">
+          <div class="exp-item">
+            <div class="exp-dot"></div>
+            <div>
+              <p class="exp-role">Software Development Intern</p>
+              <p class="exp-company">Ford Motor Company</p>
+              <p class="exp-date">Summer 2026</p>
+            </div>
           </div>
-          <h3 class="card-title">8-bit RISC-V Processor</h3>
-          <p class="card-desc">Full processor implementation in Verilog on Basys3 FPGA. Includes instruction decoder, testbench, and SystemVerilog FSM design.</p>
-          <div class="card-chips">
-            <span class="chip">SystemVerilog</span>
-            <span class="chip">Basys3</span>
-            <span class="chip">RISC-V</span>
+          <div class="exp-item">
+            <div class="exp-dot"></div>
+            <div>
+              <p class="exp-role">IT Architecture Intern</p>
+              <p class="exp-company">BWX Technologies</p>
+              <p class="exp-date">Summer 2025</p>
+            </div>
           </div>
         </div>
+      </section>
 
-        <div class="project-card">
-          <div class="card-header">
-            <span class="card-tag">FPGA / RTL</span>
-            <span class="card-arrow">&#8599;</span>
+      <hr class="divider" />
+
+      <!-- Projects -->
+      <section class="section" id="projects">
+        <p class="section-label">selected builds</p>
+        <div class="projects-list">
+
+          <div class="project-card">
+            <div class="card-top">
+              <h3 class="card-title">AI-Powered Aim Assist System</h3>
+              <div class="card-right">
+                <span class="card-tag">HARDWARE</span>
+                <span class="card-arrow">&#8599;</span>
+              </div>
+            </div>
+            <p class="card-desc">Jetson Orin Nano + global shutter camera + EMS actuators. Dual-mode PID controller and SPI digital potentiometers for precise muscle stimulation control.</p>
+            <div class="card-chips">
+              <span class="chip">Python</span>
+              <span class="chip">SPI</span>
+              <span class="chip">PID</span>
+              <span class="chip-accent">3rd place</span>
+            </div>
           </div>
-          <h3 class="card-title">FPGA Vending Machine Controller</h3>
-          <p class="card-desc">SystemVerilog FSM-based coin acceptor on a Boolean FPGA board. Detects nickels, dimes, and quarters via pulse counting, with two-flop input synchronizers for metastability handling and 7-segment display output.</p>
-          <div class="card-chips">
-            <span class="chip">SystemVerilog</span>
-            <span class="chip">FSM</span>
-            <span class="chip">Boolean Board</span>
-            <span class="chip">RTL</span>
+
+          <div class="project-card">
+            <div class="card-top">
+              <h3 class="card-title">8-bit RISC-V Processor</h3>
+              <div class="card-right">
+                <span class="card-tag">FPGA / RTL</span>
+                <span class="card-arrow">&#8599;</span>
+              </div>
+            </div>
+            <p class="card-desc">Full processor implementation in Verilog on Basys3 FPGA. Includes instruction decoder, testbench, and SystemVerilog FSM design.</p>
+            <div class="card-chips">
+              <span class="chip">SystemVerilog</span>
+              <span class="chip">Basys3</span>
+              <span class="chip">RISC-V</span>
+            </div>
+          </div>
+
+          <div class="project-card">
+            <div class="card-top">
+              <h3 class="card-title">FPGA Vending Machine Controller</h3>
+              <div class="card-right">
+                <span class="card-tag">FPGA / RTL</span>
+                <span class="card-arrow">&#8599;</span>
+              </div>
+            </div>
+            <p class="card-desc">SystemVerilog FSM-based coin acceptor on a Boolean FPGA board. Detects nickels, dimes, and quarters via pulse counting, with two-flop input synchronizers for metastability handling and 7-segment display output.</p>
+            <div class="card-chips">
+              <span class="chip">SystemVerilog</span>
+              <span class="chip">FSM</span>
+              <span class="chip">Boolean Board</span>
+              <span class="chip">RTL</span>
+            </div>
+          </div>
+
+          <div class="project-card">
+            <div class="card-top">
+              <h3 class="card-title">PCB Design &amp; Fabrication</h3>
+              <div class="card-right">
+                <span class="card-tag">PCB DESIGN</span>
+                <span class="card-arrow">&#8599;</span>
+              </div>
+            </div>
+            <p class="card-desc">Designed and fabricated a PCB with defined test patterns, going end-to-end from schematic to physical board via JLCPCB with full BOM and CPL files.</p>
+            <div class="card-chips">
+              <span class="chip">Eagle/Fusion</span>
+              <span class="chip">JLCPCB</span>
+              <span class="chip">BOM / CPL</span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <hr class="divider" />
+
+      <!-- Stack -->
+      <section class="section" id="stack">
+        <p class="section-label">stack</p>
+        <div class="stack-grid">
+          <div>
+            <p class="stack-label">LANGUAGES</p>
+            <p class="stack-list">SystemVerilog<br>Python<br>C / C++<br>MATLAB</p>
+          </div>
+          <div>
+            <p class="stack-label">HARDWARE</p>
+            <p class="stack-list">Basys3 FPGA<br>Jetson Orin<br>Raspberry Pi<br>Eagle / JLCPCB</p>
+          </div>
+          <div>
+            <p class="stack-label">CONCEPTS</p>
+            <p class="stack-list">RTL Design<br>Signals &amp; Systems<br>PID Control<br>SPI / UART</p>
+          </div>
+          <div>
+            <p class="stack-label">TOOLS</p>
+            <p class="stack-list">Git / GitHub<br>Linux<br>Vivado<br>VS Code</p>
           </div>
         </div>
+      </section>
 
-        <div class="project-card">
-          <div class="card-header">
-            <span class="card-tag">PCB DESIGN</span>
-            <span class="card-arrow">&#8599;</span>
+      <hr class="divider" />
+
+      <!-- Contact -->
+      <section class="section" id="contact" style="padding-bottom: 0;">
+        <div class="contact-strip glass">
+          <div>
+            <p class="contact-title">Open to hardware engineering opportunities</p>
+            <p class="contact-sub">Verification, test &amp; validation, embedded &mdash; Pittsburgh, PA &middot; CMU ECE &middot; GPA 3.51</p>
           </div>
-          <h3 class="card-title">PCB Design &amp; Fabrication</h3>
-          <p class="card-desc">Designed and fabricated a PCB with defined test patterns, going end-to-end from schematic to physical board via JLCPCB with full BOM and CPL files.</p>
-          <div class="card-chips">
-            <span class="chip">Eagle/Fusion</span>
-            <span class="chip">JLCPCB</span>
-            <span class="chip">BOM / CPL</span>
-          </div>
+          <a href="mailto:jtaylor3@andrew.cmu.edu" class="contact-btn">get in touch &#8599;</a>
         </div>
+      </section>
 
-      </div>
-    </section>
-
-    <section class="section" id="stack">
-      <p class="section-label">stack</p>
-      <div class="stack-grid">
-        <div>
-          <p class="stack-label">LANGUAGES</p>
-          <p class="stack-list">SystemVerilog<br>Python<br>C / C++<br>MATLAB</p>
-        </div>
-        <div>
-          <p class="stack-label">HARDWARE</p>
-          <p class="stack-list">Basys3 FPGA<br>Jetson Orin<br>Raspberry Pi<br>Eagle / JLCPCB</p>
-        </div>
-        <div>
-          <p class="stack-label">CONCEPTS</p>
-          <p class="stack-list">RTL Design<br>Signals &amp; Systems<br>PID Control<br>SPI / UART</p>
-        </div>
-        <div>
-          <p class="stack-label">TOOLS</p>
-          <p class="stack-list">Git / GitHub<br>Linux<br>Vivado<br>VS Code</p>
-        </div>
-      </div>
-    </section>
-
-    <div class="contact-strip" id="contact">
-      <div>
-        <p class="contact-title">Open to hardware engineering opportunities</p>
-        <p class="contact-sub">Verification, test &amp; validation, embedded &mdash; Pittsburgh, PA &middot; CMU ECE &middot; GPA 3.51</p>
-      </div>
-      <a href="mailto:jtaylor3@andrew.cmu.edu" class="contact-btn">get in touch &#8599;</a>
     </div>
-
   </div>
 
 </body>
-</html>
+</html>g
