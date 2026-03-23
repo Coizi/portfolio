@@ -308,14 +308,14 @@
             </div>
           </a>
 
-          <div class="project-card">
+          <a class="project-card" href="riscv.html">
             <div class="card-top">
               <h3 class="card-title">8-bit RISC-V Processor</h3>
               <div class="card-right"><span class="card-tag">FPGA / RTL</span><span class="card-arrow">&#8599;</span></div>
             </div>
             <p class="card-desc">Full processor implementation in Verilog on Basys3 FPGA. Includes instruction decoder, testbench, and SystemVerilog FSM design.</p>
             <div class="card-chips"><span class="chip">SystemVerilog</span><span class="chip">Basys3</span><span class="chip">RISC-V</span></div>
-          </div>
+          </a>
 
           <a class="project-card" href="vending-machine.html">
             <div class="card-top">
@@ -356,11 +356,11 @@
         <div class="contact-strip">
           <div>
             <p class="contact-text">Let&#8217;s connect.</p>
-            <p class="contact-sub">jtaylor3@andrew.cmu.edu</p>
+            <p class="contact-sub"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="e08a9481998c8f92d3a0818e84928597ce838d95ce858495">[email&#160;protected]</a></p>
           </div>
           <div class="contact-btns">
             <a href="https://www.linkedin.com/in/joshtaylor06/" target="_blank" class="contact-btn">LinkedIn &#8599;</a>
-            <a href="mailto:jtaylor3@andrew.cmu.edu" class="contact-btn">email &#8599;</a>
+            <a href="/cdn-cgi/l/email-protection#3e544a5f4752514c0d7e5f505a4c5b49105d534b105b5a4b" class="contact-btn">email &#8599;</a>
           </div>
         </div>
       </section>
@@ -369,7 +369,7 @@
     <div id="page-end"></div>
   </div>
 
-  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
     function buildDispMap(w, h) {
       const edge = Math.min(w, h) * 0.07;
       const svg = `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
@@ -435,11 +435,4 @@
       link.classList.add('active');
     }
     window.addEventListener('load', () => setTimeout(() => moveIndicator(links[0]), 50));
-    links.forEach(link => link.addEventListener('click', () => setTimeout(() => moveIndicator(link), 50)));
-
-    // Scroll: update active section
-    const sections = ['experience', 'projects', 'stack', 'contact'];
-    window.addEventListener('scroll', () => {
-      let current = sections[0];
-      for (const id of sections) {
-        const el = document.getElementByI
+    links.forEach(link => link.addEventListener('click', () => setTimeout(() => moveIndica

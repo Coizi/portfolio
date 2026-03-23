@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RISC-V Processor — Joshua Taylor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #fafaf8; --bg2: #f3f2ee; --bg3: #eceae4;
+      --border: #e0ddd6; --border2: #ccc9c0;
+      --text: #1a1916; --text2: #6b6860; --text3: #a8a59e;
+      --purple-dark: #4b30a8; --purple-mid: #6c4fd4; --purple-light: #9b82e8;
+      --accent-bg: #f0ecfd; --accent-bg2: #e4dcfb; --accent-border: #c4b5f4;
+      --font-sans: 'Syne', sans-serif; --font-mono: 'DM Mono', monospace;
+      --max-w: 820px;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: var(--font-sans); font-size: 16px; min-height: 100vh; -webkit-font-smoothing: antialiased; }
+    .bg-orbs { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+    .orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.28; }
+    .orb-1 { width: 600px; height: 600px; top: -150px; left: -150px; background: radial-gradient(circle, #c4b5f4, transparent); }
+    .orb-2 { width: 450px; height: 450px; top: 300px; right: -100px; background: radial-gradient(circle, #9b82e8, transparent); }
+    .orb-3 { width: 400px; height: 400px; bottom: 0; left: 30%; background: radial-gradient(circle, #ddd6fe, transparent); }
+    .page { position: relative; z-index: 1; }
+    .container { max-width: var(--max-w); margin: 0 auto; padding: 0 2rem; }
+    .back { display: inline-flex; align-items: center; gap: 0.4rem; font-family: var(--font-mono); font-size: 12px; color: var(--text3); text-decoration: none; padding: 2rem 0 0; transition: color 0.15s; }
+    .back:hover { color: var(--purple-mid); }
+    .project-header { padding: 2rem 0 1.5rem; }
+    .project-tag { font-family: var(--font-mono); font-size: 10px; color: var(--purple-dark); background: var(--accent-bg2); border: 0.5px solid var(--accent-border); padding: 2px 10px; border-radius: 2px; display: inline-block; margin-bottom: 1rem; }
+    .project-title { font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; line-height: 1.1; letter-spacing: -0.03em; color: var(--text); }
+    .project-sub { margin-top: 1rem; font-size: 15px; color: var(--text2); line-height: 1.75; max-width: 600px; }
+    .project-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 1.25rem; }
+    .chip { font-family: var(--font-mono); font-size: 10px; color: var(--text2); background: var(--bg3); padding: 3px 10px; border-radius: 2px; }
+    .chip-accent { font-family: var(--font-mono); font-size: 10px; color: var(--purple-dark); background: var(--accent-bg2); border: 0.5px solid var(--accent-border); padding: 3px 10px; border-radius: 2px; }
+    .divider { border: none; border-top: 0.5px solid var(--border); margin: 0; }
+    .section { padding: 2.5rem 0; }
+    .section-label { font-family: var(--font-mono); font-size: 11px; color: #b8a8f0; letter-spacing: 0.12em; margin-bottom: 1.5rem; }
+    .prose { font-size: 14px; color: var(--text2); line-height: 1.8; }
+    .prose p { margin-bottom: 1rem; }
+    .prose p:last-child { margin-bottom: 0; }
+    .prose h3 { font-family: var(--font-sans); font-size: 15px; font-weight: 600; color: var(--text); margin: 1.75rem 0 0.6rem; }
+    .prose strong { color: var(--text); font-weight: 600; }
+    .prose ul { padding-left: 1.25rem; margin-bottom: 1rem; }
+    .prose li { margin-bottom: 0.4rem; }
+    .prose code { font-family: var(--font-mono); font-size: 12px; background: var(--bg3); border: 0.5px solid var(--border); padding: 1px 5px; border-radius: 3px; color: var(--purple-dark); }
+    .prose em { font-style: italic; }
+    .code-block { background: var(--bg2); border: 0.5px solid var(--border); border-radius: 8px; padding: 1.25rem; overflow-x: auto; margin: 1rem 0; }
+    .code-block pre { font-family: var(--font-mono); font-size: 11px; color: var(--text2); line-height: 1.65; white-space: pre; }
+    .table-wrap { border: 0.5px solid var(--border); border-radius: 8px; overflow: hidden; margin: 0.5rem 0; }
+    .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .data-table th { font-family: var(--font-mono); font-size: 10px; color: var(--text3); letter-spacing: 0.08em; text-align: left; padding: 6px 12px; border-bottom: 0.5px solid var(--border); background: var(--bg2); }
+    .data-table td { padding: 9px 12px; border-bottom: 0.5px solid var(--border); color: var(--text2); font-size: 13px; vertical-align: top; line-height: 1.5; }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table td:first-child { font-family: var(--font-mono); font-size: 12px; color: var(--text); }
+    .data-table td code { font-family: var(--font-mono); font-size: 11px; background: var(--bg3); border: 0.5px solid var(--border); padding: 1px 5px; border-radius: 3px; color: var(--purple-dark); }
+    .links-row { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    .project-link { font-family: var(--font-mono); font-size: 12px; color: var(--purple-dark); border: 0.5px solid var(--accent-border); background: var(--accent-bg); padding: 7px 16px; border-radius: 2px; text-decoration: none; transition: background 0.15s; }
+    .project-link:hover { background: var(--accent-bg2); }
+    .project-link.disabled { opacity: 0.45; cursor: not-allowed; pointer-events: none; }
+
+    /* Architecture diagram */
+    .arch-wrap { width: 100%; background: #f8f7f3; border: 0.5px solid var(--border); border-radius: 12px; overflow: hidden; position: relative; cursor: grab; user-select: none; aspect-ratio: 16/9; }
+    .arch-wrap:active { cursor: grabbing; }
+    .arch-hint { position: absolute; bottom: 12px; right: 14px; font-family: var(--font-mono); font-size: 10px; color: var(--text3); pointer-events: none; z-index: 10; }
+    .zoom-controls { position: absolute; top: 12px; right: 14px; display: flex; flex-direction: column; gap: 4px; z-index: 10; }
+    .zoom-btn { width: 28px; height: 28px; border-radius: 4px; border: 0.5px solid var(--border2); background: rgba(255,255,255,0.85); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; font-size: 15px; color: var(--text2); cursor: pointer; line-height: 1; transition: background 0.15s; }
+    .zoom-btn:hover { background: var(--accent-bg); color: var(--purple-mid); }
+    #arch-svg { width: 100%; height: 100%; transform-origin: 0 0; display: block; }
+    .a-tooltip { position: absolute; background: white; border: 0.5px solid var(--accent-border); border-radius: 8px; padding: 9px 13px; font-family: var(--font-mono); font-size: 11px; color: var(--text2); pointer-events: none; opacity: 0; transition: opacity 0.15s; z-index: 20; max-width: 230px; line-height: 1.65; box-shadow: 0 4px 20px rgba(108,79,212,0.12); }
+    .a-tooltip.visible { opacity: 1; }
+    .a-tooltip strong { color: var(--purple-dark); display: block; margin-bottom: 3px; font-size: 11px; }
+    .acomp { cursor: pointer; }
+    .bottom-space { height: 5rem; }
+  </style>
+</head>
+<body>
+  <div class="bg-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <div class="page">
+    <div class="container">
+      <a href="index.html" class="back">&#8592; back</a>
+
+      <header class="project-header">
+        <div class="project-tag">FPGA / RTL</div>
+        <h1 class="project-title">8-bit RISC-V Processor</h1>
+      </header>
+
+      <div class="project-chips">
+        <span class="chip">SystemVerilog</span>
+        <span class="chip">RISC-V ISA</span>
+        <span class="chip">Basys3 FPGA</span>
+        <span class="chip">RTL Design</span>
+        <span class="chip">Vivado</span>
+        <span class="chip">Testbench</span>
+      </div>
+
+      <p class="project-sub" style="margin-top:1.5rem;">A RISC-V instruction decoder implemented in SystemVerilog and synthesized on a Basys3 FPGA. Decodes all major instruction formats — R, I, S, B, U, and J-type — extracting register fields, immediates, and control signals from a 32-bit instruction word. Includes a complete testbench verifying ADD, ADDI, LW, SW, BEQ, LUI, and JAL.</p>
+
+      <hr class="divider" style="margin-top:2.5rem;" />
+
+      <section class="section" id="architecture">
+        <p class="section-label">datapath diagram</p>
+        <div class="arch-wrap" id="arch-wrap">
+          <div class="zoom-controls">
+            <button class="zoom-btn" id="zoom-in">+</button>
+            <button class="zoom-btn" id="zoom-out">−</button>
+            <button class="zoom-btn" id="zoom-reset" style="font-size:11px;">⌂</button>
+          </div>
+          <div class="arch-hint">scroll to zoom · drag to pan · hover for details</div>
+          <div class="a-tooltip" id="a-tooltip"></div>
+
+          <svg id="arch-svg" viewBox="0 0 960 540" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="agrid" width="24" height="24" patternUnits="userSpaceOnUse">
+                <path d="M 24 0 L 0 0 0 24" fill="none" stroke="#e5e2d8" stroke-width="0.5"/>
+              </pattern>
+              <marker id="aarr"   markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0,0 L0,7 L7,3.5 z" fill="#8a7cc8"/></marker>
+              <marker id="aarr-g" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0,0 L0,7 L7,3.5 z" fill="#5a9e6f"/></marker>
+              <marker id="aarr-b" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0,0 L0,7 L7,3.5 z" fill="#4a7fb5"/></marker>
+              <marker id="aarr-o" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0,0 L0,7 L7,3.5 z" fill="#c47c30"/></marker>
+              <marker id="aarr-r" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0,0 L0,7 L7,3.5 z" fill="#c0524a"/></marker>
+            </defs>
+            <rect width="960" height="540" fill="url(#agrid)"/>
+
+            <!-- 32-bit instruction input -->
+            <line x1="40" y1="270" x2="120" y2="270" stroke="#c47c30" stroke-width="2" marker-end="url(#aarr-o)"/>
+            <text x="44" y="262" font-family="DM Mono,monospace" font-size="9" fill="#c47c30">instr[31:0]</text>
+
+            <!-- Decoder box -->
+            <g class="acomp" data-tip="riscv_decoder" data-desc="Combinational decode of a 32-bit RISC-V instruction. Extracts rd, rs1, rs2, funct3, funct7 directly from fixed bit positions. Performs sign-extended immediate reconstruction for each format. Outputs five control signals: reg_write, mem_read, mem_write, branch, alu_src.">
+              <rect x="120" y="180" width="180" height="180" rx="8" fill="#f0ecfd" stroke="#c4b5f4" stroke-width="1.5"/>
+              <text x="210" y="215" text-anchor="middle" font-family="Syne,sans-serif" font-size="13" font-weight="700" fill="#6c4fd4">Decoder</text>
+              <text x="210" y="233" text-anchor="middle" font-family="DM Mono,monospace" font-size="8.5" fill="#9b82e8">riscv_decoder</text>
+              <line x1="120" y1="248" x2="300" y2="248" stroke="#c4b5f4" stroke-width="0.7" stroke-dasharray="4,3"/>
+              <text x="210" y="266" text-anchor="middle" font-family="DM Mono,monospace" font-size="8" fill="#9b82e8">instr[6:0]  opcode</text>
+              <text x="210" y="282" text-anchor="middle" font-family="DM Mono,monospace" font-size="8" fill="#9b82e8">instr[11:7]  rd</text>
+              <text x="210" y="298" text-anchor="middle" font-family="DM Mono,monospace" font-size="8" fill="#9b82e8">instr[14:12] funct3</text>
+              <text x="210" y="314" text-anchor="middle" font-family="DM Mono,monospace" font-size="8" fill="#9b82e8">instr[19:15] rs1</text>
+              <text x="210" y="330" text-anchor="middle" font-family="DM Mono,monospace" font-size="8" fill="#9b82e8">instr[24:20] rs2</text>
+              <text x="210" y="346" text-anchor="middle" font-family="DM Mono,monospace" font-size="8" fill="#9b82e8">instr[31:25] funct7</text>
+            </g>
+
+            <!-- Register file outputs: rd, rs1, rs2 -->
+            <line x1="300" y1="220" x2="420" y2="220" stroke="#5a9e6f" stroke-width="1.8" marker-end="url(#aarr-g)"/>
+            <text x="308" y="213" font-family="DM Mono,monospace" font-size="8" fill="#5a9e6f">rd [4:0]</text>
+            <line x1="300" y1="240" x2="420" y2="240" stroke="#5a9e6f" stroke-width="1.8" marker-end="url(#aarr-g)"/>
+            <text x="308" y="233" font-family="DM Mono,monospace" font-size="8" fill="#5a9e6f">rs1 [4:0]</text>
+            <line x1="300" y1="260" x2="420" y2="260" stroke="#5a9e6f" stroke-width="1.8" marker-end="url(#aarr-g)"/>
+            <text x="308" y="253" font-family="DM Mono,monospace" font-size="8" fill="#5a9e6f">rs2 [4:0]</text>
+            <line x1="300" y1="285" x2="420" y2="285" stroke="#5a9e6f" stroke-width="1.8" marker-end="url(#aarr-g)"/>
+            <text x="308" y="278" font-family="DM Mono,monospace" font-size="8" fill="#5a9e6f">funct3 [2:0]</text>
+            <line x1="300" y1="305" x2="420" y2="305" stroke="#5a9e6f" stroke-width="1.8" marker-end="url(#aarr-g)"/>
+            <text x="308" y="298" font-family="DM Mono,monospace" font-size="8" fill="#5a9e6f">funct7 [6:0]</text>
+            <line x1="300" y1="330" x2="420" y2="330" stroke="#8a7cc8" stroke-width="1.8" marker-end="url(#aarr)"/>
+            <text x="308" y="323" font-family="DM Mono,monospace" font-size="8" fill="#8a7cc8">imm [31:0]</text>
+
+            <!-- Register file -->
+            <g class="acomp" data-tip="Register File" data-desc="32 general-purpose registers (x0–x31). x0 is hardwired to 0. rd is the destination register written on reg_write=1. rs1 and rs2 are source registers read combinationally. 5-bit addresses allow addressing all 32 registers.">
+              <rect x="420" y="190" width="140" height="130" rx="8" fill="#edf7f0" stroke="#a8d5b5" stroke-width="1.5"/>
+              <text x="490" y="218" text-anchor="middle" font-family="Syne,sans-serif" font-size="12" font-weight="700" fill="#5a9e6f">Register File</text>
+              <text x="490" y="236" text-anchor="middle" font-family="DM Mono,monospace" font-size="8.5" fill="#5a9e6f">x0–x31</text>
+              <line x1="420" y1="248" x2="560" y2="248" stroke="#a8d5b5" stroke-width="0.7" stroke-dasharray="4,3"/>
+              <text x="490" y="266" text-anchor="middle" font-family="DM Mono,monospace" font-size="8" fill="#5a9e6f">rd  → write addr</text>
+              <text x="490" y="282" text-anchor="middle" font-family="DM Mono,monospace" font-size="8" fill="#5a9e6f">rs1 → read port A</text>
+              <text x="490" y="298" text-anchor="middle" font-family="DM Mono,monospace" font-size="8" fill="#5a9e6f">rs2 → read port B</text>
+            </g>
+
+            <!-- Immediate gen -->
+            <g class="acomp" data-tip="Immediate Generator" data-desc="Sign-extends and assembles the immediate value from scattered bits depending on instruction format. R-type: imm=0. I-type: sign-extend instr[31:20]. S-type: {instr[31:25], instr[11:7]}. B-type: {instr[31], instr[7], instr[30:25], instr[11:8], 1'b0}. U-type: {instr[31:12], 12'b0}. J-type: {instr[31], instr[19:12], instr[20], instr[30:21], 1'b0}.">
+              <rect x="420" y="370" width="140" height="90" rx="8" fill="#eaf1fb" stroke="#a8c4e8" stroke-width="1.5"/>
+              <text x="490" y="398" text-anchor="middle" font-family="Syne,sans-serif" font-size="12" font-weight="700" fill="#4a7fb5">Imm Gen</text>
+              <text x="490" y="416" text-anchor="middle" font-family="DM Mono,monospace" font-size="8.5" fill="#4a7fb5">sign-extend</text>
+              <text x="490" y="432" text-anchor="middle" font-family="DM Mono,monospace" font-size="8.5" fill="#4a7fb5">R/I/S/B/U/J</text>
+              <text x="490" y="448" text-anchor="middle" font-family="DM Mono,monospace" font-size="8.5" fill="#4a7fb5">→ 32-bit imm</text>
+              <line x1="330" y1="330" x2="330" y2="415" stroke="#8a7cc8" stroke-width="1.4" stroke-dasharray="4,3"/>
+              <line x1="330" y1="415" x2="420" y2="415" stroke="#8a7cc8" stroke-width="1.4" marker-end="url(#aarr)"/>
+            </g>
+
+            <!-- Control signals -->
+            <g class="acomp" data-tip="Control Signals" data-desc="Five 1-bit control outputs derived from the opcode: reg_write (write result to rd), mem_read (load from memory), mem_write (store to memory), branch (PC-relative branch), alu_src (ALU second operand is imm instead of rs2).">
+              <rect x="680" y="180" width="180" height="145" rx="8" fill="#fdf0ef" stroke="#e8b8b5" stroke-width="1.5"/>
+              <text x="770" y="208" text-anchor="middle" font-family="Syne,sans-serif" font-size="12" font-weight="700" fill="#c0524a">Control</text>
+              <text x="770" y="226" text-anchor="middle" font-family="DM Mono,monospace" font-size="8.5" fill="#c0524a">reg_write</text>
+              <text x="770" y="244" text-anchor="middle" font-family="DM Mono,monospace" font-size="8.5" fill="#c0524a">mem_read</text>
+              <text x="770" y="262" text-anchor="middle" font-family="DM Mono,monospace" font-size="8.5" fill="#c0524a">mem_write</text>
+              <text x="770" y="280" text-anchor="middle" font-family="DM Mono,monospace" font-size="8.5" fill="#c0524a">branch</text>
+              <text x="770" y="298" text-anchor="middle" font-family="DM Mono,monospace" font-size="8.5" fill="#c0524a">alu_src</text>
+            </g>
+
+            <!-- Decoder → Control signals -->
+            <line x1="300" y1="360" x2="640" y2="360" stroke="#c0524a" stroke-width="1.8"/>
+            <line x1="640" y1="253" x2="680" y2="253" stroke="#c0524a" stroke-width="1.8" marker-end="url(#aarr-r)"/>
+            <line x1="640" y1="253" x2="640" y2="360" stroke="#c0524a" stroke-width="1.8"/>
+            <text x="308" y="354" font-family="DM Mono,monospace" font-size="8" fill="#c0524a">control signals</text>
+
+            <!-- ALU -->
+            <g class="acomp" data-tip="ALU" data-desc="Arithmetic Logic Unit. Takes two operands: rs1 from the register file, and either rs2 (alu_src=0, R-type) or the sign-extended immediate (alu_src=1, I/S/B/U/J-type). Operation selected by funct3 and funct7. Outputs result and zero flag for branch decisions.">
+              <rect x="680" y="370" width="180" height="100" rx="8" fill="#edf7f0" stroke="#a8d5b5" stroke-width="1.5"/>
+              <text x="770" y="400" text-anchor="middle" font-family="Syne,sans-serif" font-size="12" font-weight="700" fill="#5a9e6f">ALU</text>
+              <text x="770" y="418" text-anchor="middle" font-family="DM Mono,monospace" font-size="8.5" fill="#5a9e6f">op: funct3 / funct7</text>
+              <text x="770" y="436" text-anchor="middle" font-family="DM Mono,monospace" font-size="8.5" fill="#5a9e6f">src: rs2 or imm</text>
+              <text x="770" y="454" text-anchor="middle" font-family="DM Mono,monospace" font-size="8.5" fill="#5a9e6f">out: result, zero</text>
+            </g>
+
+            <!-- Register file → ALU -->
+            <line x1="560" y1="265" x2="620" y2="265" stroke="#5a9e6f" stroke-width="1.6"/>
+            <line x1="620" y1="265" x2="620" y2="410" stroke="#5a9e6f" stroke-width="1.6"/>
+            <line x1="620" y1="410" x2="680" y2="410" stroke="#5a9e6f" stroke-width="1.6" marker-end="url(#aarr-g)"/>
+
+            <!-- Imm → ALU (via alu_src mux) -->
+            <line x1="560" y1="415" x2="600" y2="415" stroke="#8a7cc8" stroke-width="1.6"/>
+            <line x1="600" y1="415" x2="600" y2="435" stroke="#8a7cc8" stroke-width="1.6"/>
+            <line x1="600" y1="435" x2="680" y2="435" stroke="#8a7cc8" stroke-width="1.6" marker-end="url(#aarr)"/>
+            <text x="564" y="410" font-family="DM Mono,monospace" font-size="8" fill="#8a7cc8">imm</text>
+            <text x="564" y="424" font-family="DM Mono,monospace" font-size="8" fill="#888">(alu_src mux)</text>
+
+            <!-- Instruction format label -->
+            <text x="480" y="500" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#a8a59e">R · I · I(load) · S · B · U(LUI) · U(AUIPC) · J(JAL) · I(JALR)</text>
+          </svg>
+        </div>
+      </section>
+
+      <hr class="divider" />
+
+      <section class="section" id="overview">
+        <p class="section-label">overview</p>
+        <div class="prose">
+          <p>The decoder is the first stage of a single-cycle RISC-V pipeline. It takes a 32-bit instruction and extracts all fields needed by downstream stages: register addresses, the immediate value, and five control signals that drive the register file, ALU, and memory.</p>
+          <p>All logic is purely combinational — no clock, no state. The opcode in <code>instr[6:0]</code> selects which instruction format to interpret, and each format scatters its immediate across different bit fields of the instruction word.</p>
+        </div>
+      </section>
+
+      <hr class="divider" />
+
+      <section class="section" id="instruction-formats">
+        <p class="section-label">instruction formats</p>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Type</th><th>Opcode</th><th>Instructions</th><th>Immediate encoding</th><th>Control</th></tr></thead>
+            <tbody>
+              <tr><td>R</td><td><code>0110011</code></td><td>ADD, SUB, AND, OR, XOR</td><td>none (imm = 0)</td><td>reg_write, alu_src=0</td></tr>
+              <tr><td>I</td><td><code>0010011</code></td><td>ADDI, ANDI, ORI</td><td>sign-extend instr[31:20]</td><td>reg_write, alu_src=1</td></tr>
+              <tr><td>I (load)</td><td><code>0000011</code></td><td>LW, LB, LH</td><td>sign-extend instr[31:20]</td><td>reg_write, mem_read, alu_src=1</td></tr>
+              <tr><td>S</td><td><code>0100011</code></td><td>SW, SB, SH</td><td>{instr[31:25], instr[11:7]}</td><td>mem_write, alu_src=1</td></tr>
+              <tr><td>B</td><td><code>1100011</code></td><td>BEQ, BNE, BLT</td><td>scrambled across [31,7,30:25,11:8]</td><td>branch, alu_src=0</td></tr>
+              <tr><td>U (LUI)</td><td><code>0110111</code></td><td>LUI</td><td>{instr[31:12], 12'b0}</td><td>reg_write, alu_src=1</td></tr>
+              <tr><td>U (AUIPC)</td><td><code>0010111</code></td><td>AUIPC</td><td>{instr[31:12], 12'b0}</td><td>reg_write, alu_src=1</td></tr>
+              <tr><td>J</td><td><code>1101111</code></td><td>JAL</td><td>scrambled across [31,19:12,20,30:21]</td><td>reg_write, alu_src=1</td></tr>
+              <tr><td>I (JALR)</td><td><code>1100111</code></td><td>JALR</td><td>sign-extend instr[31:20]</td><td>reg_write, alu_src=1</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <hr class="divider" />
+
+      <section class="section" id="testbench">
+        <p class="section-label">testbench</p>
+        <div class="prose">
+          <p>The <code>decoder_tb</code> module applies seven test vectors covering all major instruction formats. Each test drives a 32-bit instruction encoding, waits 10 time units for combinational propagation, then calls a <code>check()</code> task that compares all nine outputs against expected values and prints PASS or FAIL with a full diff on failure.</p>
+        </div>
+        <div class="table-wrap" style="margin-top:1rem;">
+          <table class="data-table">
+            <thead><tr><th>Test</th><th>Instruction</th><th>Encoding</th><th>Key check</th></tr></thead>
+            <tbody>
+              <tr><td>R-type</td><td>ADD x3, x1, x2</td><td><code>0x0020_81B3</code></td><td>reg_write=1, alu_src=0, imm=0</td></tr>
+              <tr><td>I-type</td><td>ADDI x1, x1, 4</td><td><code>0x0040_8093</code></td><td>reg_write=1, alu_src=1, imm=4</td></tr>
+              <tr><td>I-load</td><td>LW x2, 8(x1)</td><td><code>0x0080_A103</code></td><td>mem_read=1, alu_src=1, imm=8</td></tr>
+              <tr><td>S-type</td><td>SW x2, 8(x1)</td><td><code>0x0020_A423</code></td><td>mem_write=1, reg_write=0, imm=8</td></tr>
+              <tr><td>B-type</td><td>BEQ x1, x2, 16</td><td><code>0x0020_8863</code></td><td>branch=1, alu_src=0, imm=16</td></tr>
+              <tr><td>U-type</td><td>LUI x5, 0x12345</td><td><code>0x1234_52B7</code></td><td>reg_write=1, imm=0x12345000</td></tr>
+              <tr><td>J-type</td><td>JAL x1, 32</td><td><code>0x0200_00EF</code></td><td>reg_write=1, alu_src=1, imm=32</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <hr class="divider" />
+
+      <section class="section" id="links">
+        <p class="section-label">links</p>
+        <div class="links-row">
+          <a href="https://github.com/Coizi" target="_blank" class="project-link">GitHub &#8599;</a>
+        </div>
+      </section>
+
+    </div>
+    <div class="bottom-space"></div>
+  </div>
+
+  <script>
+    const wrap = document.getElementById('arch-wrap');
+    const svg  = document.getElementById('arch-svg');
+    const tip  = document.getElementById('a-tooltip');
+    let scale = 1, tx = 0, ty = 0;
+    let dragging = false, startX, startY, startTx, startTy;
+    function applyTransform() { svg.style.transform = `translate(${tx}px,${ty}px) scale(${scale})`; }
+    document.getElementById('zoom-in').addEventListener('click', () => { scale = Math.min(scale * 1.3, 5); applyTransform(); });
+    document.getElementById('zoom-out').addEventListener('click', () => { scale = Math.max(scale / 1.3, 0.35); applyTransform(); });
+    document.getElementById('zoom-reset').addEventListener('click', () => { scale = 1; tx = 0; ty = 0; applyTransform(); });
+    wrap.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const rect = wrap.getBoundingClientRect();
+      const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+      const delta = e.deltaY > 0 ? 0.88 : 1.14;
+      const ns = Math.min(Math.max(scale * delta, 0.35), 5);
+      tx = mx - (mx - tx) * (ns / scale); ty = my - (my - ty) * (ns / scale);
+      scale = ns; applyTransform();
+    }, { passive: false });
+    wrap.addEventListener('pointerdown', (e) => {
+      if (e.target.closest('.zoom-btn')) return;
+      dragging = true; startX = e.clientX; startY = e.clientY; startTx = tx; startTy = ty;
+      wrap.setPointerCapture(e.pointerId);
+    });
+    wrap.addEventListener('pointermove', (e) => {
+      if (!dragging) return;
+      tx = startTx + (e.clientX - startX); ty = startTy + (e.clientY - startY); applyTransform();
+    });
+    wrap.addEventListener('pointerup', () => { dragging = false; });
+    document.querySelectorAll('.acomp').forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        tip.innerHTML = `<strong>${el.dataset.tip}</strong>${el.dataset.desc}`;
+        tip.classList.add('visible');
+      });
+      el.addEventListener('mousemove', (e) => {
+        const rect = wrap.getBoundingClientRect();
+        let x = e.clientX - rect.left + 14, y = e.clientY - rect.top + 14;
+        if (x + 240 > rect.width) x -= 250;
+        if (y + 120 > rect.height) y -= 130;
+        tip.style.left = x + 'px'; tip.style.top = y + 'px';
+      });
+      el.addEventListener('mouseleave', () => tip.classList.remove('visible'));
+    });
+  </script>
+</body>
+</html>
