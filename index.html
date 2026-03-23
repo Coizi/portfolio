@@ -20,14 +20,12 @@
       --text: #1a1916;
       --text2: #6b6860;
       --text3: #a8a59e;
-
       --purple-dark: #4b30a8;
       --purple-mid: #6c4fd4;
       --purple-light: #9b82e8;
       --accent-bg: #f0ecfd;
       --accent-bg2: #e4dcfb;
       --accent-border: #c4b5f4;
-
       --font-sans: 'Syne', sans-serif;
       --font-mono: 'DM Mono', monospace;
       --max-w: 820px;
@@ -52,38 +50,156 @@
     .orb-2 { width: 450px; height: 450px; top: 300px; right: -100px; background: radial-gradient(circle, #9b82e8, transparent); }
     .orb-3 { width: 400px; height: 400px; bottom: 0; left: 30%; background: radial-gradient(circle, #ddd6fe, transparent); }
 
-    .svg-filters { position: absolute; width: 0; height: 0; overflow: hidden; }
-
-    .glass {
-      background: rgba(255,255,255,0.5);
-      backdrop-filter: blur(16px) saturate(1.6);
-      -webkit-backdrop-filter: blur(16px) saturate(1.6);
-      border: 1px solid rgba(255,255,255,0.8);
-      box-shadow: 0 1px 0 rgba(255,255,255,0.9) inset, 0 4px 24px rgba(108,79,212,0.07), 0 1px 4px rgba(0,0,0,0.05);
-      position: relative;
+    /* ---- FLOATING PILL NAV ---- */
+    #pill-nav {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 200;
     }
-    .glass::before {
-      content: '';
+
+    #pill-nav.settled {
       position: absolute;
-      inset: 0;
-      border-radius: inherit;
-      background: linear-gradient(135deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.05) 60%, rgba(255,255,255,0.2) 100%);
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: auto;
+    }
+
+    .pill-wrap {
+      position: relative;
+      border-radius: 999px;
+    }
+
+    /* Glow border */
+    .pill-glow-border {
+      position: absolute;
+      inset: -1.5px;
+      border-radius: 999px;
+      background: conic-gradient(
+        from 0deg,
+        transparent 0deg,
+        transparent calc(var(--cursor-angle, 180deg) - 30deg),
+        hsl(260deg 70% 75% / calc(var(--proximity, 0) * 0.85)) calc(var(--cursor-angle, 180deg) - 15deg),
+        hsl(260deg 85% 88% / calc(var(--proximity, 0) * 1.0)) var(--cursor-angle, 180deg),
+        hsl(260deg 70% 75% / calc(var(--proximity, 0) * 0.85)) calc(var(--cursor-angle, 180deg) + 15deg),
+        transparent calc(var(--cursor-angle, 180deg) + 30deg),
+        transparent 360deg
+      );
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      padding: 1.5px;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* Hidden SVG filters for liquid glass */
+    .pill-filters {
+      position: absolute;
+      width: 0;
+      height: 0;
+      overflow: hidden;
       pointer-events: none;
     }
 
-    .page { position: relative; z-index: 1; }
-    .container { max-width: var(--max-w); margin: 0 auto; padding: 0 2rem; }
+    /* The actual liquid glass pill — truly transparent */
+    .pill-glass {
+      position: relative;
+      border-radius: 999px;
+      overflow: hidden;
+      backdrop-filter: url(#pill-glass-filter) blur(14px) saturate(2.2) brightness(1.08);
+      -webkit-backdrop-filter: blur(14px) saturate(2.2) brightness(1.08);
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.55);
+      box-shadow:
+        0 1.5px 0 rgba(255,255,255,0.7) inset,
+        0 -1px 0 rgba(200,180,255,0.15) inset,
+        0 8px 32px rgba(108,79,212,0.1),
+        0 2px 8px rgba(0,0,0,0.06);
+    }
 
-    /* Nav */
-    nav {
+    /* Top specular highlight — thin bright line at the rim */
+    .pill-glass::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 8%;
+      width: 84%;
+      height: 1.5px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.85);
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    /* Subtle inner bottom tint */
+    .pill-glass::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 10%;
+      width: 80%;
+      height: 35%;
+      border-radius: 50% 50% 0 0;
+      background: linear-gradient(0deg, rgba(160,130,255,0.1) 0%, transparent 100%);
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    .pill-inner {
+      position: relative;
+      z-index: 4;
+      display: flex;
+      align-items: center;
+      padding: 7px 6px;
+      gap: 0;
+    }
+
+    /* Sliding active indicator */
+    .pill-indicator {
+      position: absolute;
+      height: calc(100% - 10px);
+      top: 5px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.22);
+      border: 0.5px solid rgba(255,255,255,0.5);
+      transition: left 0.32s cubic-bezier(0.25, 0.46, 0.45, 0.94), width 0.32s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      pointer-events: none;
+      z-index: 0;
+      backdrop-filter: blur(6px);
+    }
+
+    .pill-link {
+      position: relative;
+      z-index: 1;
+      font-family: var(--font-sans);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      text-decoration: none;
+      padding: 6px 16px;
+      border-radius: 999px;
+      transition: color 0.2s;
+      white-space: nowrap;
+      letter-spacing: 0.01em;
+      text-shadow: 0 1px 4px rgba(255,255,255,0.5);
+    }
+    .pill-link.active { color: var(--purple-dark); font-weight: 600; }
+    .pill-link:hover { color: var(--purple-mid); }
+
+    /* ---- TOP BAR ---- */
+    .top-bar {
       position: sticky;
       top: 0;
       z-index: 100;
       border-bottom: 0.5px solid rgba(224,221,214,0.5);
-      border-radius: 0;
       padding: 1.1rem 0;
+      background: rgba(255,255,255,0.5);
+      backdrop-filter: blur(16px) saturate(1.6);
+      -webkit-backdrop-filter: blur(16px) saturate(1.6);
     }
-    nav .container { display: flex; justify-content: space-between; align-items: center; }
+    .top-bar .container { display: flex; justify-content: space-between; align-items: center; }
     .nav-logo {
       font-family: var(--font-mono);
       font-size: 13px;
@@ -91,240 +207,60 @@
       letter-spacing: 0.05em;
       text-decoration: none;
     }
-    .nav-links { display: flex; gap: 1.5rem; align-items: center; }
-    .nav-links a {
-      font-size: 13px;
-      color: var(--text2);
-      text-decoration: none;
-      transition: color 0.15s;
-    }
-    .nav-links a:hover { color: var(--purple-mid); }
-    .nav-cta {
-      color: var(--purple-dark) !important;
-      border: 0.5px solid var(--accent-border) !important;
-      background: var(--accent-bg) !important;
-      padding: 4px 14px;
-      border-radius: 3px;
-      font-family: var(--font-mono) !important;
-      font-size: 12px !important;
-    }
 
-    /* Hero */
+    .page { position: relative; z-index: 1; }
+    .container { max-width: var(--max-w); margin: 0 auto; padding: 0 2rem; }
+
     .hero { padding: 5rem 0 3.5rem; }
-    .hero-eyebrow {
-      font-family: var(--font-mono);
-      font-size: 12px;
-      color: var(--text3);
-      letter-spacing: 0.1em;
-      margin-bottom: 1rem;
-    }
-    .hero-title {
-      font-size: clamp(2.8rem, 7vw, 4rem);
-      font-weight: 700;
-      line-height: 1.05;
-      letter-spacing: -0.03em;
-      color: var(--text);
-    }
+    .hero-eyebrow { font-family: var(--font-mono); font-size: 12px; color: var(--text3); letter-spacing: 0.1em; margin-bottom: 1rem; }
+    .hero-title { font-size: clamp(2.8rem, 7vw, 4rem); font-weight: 700; line-height: 1.05; letter-spacing: -0.03em; color: var(--text); }
     .hero-title .muted { color: var(--text2); font-weight: 400; }
-    .hero-sub {
-      margin-top: 1.4rem;
-      font-size: 16px;
-      color: var(--text2);
-      line-height: 1.8;
-      max-width: 560px;
-    }
-    .hero-badges {
-      display: flex;
-      gap: 0.6rem;
-      margin-top: 2rem;
-      flex-wrap: wrap;
-    }
-    .badge-dark {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      color: var(--purple-dark);
-      border: 0.5px solid var(--purple-mid);
-      background: var(--accent-bg2);
-      padding: 4px 12px;
-      border-radius: 2px;
-    }
-    .badge-light {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      color: var(--purple-light);
-      border: 0.5px solid var(--accent-border);
-      background: var(--accent-bg);
-      padding: 4px 12px;
-      border-radius: 2px;
-    }
-    .badge-ghost {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      color: var(--text3);
-      border: 0.5px solid var(--border2);
-      background: var(--bg2);
-      padding: 4px 12px;
-      border-radius: 2px;
-    }
+    .hero-sub { margin-top: 1.4rem; font-size: 16px; color: var(--text2); line-height: 1.8; max-width: 560px; }
+    .hero-badges { display: flex; gap: 0.6rem; margin-top: 2rem; flex-wrap: wrap; }
+    .badge-dark { font-family: var(--font-mono); font-size: 11px; color: var(--purple-dark); border: 0.5px solid var(--purple-mid); background: var(--accent-bg2); padding: 4px 12px; border-radius: 2px; }
+    .badge-light { font-family: var(--font-mono); font-size: 11px; color: var(--purple-light); border: 0.5px solid var(--accent-border); background: var(--accent-bg); padding: 4px 12px; border-radius: 2px; }
+    .badge-ghost { font-family: var(--font-mono); font-size: 11px; color: var(--text3); border: 0.5px solid var(--border2); background: var(--bg2); padding: 4px 12px; border-radius: 2px; }
 
     .divider { border: none; border-top: 0.5px solid var(--border); margin: 0; }
-
     .section { padding: 3rem 0; }
-    .section-label {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      color: var(--text3);
-      letter-spacing: 0.12em;
-      margin-bottom: 1.75rem;
-    }
+    .section-label { font-family: var(--font-mono); font-size: 11px; color: var(--text3); letter-spacing: 0.12em; margin-bottom: 1.75rem; }
 
-    /* Experience */
     .exp-list { display: flex; flex-direction: column; gap: 2rem; }
     .exp-item { display: flex; gap: 1.25rem; align-items: flex-start; }
-    .exp-logo {
-      width: 40px;
-      height: 40px;
-      border-radius: 8px;
-      border: 0.5px solid var(--border);
-      background: white;
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      margin-top: 2px;
-    }
-    .exp-logo img {
-      width: 28px;
-      height: 28px;
-      object-fit: contain;
-      mix-blend-mode: multiply;
-    }
+    .exp-logo { width: 40px; height: 40px; border-radius: 8px; border: 0.5px solid var(--border); background: white; flex-shrink: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; margin-top: 2px; }
+    .exp-logo img { width: 28px; height: 28px; object-fit: contain; mix-blend-mode: multiply; }
     .exp-role { font-size: 15px; font-weight: 500; color: var(--text); }
-    .exp-company {
-      font-family: var(--font-mono);
-      font-size: 12px;
-      color: var(--purple-mid);
-      margin-top: 3px;
-    }
-    .exp-date {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      color: var(--text3);
-      margin-top: 2px;
-    }
-    .exp-desc {
-      font-size: 13px;
-      color: var(--text2);
-      line-height: 1.65;
-      margin-top: 0.5rem;
-    }
+    .exp-company { font-family: var(--font-mono); font-size: 12px; color: var(--purple-mid); margin-top: 3px; }
+    .exp-date { font-family: var(--font-mono); font-size: 11px; color: var(--text3); margin-top: 2px; }
+    .exp-desc { font-size: 13px; color: var(--text2); line-height: 1.65; margin-top: 0.5rem; }
 
-    /* Projects */
     .projects-list { display: flex; flex-direction: column; gap: 1px; background: var(--border); border-radius: 8px; overflow: hidden; }
-    .project-card {
-      background: var(--bg);
-      padding: 1.4rem 1.6rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      cursor: pointer;
-      transition: background 0.15s;
-      text-decoration: none;
-      color: inherit;
-    }
+    .project-card { background: var(--bg); padding: 1.4rem 1.6rem; display: flex; flex-direction: column; gap: 0.5rem; cursor: pointer; transition: background 0.15s; text-decoration: none; color: inherit; }
     .project-card:hover { background: var(--accent-bg); }
     .card-top { display: flex; justify-content: space-between; align-items: center; }
     .card-title { font-size: 15px; font-weight: 500; color: var(--text); }
     .card-right { display: flex; align-items: center; gap: 0.75rem; }
-    .card-tag {
-      font-family: var(--font-mono);
-      font-size: 10px;
-      color: var(--purple-dark);
-      background: var(--accent-bg2);
-      border: 0.5px solid var(--accent-border);
-      padding: 2px 8px;
-      border-radius: 2px;
-    }
+    .card-tag { font-family: var(--font-mono); font-size: 10px; color: var(--purple-dark); background: var(--accent-bg2); border: 0.5px solid var(--accent-border); padding: 2px 8px; border-radius: 2px; }
     .card-arrow { font-size: 14px; color: var(--text3); }
     .card-desc { font-size: 13px; color: var(--text2); line-height: 1.65; }
     .card-chips { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 0.25rem; }
-    .chip {
-      font-family: var(--font-mono);
-      font-size: 10px;
-      color: var(--text2);
-      background: var(--bg3);
-      padding: 2px 8px;
-      border-radius: 2px;
-    }
-    .chip-accent {
-      font-family: var(--font-mono);
-      font-size: 10px;
-      color: var(--purple-dark);
-      background: var(--accent-bg2);
-      border: 0.5px solid var(--accent-border);
-      padding: 2px 8px;
-      border-radius: 2px;
-    }
+    .chip { font-family: var(--font-mono); font-size: 10px; color: var(--text2); background: var(--bg3); padding: 2px 8px; border-radius: 2px; }
+    .chip-accent { font-family: var(--font-mono); font-size: 10px; color: var(--purple-dark); background: var(--accent-bg2); border: 0.5px solid var(--accent-border); padding: 2px 8px; border-radius: 2px; }
 
-    /* Stack */
     .stack-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem 4rem; }
-    .stack-label {
-      font-family: var(--font-mono);
-      font-size: 10px;
-      color: var(--purple-mid);
-      letter-spacing: 0.08em;
-      margin-bottom: 0.6rem;
-    }
+    .stack-label { font-family: var(--font-mono); font-size: 10px; color: var(--purple-mid); letter-spacing: 0.08em; margin-bottom: 0.6rem; }
     .stack-list { font-size: 14px; color: var(--text2); line-height: 2.1; }
 
-    /* Contact */
-    .contact-strip {
-      border-radius: 8px;
-      padding: 1.75rem 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 1rem;
-      margin-bottom: 3rem;
-      border: 0.5px solid var(--accent-border);
-      background: linear-gradient(135deg, var(--accent-bg) 0%, var(--accent-bg2) 100%);
-    }
+    .contact-strip { border-radius: 8px; padding: 1.75rem 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 7rem; border: 0.5px solid var(--accent-border); background: linear-gradient(135deg, var(--accent-bg) 0%, var(--accent-bg2) 100%); }
     .contact-text { font-size: 15px; color: var(--purple-dark); font-weight: 500; }
-    .contact-sub {
-      font-size: 13px;
-      color: var(--purple-light);
-      margin-top: 0.2rem;
-      font-family: var(--font-mono);
-    }
-    .contact-btn {
-      text-decoration: none;
-      font-family: var(--font-mono);
-      font-size: 12px;
-      color: var(--purple-dark);
-      border: 0.5px solid var(--purple-mid);
-      background: white;
-      padding: 9px 20px;
-      border-radius: 2px;
-      white-space: nowrap;
-      transition: background 0.15s;
-    }
+    .contact-sub { font-size: 13px; color: var(--purple-light); margin-top: 0.2rem; font-family: var(--font-mono); }
+    .contact-btn { text-decoration: none; font-family: var(--font-mono); font-size: 12px; color: var(--purple-dark); border: 0.5px solid var(--purple-mid); background: white; padding: 9px 20px; border-radius: 2px; white-space: nowrap; transition: background 0.15s; }
     .contact-btn:hover { background: var(--accent-bg2); }
+
+    #page-end { height: 1px; }
   </style>
 </head>
 <body>
-
-  <svg class="svg-filters" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <filter id="lg" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">
-        <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" seed="2" result="noise" />
-        <feDisplacementMap in="SourceGraphic" in2="noise" scale="4" xChannelSelector="R" yChannelSelector="G" result="d" />
-        <feGaussianBlur in="d" stdDeviation="0.4" result="b" />
-        <feComposite in="b" in2="SourceGraphic" operator="in" />
-      </filter>
-    </defs>
-  </svg>
 
   <div class="bg-orbs">
     <div class="orb orb-1"></div>
@@ -333,30 +269,18 @@
   </div>
 
   <div class="page">
-
-    <nav class="glass">
+    <header class="top-bar">
       <div class="container">
         <a href="#" class="nav-logo">jtaylor3</a>
-        <div class="nav-links">
-          <a href="#experience">experience</a>
-          <a href="#projects">work</a>
-          <a href="#stack">stack</a>
-          <a href="#contact" class="nav-cta">contact</a>
-        </div>
       </div>
-    </nav>
+    </header>
 
     <div class="container">
 
-      <section class="hero">
+      <section class="hero" id="hero">
         <p class="hero-eyebrow">ECE @ Carnegie Mellon &middot; 2028</p>
-        <h1 class="hero-title">
-          Joshua Taylor<br>
-          <span class="muted">Hardware &amp; Software</span>
-        </h1>
-        <p class="hero-sub">
-          Building systems at the boundary of silicon and software &mdash; verification, embedded, and the things in between.
-        </p>
+        <h1 class="hero-title">Joshua Taylor<br><span class="muted">Hardware &amp; Software</span></h1>
+        <p class="hero-sub">Building systems at the boundary of silicon and software &mdash; verification, embedded, and the things in between.</p>
         <div class="hero-badges">
           <span class="badge-dark">Ford SWE &middot; Summer 2026</span>
           <span class="badge-light">BWXT IT Architecture &middot; Summer 2025</span>
@@ -369,22 +293,16 @@
       <section class="section" id="experience">
         <p class="section-label">experience</p>
         <div class="exp-list">
-
           <div class="exp-item">
-            <div class="exp-logo">
-              <img src="Ford-Logo.png" alt="Ford" />
-            </div>
+            <div class="exp-logo"><img src="ford.png" alt="Ford" /></div>
             <div>
               <p class="exp-role">Software Development Intern</p>
               <p class="exp-company">Ford Motor Company</p>
               <p class="exp-date">Summer 2026</p>
             </div>
           </div>
-
           <div class="exp-item">
-            <div class="exp-logo">
-              <img src="bwxt-logo.png" alt="BWXT" />
-            </div>
+            <div class="exp-logo"><img src="bwxt.png" alt="BWXT" /></div>
             <div>
               <p class="exp-role">IT Architecture &amp; Systems Engineering Intern</p>
               <p class="exp-company">BWX Technologies</p>
@@ -392,7 +310,6 @@
               <p class="exp-desc">Evaluated Microsoft CoPilot Studio and Power Automate for production readiness in a Government Cloud environment. Built an AI-powered resume screening tool for HR and an AI ticket response tool for the help desk. Applied government data security standards throughout.</p>
             </div>
           </div>
-
         </div>
       </section>
 
@@ -401,73 +318,26 @@
       <section class="section" id="projects">
         <p class="section-label">selected builds</p>
         <div class="projects-list">
-
           <div class="project-card">
-            <div class="card-top">
-              <h3 class="card-title">AI-Powered Aim Assist System</h3>
-              <div class="card-right">
-                <span class="card-tag">HARDWARE</span>
-                <span class="card-arrow">&#8599;</span>
-              </div>
-            </div>
-            <p class="card-desc">Jetson Orin Nano + global shutter camera + EMS actuators. Dual-mode PID controller and SPI digital potentiometers for precise muscle stimulation control.</p>
-            <div class="card-chips">
-              <span class="chip">Python</span>
-              <span class="chip">SPI</span>
-              <span class="chip">PID</span>
-              <span class="chip-accent">3rd place @ CMU HackberryPi</span>
-            </div>
+            <div class="card-top"><h3 class="card-title">AI-Powered Aim Assist System</h3><div class="card-right"><span class="card-tag">HARDWARE</span><span class="card-arrow">&#8599;</span></div></div>
+            <p class="card-desc">Jetson Orin Nano + global shutter camera + EMS actuators. Dual-mode PID controller running at 1kHz and SPI digital potentiometers for precise muscle stimulation control, achieving a 15ms pixel-to-stimulation response time.</p>
+            <div class="card-chips"><span class="chip">Python</span><span class="chip">SPI</span><span class="chip">PID</span><span class="chip-accent">3rd place</span></div>
           </div>
-
           <div class="project-card">
-            <div class="card-top">
-              <h3 class="card-title">8-bit RISC-V Processor</h3>
-              <div class="card-right">
-                <span class="card-tag">FPGA / RTL</span>
-                <span class="card-arrow">&#8599;</span>
-              </div>
-            </div>
+            <div class="card-top"><h3 class="card-title">8-bit RISC-V Processor</h3><div class="card-right"><span class="card-tag">FPGA / RTL</span><span class="card-arrow">&#8599;</span></div></div>
             <p class="card-desc">Full processor implementation in Verilog on Basys3 FPGA. Includes instruction decoder, testbench, and SystemVerilog FSM design.</p>
-            <div class="card-chips">
-              <span class="chip">SystemVerilog</span>
-              <span class="chip">Basys3</span>
-              <span class="chip">RISC-V</span>
-            </div>
+            <div class="card-chips"><span class="chip">SystemVerilog</span><span class="chip">Basys3</span><span class="chip">RISC-V</span></div>
           </div>
-
           <div class="project-card">
-            <div class="card-top">
-              <h3 class="card-title">FPGA Vending Machine Controller</h3>
-              <div class="card-right">
-                <span class="card-tag">FPGA / RTL</span>
-                <span class="card-arrow">&#8599;</span>
-              </div>
-            </div>
+            <div class="card-top"><h3 class="card-title">FPGA Vending Machine Controller</h3><div class="card-right"><span class="card-tag">FPGA / RTL</span><span class="card-arrow">&#8599;</span></div></div>
             <p class="card-desc">SystemVerilog FSM-based coin acceptor on a Boolean FPGA board. Detects nickels, dimes, and quarters via pulse counting, with two-flop input synchronizers for metastability handling and 7-segment display output.</p>
-            <div class="card-chips">
-              <span class="chip">SystemVerilog</span>
-              <span class="chip">FSM</span>
-              <span class="chip">Boolean Board</span>
-              <span class="chip">RTL</span>
-            </div>
+            <div class="card-chips"><span class="chip">SystemVerilog</span><span class="chip">FSM</span><span class="chip">Boolean Board</span><span class="chip">RTL</span></div>
           </div>
-
           <div class="project-card">
-            <div class="card-top">
-              <h3 class="card-title">PCB Design &amp; Fabrication</h3>
-              <div class="card-right">
-                <span class="card-tag">PCB DESIGN</span>
-                <span class="card-arrow">&#8599;</span>
-              </div>
-            </div>
+            <div class="card-top"><h3 class="card-title">PCB Design &amp; Fabrication</h3><div class="card-right"><span class="card-tag">PCB DESIGN</span><span class="card-arrow">&#8599;</span></div></div>
             <p class="card-desc">Designed and fabricated a PCB with defined test patterns, going end-to-end from schematic to physical board via JLCPCB with full BOM and CPL files.</p>
-            <div class="card-chips">
-              <span class="chip">Eagle/Fusion</span>
-              <span class="chip">JLCPCB</span>
-              <span class="chip">BOM / CPL</span>
-            </div>
+            <div class="card-chips"><span class="chip">Eagle/Fusion</span><span class="chip">JLCPCB</span><span class="chip">BOM / CPL</span></div>
           </div>
-
         </div>
       </section>
 
@@ -476,39 +346,177 @@
       <section class="section" id="stack">
         <p class="section-label">stack</p>
         <div class="stack-grid">
-          <div>
-            <p class="stack-label">LANGUAGES</p>
-            <p class="stack-list">SystemVerilog<br>Python<br>C / C++<br>MATLAB</p>
-          </div>
-          <div>
-            <p class="stack-label">HARDWARE</p>
-            <p class="stack-list">Basys3 FPGA<br>Jetson Orin<br>Raspberry Pi<br>Eagle / JLCPCB</p>
-          </div>
-          <div>
-            <p class="stack-label">CONCEPTS</p>
-            <p class="stack-list">RTL Design<br>Signals &amp; Systems<br>PID Control<br>SPI / UART</p>
-          </div>
-          <div>
-            <p class="stack-label">TOOLS</p>
-            <p class="stack-list">Git / GitHub<br>Linux<br>Vivado<br>VS Code</p>
-          </div>
+          <div><p class="stack-label">LANGUAGES</p><p class="stack-list">SystemVerilog<br>Python<br>C / C++<br>MATLAB</p></div>
+          <div><p class="stack-label">HARDWARE</p><p class="stack-list">Basys3 FPGA<br>Jetson Orin<br>Raspberry Pi<br>Eagle / JLCPCB</p></div>
+          <div><p class="stack-label">CONCEPTS</p><p class="stack-list">RTL Design<br>Signals &amp; Systems<br>PID Control<br>SPI / UART</p></div>
+          <div><p class="stack-label">TOOLS</p><p class="stack-list">Git / GitHub<br>Linux<br>Vivado<br>VS Code</p></div>
         </div>
       </section>
 
       <hr class="divider" />
 
-      <section class="section" id="contact" style="padding-bottom: 0;">
+      <section class="section" id="contact" style="padding-bottom:0;">
         <div class="contact-strip">
           <div>
             <p class="contact-text">Let&#8217;s connect.</p>
-            <p class="contact-sub">jtaylor3@andrew.cmu.edu</p>
+            <p class="contact-sub"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="412b3520382d2e337201202f253324366f222c346f242534">[email&#160;protected]</a></p>
           </div>
-          <a href="mailto:jtaylor3@andrew.cmu.edu" class="contact-btn">get in touch &#8599;</a>
+          <a href="/cdn-cgi/l/email-protection#2b415f4a52474459186b4a454f594e5c0548465e054e4f5e" class="contact-btn">get in touch &#8599;</a>
         </div>
       </section>
 
     </div>
+    <div id="page-end"></div>
   </div>
 
-</body>
-</html>
+  <!-- Floating pill nav -->
+  <nav id="pill-nav">
+    <!-- Hidden SVG filter for liquid glass displacement -->
+    <svg class="pill-filters" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="pill-glass-filter" x="-10%" y="-40%" width="120%" height="180%" color-interpolation-filters="sRGB">
+          <!-- Displacement map image, updated by JS to match pill dimensions -->
+          <feImage id="pill-disp-map" x="0" y="0" width="100%" height="100%" preserveAspectRatio="none" result="map" />
+          <!-- Red channel: displaced slightly left -->
+          <feDisplacementMap in="SourceGraphic" in2="map" scale="-160" xChannelSelector="R" yChannelSelector="G" result="dispRed" />
+          <feColorMatrix in="dispRed" type="matrix"
+            values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0"
+            result="red" />
+          <!-- Green channel: baseline -->
+          <feDisplacementMap in="SourceGraphic" in2="map" scale="-170" xChannelSelector="R" yChannelSelector="G" result="dispGreen" />
+          <feColorMatrix in="dispGreen" type="matrix"
+            values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0"
+            result="green" />
+          <!-- Blue channel: displaced slightly right -->
+          <feDisplacementMap in="SourceGraphic" in2="map" scale="-180" xChannelSelector="R" yChannelSelector="G" result="dispBlue" />
+          <feColorMatrix in="dispBlue" type="matrix"
+            values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0"
+            result="blue" />
+          <!-- Composite RGB channels -->
+          <feBlend in="red" in2="green" mode="screen" result="rg" />
+          <feBlend in="rg" in2="blue" mode="screen" result="output" />
+          <feGaussianBlur in="output" stdDeviation="0.5" />
+        </filter>
+      </defs>
+    </svg>
+
+    <div class="pill-wrap" id="pill-wrap">
+      <div class="pill-glow-border"></div>
+      <div class="pill-glass">
+        <div class="pill-inner">
+          <div class="pill-indicator" id="pill-indicator"></div>
+          <a href="#experience" class="pill-link" data-section="experience">experience</a>
+          <a href="#projects"   class="pill-link" data-section="projects">work</a>
+          <a href="#stack"      class="pill-link" data-section="stack">stack</a>
+          <a href="#contact"    class="pill-link" data-section="contact">contact</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+    // ---- BUILD DISPLACEMENT MAP SVG ----
+    function buildDispMap(w, h, borderRadius) {
+      const edge = Math.min(w, h) * 0.07;
+      const r = borderRadius;
+      const svg = `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="rg" x1="100%" y1="0%" x2="0%" y2="0%">
+            <stop offset="0%" stop-color="#0000"/>
+            <stop offset="100%" stop-color="red"/>
+          </linearGradient>
+          <linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#0000"/>
+            <stop offset="100%" stop-color="blue"/>
+          </linearGradient>
+        </defs>
+        <rect x="0" y="0" width="${w}" height="${h}" fill="black"/>
+        <rect x="0" y="0" width="${w}" height="${h}" rx="${r}" fill="url(#rg)"/>
+        <rect x="0" y="0" width="${w}" height="${h}" rx="${r}" fill="url(#bg)" style="mix-blend-mode:difference"/>
+        <rect x="${edge}" y="${edge}" width="${w - edge*2}" height="${h - edge*2}" rx="${r}" fill="hsl(0 0% 50% / 0.93)" style="filter:blur(${Math.min(w,h)*0.06}px)"/>
+      </svg>`;
+      return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+    }
+
+    function updateDispMap() {
+      const glass = document.querySelector('.pill-glass');
+      const feImg = document.getElementById('pill-disp-map');
+      if (!glass || !feImg) return;
+      const { width, height } = glass.getBoundingClientRect();
+      if (width === 0) return;
+      feImg.setAttribute('href', buildDispMap(width, height, 999));
+    }
+
+    window.addEventListener('load', () => {
+      updateDispMap();
+      setTimeout(updateDispMap, 100);
+    });
+    window.addEventListener('resize', updateDispMap);
+
+    // ---- GLOW ON HOVER ----
+    const pillWrap = document.getElementById('pill-wrap');
+
+    pillWrap.addEventListener('pointermove', (e) => {
+      const rect = pillWrap.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const cx = rect.width / 2, cy = rect.height / 2;
+      const dx = x - cx, dy = y - cy;
+      const kx = cx / Math.abs(dx || 0.001);
+      const ky = cy / Math.abs(dy || 0.001);
+      const proximity = Math.min(Math.max(1 / Math.min(kx, ky), 0), 1);
+      let angle = Math.atan2(dy, dx) * (180 / Math.PI) + 90;
+      if (angle < 0) angle += 360;
+      pillWrap.style.setProperty('--cursor-angle', `${angle.toFixed(2)}deg`);
+      pillWrap.style.setProperty('--proximity', proximity.toFixed(3));
+    });
+
+    pillWrap.addEventListener('pointerleave', () => {
+      let p = parseFloat(pillWrap.style.getPropertyValue('--proximity')) || 0;
+      const fade = () => {
+        p = Math.max(0, p - 0.05);
+        pillWrap.style.setProperty('--proximity', p.toFixed(3));
+        if (p > 0) requestAnimationFrame(fade);
+      };
+      requestAnimationFrame(fade);
+    });
+
+    // ---- SLIDING ACTIVE INDICATOR ----
+    const links = document.querySelectorAll('.pill-link');
+    const indicator = document.getElementById('pill-indicator');
+
+    function moveIndicator(link) {
+      const innerRect = document.querySelector('.pill-inner').getBoundingClientRect();
+      const linkRect = link.getBoundingClientRect();
+      indicator.style.left = `${linkRect.left - innerRect.left}px`;
+      indicator.style.width = `${linkRect.width}px`;
+      links.forEach(l => l.classList.remove('active'));
+      link.classList.add('active');
+    }
+
+    window.addEventListener('load', () => setTimeout(() => moveIndicator(links[0]), 50));
+    links.forEach(link => link.addEventListener('click', () => setTimeout(() => moveIndicator(link), 50)));
+
+    // ---- SCROLL: active section + settle ----
+    const sections = ['experience', 'projects', 'stack', 'contact'];
+
+    function onScroll() {
+      // Active section
+      let current = sections[0];
+      for (const id of sections) {
+        const el = document.getElementById(id);
+        if (el && window.scrollY >= el.offsetTop - 140) current = id;
+      }
+      const activeLink = document.querySelector(`.pill-link[data-section="${current}"]`);
+      if (activeLink) moveIndicator(activeLink);
+
+      // Settle near page bottom
+      const nav = document.getElementById('pill-nav');
+      const pageEnd = document.getElementById('page-end');
+      const navH = nav.offsetHeight;
+      const pageEndY = pageEnd.getBoundingClientRect().top + window.scrollY;
+      const threshold = pageEndY - window.innerHeight + navH + 80;
+
+      if (window.scrollY >= threshold) {
+        nav.style.position = 'absolute';
+        nav.style.top = `${pageEndY - na
