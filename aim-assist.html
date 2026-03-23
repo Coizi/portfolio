@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Aim Assist — Joshua Taylor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #fafaf8;
+      --bg2: #f3f2ee;
+      --bg3: #eceae4;
+      --border: #e0ddd6;
+      --text: #1a1916;
+      --text2: #6b6860;
+      --text3: #a8a59e;
+      --purple-dark: #4b30a8;
+      --purple-mid: #6c4fd4;
+      --purple-light: #9b82e8;
+      --accent-bg: #f0ecfd;
+      --accent-bg2: #e4dcfb;
+      --accent-border: #c4b5f4;
+      --font-sans: 'Syne', sans-serif;
+      --font-mono: 'DM Mono', monospace;
+      --max-w: 820px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      font-size: 16px;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .bg-orbs { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+    .orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.28; }
+    .orb-1 { width: 600px; height: 600px; top: -150px; left: -150px; background: radial-gradient(circle, #c4b5f4, transparent); }
+    .orb-2 { width: 450px; height: 450px; top: 300px; right: -100px; background: radial-gradient(circle, #9b82e8, transparent); }
+    .orb-3 { width: 400px; height: 400px; bottom: 0; left: 30%; background: radial-gradient(circle, #ddd6fe, transparent); }
+
+    .page { position: relative; z-index: 1; }
+    .container { max-width: var(--max-w); margin: 0 auto; padding: 0 2rem; }
+
+    /* Back link */
+    .back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text3);
+      text-decoration: none;
+      padding: 2rem 0 0;
+      transition: color 0.15s;
+    }
+    .back:hover { color: var(--purple-mid); }
+
+    /* Header */
+    .project-header { padding: 2rem 0 2.5rem; }
+    .project-tag {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--purple-dark);
+      background: var(--accent-bg2);
+      border: 0.5px solid var(--accent-border);
+      padding: 2px 10px;
+      border-radius: 2px;
+      display: inline-block;
+      margin-bottom: 1rem;
+    }
+    .project-title {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      color: var(--text);
+    }
+    .project-sub {
+      margin-top: 1rem;
+      font-size: 15px;
+      color: var(--text2);
+      line-height: 1.75;
+      max-width: 580px;
+    }
+    .project-chips {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 1.25rem;
+    }
+    .chip { font-family: var(--font-mono); font-size: 10px; color: var(--text2); background: var(--bg3); padding: 3px 10px; border-radius: 2px; }
+    .chip-accent { font-family: var(--font-mono); font-size: 10px; color: var(--purple-dark); background: var(--accent-bg2); border: 0.5px solid var(--accent-border); padding: 3px 10px; border-radius: 2px; }
+
+    .divider { border: none; border-top: 0.5px solid var(--border); margin: 0; }
+
+    /* Content sections */
+    .section { padding: 2.5rem 0; }
+    .section-label { font-family: var(--font-mono); font-size: 11px; color: var(--text3); letter-spacing: 0.12em; margin-bottom: 1.5rem; }
+
+    /* Placeholder image slots */
+    .image-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+    }
+    .image-placeholder {
+      aspect-ratio: 16/10;
+      background: var(--bg2);
+      border: 0.5px dashed var(--border2);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .image-placeholder span {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text3);
+    }
+
+    /* Placeholder text blocks */
+    .content-placeholder {
+      background: var(--bg2);
+      border: 0.5px dashed var(--border2);
+      border-radius: 8px;
+      padding: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .content-placeholder span {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text3);
+    }
+
+    /* Links row */
+    .links-row {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .project-link {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--purple-dark);
+      border: 0.5px solid var(--accent-border);
+      background: var(--accent-bg);
+      padding: 7px 16px;
+      border-radius: 2px;
+      text-decoration: none;
+      transition: background 0.15s;
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Bottom spacing */
+    .bottom-space { height: 5rem; }
+  </style>
+</head>
+<body>
+
+  <div class="bg-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <div class="page">
+    <div class="container">
+
+      <a href="index.html" class="back">&#8592; back</a>
+
+      <header class="project-header">
+        <div class="project-tag">HARDWARE</div>
+        <h1 class="project-title">AI-Powered Aim Assist System</h1>
+        <p class="project-sub">
+          Jetson Orin Nano + global shutter camera + EMS actuators. Dual-mode PID controller running at 1kHz and SPI digital potentiometers for precise muscle stimulation control, achieving a 15ms pixel-to-stimulation response time.
+        </p>
+        <div class="project-chips">
+          <span class="chip">Python</span>
+          <span class="chip">SPI</span>
+          <span class="chip">PID</span>
+          <span class="chip">Jetson Orin Nano</span>
+          <span class="chip">EMS</span>
+          <span class="chip-accent">3rd place @ CMU HackberryPi</span>
+        </div>
+      </header>
+
+      <hr class="divider" />
+
+      <section class="section">
+        <p class="section-label">images</p>
+        <div class="image-grid">
+          <div class="image-placeholder"><span>photo / diagram placeholder</span></div>
+          <div class="image-placeholder"><span>photo / diagram placeholder</span></div>
+          <div class="image-placeholder"><span>photo / diagram placeholder</span></div>
+        </div>
+      </section>
+
+      <hr class="divider" />
+
+      <section class="section">
+        <p class="section-label">overview</p>
+        <div class="content-placeholder" style="min-height: 120px;">
+          <span>project description placeholder</span>
+        </div>
+      </section>
+
+      <hr class="divider" />
+
+      <section class="section">
+        <p class="section-label">technical details</p>
+        <div class="content-placeholder" style="min-height: 160px;">
+          <span>hardware breakdown, architecture, key decisions placeholder</span>
+        </div>
+      </section>
+
+      <hr class="divider" />
+
+      <section class="section">
+        <p class="section-label">links</p>
+        <div class="links-row">
+          <a class="project-link">GitHub &#8599;</a>
+          <a class="project-link">Demo video &#8599;</a>
+          <a class="project-link">Devpost &#8599;</a>
+        </div>
+      </section>
+
+    </div>
+    <div class="bottom-space"></div>
+  </div>
+
+</body>
+</html>

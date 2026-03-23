@@ -295,7 +295,7 @@
         <p class="section-label">selected builds</p>
         <div class="projects-list">
 
-          <div class="project-card">
+          <a class="project-card" href="aim-assist.html">
             <div class="card-top">
               <h3 class="card-title">AI-Powered Aim Assist System</h3>
               <div class="card-right"><span class="card-tag">HARDWARE</span><span class="card-arrow">&#8599;</span></div>
@@ -305,7 +305,7 @@
               <span class="chip">Python</span><span class="chip">SPI</span><span class="chip">PID</span>
               <span class="chip-accent">3rd place @ CMU HackberryPi</span>
             </div>
-          </div>
+          </a>
 
           <div class="project-card">
             <div class="card-top">
@@ -355,9 +355,9 @@
         <div class="contact-strip">
           <div>
             <p class="contact-text">Let&#8217;s connect.</p>
-            <p class="contact-sub">jtaylor3@andrew.cmu.edu</p>
+            <p class="contact-sub"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="f9938d988095968bcab998979d8b9c8ed79a948cd79c9d8c">[email&#160;protected]</a></p>
           </div>
-          <a href="mailto:jtaylor3@andrew.cmu.edu" class="contact-btn">get in touch &#8599;</a>
+          <a href="/cdn-cgi/l/email-protection#9df7e9fce4f1f2efaeddfcf3f9eff8eab3fef0e8b3f8f9e8" class="contact-btn">get in touch &#8599;</a>
         </div>
       </section>
 
@@ -365,7 +365,7 @@
     <div id="page-end"></div>
   </div>
 
-  <script>
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
     function buildDispMap(w, h) {
       const edge = Math.min(w, h) * 0.07;
       const svg = `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
@@ -438,13 +438,4 @@
     window.addEventListener('scroll', () => {
       let current = sections[0];
       for (const id of sections) {
-        const el = document.getElementById(id);
-        if (el && window.scrollY >= el.offsetTop - 140) current = id;
-      }
-      const activeLink = document.querySelector(`.pill-link[data-section="${current}"]`);
-      if (activeLink) moveIndicator(activeLink);
-    }, { passive: true });
-  </script>
-
-</body>
-</html>
+        const el = document.getElementByI
