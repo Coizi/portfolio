@@ -38,7 +38,7 @@
     .chip-accent { font-family: var(--font-mono); font-size: 10px; color: var(--purple-dark); background: var(--accent-bg2); border: 0.5px solid var(--accent-border); padding: 3px 10px; border-radius: 2px; }
     .divider { border: none; border-top: 0.5px solid var(--border); margin: 0; }
     .section { padding: 2.5rem 0; }
-    .section-label { font-family: var(--font-mono); font-size: 11px; color: var(--text3); letter-spacing: 0.12em; margin-bottom: 1.5rem; }
+    .section-label { font-family: var(--font-mono); font-size: 11px; color: #b8a8f0; letter-spacing: 0.12em; margin-bottom: 1.5rem; }
 
     /* Schematic */
     .schematic-wrap {
@@ -67,11 +67,37 @@
     .image-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
     .image-placeholder { aspect-ratio: 16/10; background: var(--bg2); border: 0.5px dashed var(--border2); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
     .image-placeholder span { font-family: var(--font-mono); font-size: 11px; color: var(--text3); }
-    .content-placeholder { background: var(--bg2); border: 0.5px dashed var(--border2); border-radius: 8px; padding: 2rem; display: flex; align-items: center; justify-content: center; }
-    .content-placeholder span { font-family: var(--font-mono); font-size: 11px; color: var(--text3); }
     .links-row { display: flex; gap: 0.75rem; flex-wrap: wrap; }
-    .project-link { font-family: var(--font-mono); font-size: 12px; color: var(--purple-dark); border: 0.5px solid var(--accent-border); background: var(--accent-bg); padding: 7px 16px; border-radius: 2px; text-decoration: none; opacity: 0.5; cursor: not-allowed; }
+    .project-link { font-family: var(--font-mono); font-size: 12px; color: var(--purple-dark); border: 0.5px solid var(--accent-border); background: var(--accent-bg); padding: 7px 16px; border-radius: 2px; text-decoration: none; transition: background 0.15s; }
+    .project-link:hover { background: var(--accent-bg2); }
     .bottom-space { height: 5rem; }
+
+    /* Prose content */
+    .prose { font-size: 14px; color: var(--text2); line-height: 1.8; }
+    .prose p { margin-bottom: 1rem; }
+    .prose p:last-child { margin-bottom: 0; }
+    .prose h3 { font-family: var(--font-sans); font-size: 15px; font-weight: 600; color: var(--text); margin: 1.75rem 0 0.6rem; }
+    .prose h4 { font-family: var(--font-sans); font-size: 13px; font-weight: 600; color: var(--text); margin: 1.25rem 0 0.4rem; }
+    .prose strong { color: var(--text); font-weight: 600; }
+    .prose ul { padding-left: 1.25rem; margin-bottom: 1rem; }
+    .prose li { margin-bottom: 0.4rem; }
+    .prose code { font-family: var(--font-mono); font-size: 12px; background: var(--bg3); border: 0.5px solid var(--border); padding: 1px 5px; border-radius: 3px; color: var(--purple-dark); }
+    .prose em { font-style: italic; color: var(--text); }
+
+    /* Code block */
+    .code-block { background: var(--bg2); border: 0.5px solid var(--border); border-radius: 8px; padding: 1.25rem; overflow-x: auto; margin: 1rem 0; }
+    .code-block pre { font-family: var(--font-mono); font-size: 11px; color: var(--text2); line-height: 1.6; white-space: pre; }
+
+    /* Tables */
+    .data-table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 0.5rem 0; }
+    .data-table th { font-family: var(--font-mono); font-size: 10px; color: var(--text3); letter-spacing: 0.08em; text-align: left; padding: 6px 12px; border-bottom: 0.5px solid var(--border); background: var(--bg2); }
+    .data-table td { padding: 9px 12px; border-bottom: 0.5px solid var(--border); color: var(--text2); font-size: 13px; vertical-align: top; line-height: 1.5; }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table td:first-child { font-family: var(--font-mono); font-size: 12px; color: var(--text); }
+    .data-table td strong { color: var(--purple-dark); font-weight: 600; }
+    .data-table tr.highlight td { background: var(--accent-bg); }
+    .data-table tr.highlight td:first-child { color: var(--purple-dark); }
+    .table-wrap { border: 0.5px solid var(--border); border-radius: 8px; overflow: hidden; margin: 0.5rem 0; }
   </style>
 </head>
 <body>
@@ -88,48 +114,24 @@
       <header class="project-header">
         <div class="project-tag">HARDWARE</div>
         <h1 class="project-title">AI-Powered Aim Assist System</h1>
-        <p class="project-sub">Jetson Orin Nano + global shutter camera + EMS actuators. Dual-mode PID controller running at 1kHz and SPI digital potentiometers for precise muscle stimulation control, achieving a 15ms pixel-to-stimulation response time.</p>
       </header>
 
-      <hr class="divider" />
+      <img src="autoreflex.png" alt="AutoReflex system overview" style="width:100%;border-radius:8px;border:0.5px solid var(--border);display:block;" />
+      <div class="project-chips" style="margin-top:1rem;">
+        <span class="chip">Python</span>
+        <span class="chip">C++</span>
+        <span class="chip">SPI</span>
+        <span class="chip">PID Control</span>
+        <span class="chip">YOLO11n</span>
+        <span class="chip">OpenCV</span>
+        <span class="chip">TENS</span>
+        <span class="chip">Jetson Orin Nano</span>
+        <span class="chip">EMS / TENS</span>
+        <span class="chip-accent">3rd place @ CMU HackberryPi</span>
+      </div>
+      <p class="project-sub" style="margin-top:1.5rem;">Jetson Orin Nano + global shutter camera + EMS actuators. Dual-mode PID controller running at 1kHz and SPI digital potentiometers for precise muscle stimulation control, achieving a 15ms pixel-to-stimulation response time.</p>
 
-      <section class="section">
-        <p class="section-label">overview</p>
-        <img src="autoreflex.png" alt="AutoReflex system overview" style="width:100%;border-radius:8px;border:0.5px solid var(--border);display:block;" />
-        <div class="project-chips" style="margin-top:1rem;">
-          <span class="chip">Python</span>
-          <span class="chip">C++</span>
-          <span class="chip">SPI</span>
-          <span class="chip">PID Control</span>
-          <span class="chip">YOLO11n</span>
-          <span class="chip">OpenCV</span>
-          <span class="chip">TENS</span>
-          <span class="chip">Jetson Orin Nano</span>
-          <span class="chip">EMS / TENS</span>
-          <span class="chip-accent">3rd place @ CMU HackberryPi</span>
-        </div>
-      </section>
-
-      <hr class="divider" />
-
-      <section class="section">
-        <p class="section-label">overview</p>
-        <img src="autoreflex.png" alt="AutoReflex system overview" style="width:100%;border-radius:8px;border:0.5px solid var(--border);display:block;" />
-        <div class="project-chips" style="margin-top:1rem;">
-          <span class="chip">Python</span>
-          <span class="chip">C++</span>
-          <span class="chip">SPI</span>
-          <span class="chip">PID Control</span>
-          <span class="chip">YOLO11n</span>
-          <span class="chip">OpenCV</span>
-          <span class="chip">TENS</span>
-          <span class="chip">Jetson Orin Nano</span>
-          <span class="chip">EMS / TENS</span>
-          <span class="chip-accent">3rd place @ CMU HackberryPi</span>
-        </div>
-      </section>
-
-      <hr class="divider" />
+      <hr class="divider" style="margin-top:2.5rem;" />
 
       <section class="section">
         <p class="section-label">system schematic</p>
@@ -355,30 +357,130 @@
 
       <hr class="divider" />
 
-      <section class="section">
-        <p class="section-label">images</p>
-        <div class="image-grid">
-          <div class="image-placeholder"><span>photo placeholder</span></div>
-          <div class="image-placeholder"><span>photo placeholder</span></div>
-          <div class="image-placeholder"><span>photo placeholder</span></div>
+      <section class="section" id="the-problem">
+        <p class="section-label">the problem</p>
+        <div class="prose">
+          <p>Aim assist in competitive games is almost always software-only — applied inside the rendering pipeline and trivially detectable. We wanted to answer a different question: what does a <em>hardware-level</em> aim-assist look like, operating entirely outside the game process at the level of physical muscle stimulation and mechanical actuation?</p>
         </div>
       </section>
 
       <hr class="divider" />
 
-      <section class="section">
-        <p class="section-label">technical details</p>
-        <div class="content-placeholder" style="min-height:160px;"><span>hardware breakdown, architecture, key decisions placeholder</span></div>
+      <section class="section" id="architecture">
+        <p class="section-label">architecture</p>
+        <div class="prose">
+          <p>Two nodes communicate over a direct Ethernet link. The <strong>Jetson Nano</strong> runs the vision pipeline at 100fps and streams 20-byte UDP packets to the <strong>Raspberry Pi</strong>, which runs a 1kHz PID loop driving the servo, solenoid trigger, and TENS unit.</p>
+        </div>
+        <div class="code-block" style="margin-top:1rem;">
+          <pre>┌──────────────────────┐      UDP (20 bytes)      ┌──────────────────────────────┐
+│     JETSON NANO      │ ────────────────────────► │        RASPBERRY PI          │
+│                      │  timestamp|tx|cx|blob_w   │                              │
+│  Arducam OV9782      │                           │  1kHz PID Loop               │
+│  100fps MJPEG        │                           │                              │
+│  HSV / YOLO11n       │                           │  ST3215   Servo (UART 1Mbps) │
+└──────────────────────┘                           │  Solenoid Trigger (GPIO)     │
+       10.0.0.1                                    │  TENS     EMS (SPI/MCP4131)  │
+                                                   └──────────────────────────────┘
+                                                            10.0.0.2</pre>
+        </div>
       </section>
 
       <hr class="divider" />
 
-      <section class="section">
+      <section class="section" id="how-it-works">
+        <p class="section-label">how it works</p>
+        <div class="prose">
+          <h3>Vision Pipeline</h3>
+          <p>The Arducam OV9782 streams 1280×720 MJPEG at 100fps. Pre-allocated numpy buffers eliminate per-frame heap allocation. Detection runs in two modes: <strong>HSV thresholding</strong> for Aimlabs cyan targets (~2ms/frame) and <strong>YOLO11n</strong> for Valorant enemy detection, quantized for Jetson inference.</p>
+
+          <h3>PID State Machine</h3>
+          <p>The Raspberry Pi runs a 1kHz busy-spin loop (&lt;5µs jitter) with a two-state controller. All thresholds and gains scale dynamically with target size (<code>blob_w</code>) — tighter for distant targets, more aggressive for close ones.</p>
+        </div>
+        <div class="table-wrap" style="margin-top:1rem;">
+          <table class="data-table">
+            <thead><tr><th>State</th><th>Condition</th><th>Controller</th><th>Purpose</th></tr></thead>
+            <tbody>
+              <tr><td>FLICK</td><td>|error| &gt; 30px</td><td>PD (Kp=3.0)</td><td>Fast ballistic move toward target</td></tr>
+              <tr><td>SETTLE</td><td>|error| &lt; 30px</td><td>PID (Kp=3.0, Ki=0.15)</td><td>Precision lock with integral action</td></tr>
+              <tr><td>FIRE</td><td>|error| &lt; 5px</td><td>Solenoid pulse</td><td>Target acquired — click</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="prose" style="margin-top:1rem;">
+          <h3>TENS Integration</h3>
+          <p>Two MCP4131 digital potentiometers over SPI modulate TENS electrode intensity proportional to pixel error — electrically redirecting the arm (~1ms) before the servo completes its mechanical slew (~10ms), giving a two-channel correction with different response speeds.</p>
+        </div>
+      </section>
+
+      <hr class="divider" />
+
+      <section class="section" id="latency-budget">
+        <p class="section-label">latency budget</p>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Stage</th><th>Time</th><th>Notes</th></tr></thead>
+            <tbody>
+              <tr><td>Camera capture</td><td>~10ms</td><td>100fps MJPEG, hardware-timed</td></tr>
+              <tr><td>HSV detection</td><td>~2ms</td><td>Pre-allocated buffers, no malloc</td></tr>
+              <tr><td>UDP transit</td><td>&lt;1ms</td><td>Direct Ethernet, no routing</td></tr>
+              <tr><td>PID compute</td><td>&lt;1µs</td><td>All stack, no heap</td></tr>
+              <tr><td>Servo write</td><td>~9µs</td><td>9 bytes @ 1 Mbps</td></tr>
+              <tr class="highlight"><td><strong>End-to-end</strong></td><td><strong>~13ms</strong></td><td><strong>Pixel to servo movement</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <hr class="divider" />
+
+      <section class="section" id="hardware">
+        <p class="section-label">hardware</p>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Component</th><th>Role</th><th>Interface</th></tr></thead>
+            <tbody>
+              <tr><td>NVIDIA Jetson Nano</td><td>Vision processing (HSV/YOLO)</td><td>USB (camera), Ethernet (UDP)</td></tr>
+              <tr><td>Arducam OV9782</td><td>100fps global shutter camera</td><td>USB 2.0 (MJPEG)</td></tr>
+              <tr><td>Raspberry Pi 4</td><td>Real-time servo control</td><td>Ethernet, UART, GPIO, SPI</td></tr>
+              <tr><td>Feetech ST3215</td><td>12-bit digital servo (4096 steps/360°)</td><td>Half-duplex UART @ 1 Mbps</td></tr>
+              <tr><td>Solenoid</td><td>Mouse click actuator</td><td>GPIO via MOSFET driver</td></tr>
+              <tr><td>MCP4131 ×2</td><td>Digital potentiometer (TENS intensity)</td><td>SPI (CE0 + CE1)</td></tr>
+              <tr><td>TENS unit</td><td>Transcutaneous electrical stimulation</td><td>Modulated by MCP4131</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <hr class="divider" />
+
+      <section class="section" id="challenges">
+        <p class="section-label">challenges &amp; solutions</p>
+        <div class="prose">
+          <ul>
+            <li><strong>1kHz determinism on Linux:</strong> Needed a busy-spin loop with CPU affinity pinning rather than timer-based sleep — trading a full core for &lt;5µs jitter on a non-RTOS.</li>
+            <li><strong>Half-duplex UART at 1 Mbps:</strong> The Feetech protocol shares TX/RX on one line. Direction-switch timing is critical — too slow corrupts packets, too fast and the servo ignores them. First-order smoothing absorbs residual jitter.</li>
+            <li><strong>TENS safety:</strong> Intensity hard-capped at MCP4131 wiper value 40/127. The unit's own safety circuitry stays in the loop at all times.</li>
+            <li><strong>Dynamic gain scaling:</strong> Fixed thresholds overshoot on close targets and undershoot on distant ones. Scaling gains proportionally to <code>blob_w</code> linearizes response across ranges.</li>
+          </ul>
+        </div>
+      </section>
+
+      <hr class="divider" />
+
+      <section class="section" id="outcome">
+        <p class="section-label">outcome</p>
+        <div class="prose">
+          <p>AutoReflex placed 3rd at HackberryPi. It demonstrates that hardware-level aim assist — operating entirely outside the game process — is viable at latencies competitive with human reaction time. The Jetson-to-Pi UDP architecture, PID state machine, and TENS integration pattern generalizes to any real-time physical control problem: robotics, prosthetics, or closed-loop rehabilitation.</p>
+        </div>
+      </section>
+
+      <hr class="divider" />
+
+      <section class="section" id="links">
         <p class="section-label">links</p>
         <div class="links-row">
-          <a class="project-link">GitHub &#8599;</a>
-          <a class="project-link">Demo video &#8599;</a>
-          <a class="project-link">Devpost &#8599;</a>
+          <a href="https://youtu.be/0nmgYhaoP1Q" target="_blank" class="project-link">Demo video &#8599;</a>
+          <a href="https://github.com/Coizi" target="_blank" class="project-link">GitHub &#8599;</a>
         </div>
       </section>
 
