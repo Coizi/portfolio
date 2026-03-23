@@ -210,8 +210,76 @@
 
     #page-end { height: 1px; }
 
+    /* ---- FADE-IN ON SCROLL ---- */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    }
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ---- DARK MODE TOGGLE ---- */
+    .theme-toggle {
+      position: relative;
+      z-index: 1;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 15px;
+      line-height: 1;
+      transition: opacity 0.2s;
+      color: var(--text);
+    }
+    .theme-toggle:hover { opacity: 0.7; }
+    .theme-toggle .icon-sun { display: none; }
+    .theme-toggle .icon-moon { display: inline; }
+
+    /* ---- DARK THEME ---- */
+    [data-theme="dark"] {
+      --bg: #121214;
+      --bg2: #1a1a1e;
+      --bg3: #242428;
+      --border: #2a2a30;
+      --border2: #3a3a42;
+      --text: #e8e6e1;
+      --text2: #a09d96;
+      --text3: #6b6860;
+      --purple-dark: #b8a4f8;
+      --purple-mid: #9b82e8;
+      --purple-light: #7a60d4;
+      --accent-bg: #1e1a2e;
+      --accent-bg2: #252040;
+      --accent-border: #3d3460;
+    }
+    [data-theme="dark"] .pill-glass {
+      background: rgba(0,0,0,0.15);
+      border-color: rgba(255,255,255,0.1);
+      box-shadow:
+        0 1.5px 0 rgba(255,255,255,0.08) inset,
+        0 -1px 0 rgba(200,180,255,0.05) inset,
+        0 8px 32px rgba(0,0,0,0.3),
+        0 2px 8px rgba(0,0,0,0.2);
+    }
+    [data-theme="dark"] .pill-glass::before { background: rgba(255,255,255,0.1); }
+    [data-theme="dark"] .pill-indicator { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.15); }
+    [data-theme="dark"] .pill-link { text-shadow: none; }
+    [data-theme="dark"] .exp-logo { background: var(--bg2); border-color: var(--border); }
+    [data-theme="dark"] .exp-logo img { mix-blend-mode: normal; filter: brightness(0.9); }
+    [data-theme="dark"] .contact-btn { background: var(--bg2); }
+    [data-theme="dark"] .project-card { background: var(--bg); }
+    [data-theme="dark"] .project-card:hover { background: var(--accent-bg); }
+    [data-theme="dark"] .orb { opacity: 0.15; }
+    [data-theme="dark"] .theme-toggle .icon-sun { display: inline; }
+    [data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+
     @media (max-width: 768px) {
       .orb { opacity: 0.08; }
+      [data-theme="dark"] .orb { opacity: 0.08; }
     }
   </style>
 </head>
@@ -250,6 +318,7 @@
           <a href="#projects"   class="pill-link" data-section="projects">work</a>
           <a href="#stack"      class="pill-link" data-section="stack">stack</a>
           <a href="#contact"    class="pill-link" data-section="contact">contact</a>
+          <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode"><span class="icon-moon">☽</span><span class="icon-sun">☀</span></button>
         </div>
       </div>
     </div>
@@ -258,7 +327,7 @@
   <div class="page">
     <div class="container">
 
-      <section class="hero" id="hero">
+      <section class="hero fade-in" id="hero">
         <p class="hero-eyebrow">ECE @ Carnegie Mellon &middot; 2028</p>
         <h1 class="hero-title">Joshua Taylor<br><span class="muted">Hardware &amp; Software</span></h1>
         <p class="hero-sub">Building systems at the boundary of silicon and software &mdash; verification, embedded, and the things in between.</p>
@@ -271,7 +340,7 @@
 
       <hr class="divider" />
 
-      <section class="section" id="experience">
+      <section class="section fade-in" id="experience">
         <p class="section-label">experience</p>
         <div class="exp-list">
           <div class="exp-item">
@@ -296,7 +365,7 @@
 
       <hr class="divider" />
 
-      <section class="section" id="projects">
+      <section class="section fade-in" id="projects">
         <p class="section-label">selected builds</p>
         <div class="projects-list">
 
@@ -344,7 +413,7 @@
 
       <hr class="divider" />
 
-      <section class="section" id="stack">
+      <section class="section fade-in" id="stack">
         <p class="section-label">stack</p>
         <div class="stack-grid">
           <div><p class="stack-label">LANGUAGES</p><p class="stack-list">SystemVerilog<br>Python<br>C / C++<br>MATLAB</p></div>
@@ -356,7 +425,7 @@
 
       <hr class="divider" />
 
-      <section class="section" id="contact" style="padding-bottom:0;">
+      <section class="section fade-in" id="contact" style="padding-bottom:0;">
         <div class="contact-strip">
           <div>
             <p class="contact-text">Let&#8217;s connect.</p>
@@ -439,4 +508,37 @@
       link.classList.add('active');
     }
     window.addEventListener('load', () => setTimeout(() => moveIndicator(links[0]), 50));
-    links.forEach(link => link.addEventListener('click', () => setTimeout(() => moveIndica
+    links.forEach(link => link.addEventListener('click', () => setTimeout(() => moveIndicator(link), 50)));
+
+    // Scroll-triggered fade-ins
+    const fadeEls = document.querySelectorAll('.fade-in');
+    const fadeObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          fadeObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    fadeEls.forEach(el => fadeObserver.observe(el));
+
+    // Dark mode toggle
+    const toggle = document.getElementById('theme-toggle');
+    function setTheme(dark) {
+      document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+      localStorage.setItem('theme', dark ? 'dark' : 'light');
+    }
+    toggle.addEventListener('click', () => {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      setTheme(!isDark);
+    });
+    // Load saved preference or respect system preference
+    const saved = localStorage.getItem('theme');
+    if (saved) {
+      setTheme(saved === 'dark');
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      setTheme(true);
+    }
+  </script>
+</body>
+</html>
