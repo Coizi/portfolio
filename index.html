@@ -173,9 +173,18 @@
     .badge-light { font-family: var(--font-mono); font-size: 11px; color: var(--purple-light); border: 0.5px solid var(--accent-border); background: var(--accent-bg); padding: 4px 12px; border-radius: 2px; }
     .badge-ghost { font-family: var(--font-mono); font-size: 11px; color: var(--text3); border: 0.5px solid var(--border2); background: var(--bg2); padding: 4px 12px; border-radius: 2px; }
 
-    .divider { border: none; border-top: 0.5px solid var(--border); margin: 0; transition: border-color 1s ease; }
+    /* ---- ANIMATED DIVIDERS (#4) ---- */
+    .divider {
+      border: none;
+      height: 1px;
+      margin: 0;
+      background: linear-gradient(90deg, var(--purple-light), var(--accent-border) 40%, transparent 100%);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), background 1s ease;
+    }
+    .divider.visible { transform: scaleX(1); }
     .section { padding: 3rem 0; }
-    .section-label { font-family: var(--font-mono); font-size: 11px; color: #b8a8f0; letter-spacing: 0.12em; margin-bottom: 1.75rem; }
 
     .exp-list { display: flex; flex-direction: column; gap: 2rem; }
     .exp-item { display: flex; gap: 1.25rem; align-items: flex-start; }
@@ -187,13 +196,43 @@
     .exp-desc { font-size: 13px; color: var(--text2); line-height: 1.65; margin-top: 0.5rem; }
 
     .projects-list { display: flex; flex-direction: column; gap: 1px; background: var(--border); border-radius: 8px; overflow: hidden; transition: background 1s ease; }
-    .project-card { background: var(--bg); padding: 1.4rem 1.6rem; display: flex; flex-direction: column; gap: 0.5rem; cursor: pointer; transition: background 1s ease, color 1s ease; text-decoration: none; color: inherit; }
-    .project-card:hover { background: var(--accent-bg); }
+    .project-card {
+      background: var(--bg);
+      padding: 1.4rem 1.6rem;
+      display: flex; flex-direction: column; gap: 0.5rem;
+      cursor: pointer;
+      text-decoration: none; color: inherit;
+      transition: background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+    }
+    .project-card:hover {
+      background: var(--accent-bg);
+      transform: translateX(4px);
+      box-shadow: -4px 0 0 0 var(--purple-mid);
+    }
     .card-top { display: flex; justify-content: space-between; align-items: center; }
-    .card-title { font-size: 15px; font-weight: 500; color: var(--text); }
+    .card-title { font-size: 15px; font-weight: 500; color: var(--text); transition: color 0.3s; }
+    .project-card:hover .card-title { color: var(--purple-dark); }
     .card-right { display: flex; align-items: center; gap: 0.75rem; }
     .card-tag { font-family: var(--font-mono); font-size: 10px; color: var(--purple-dark); background: var(--accent-bg2); border: 0.5px solid var(--accent-border); padding: 2px 8px; border-radius: 2px; }
-    .card-arrow { font-size: 14px; color: var(--text3); }
+    .card-arrow { font-size: 14px; color: var(--text3); transition: transform 0.3s ease, color 0.3s ease; }
+    .project-card:hover .card-arrow { transform: translate(3px, -3px); color: var(--purple-mid); }
+    /* Card image preview (#7) */
+    .card-preview {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease, opacity 0.3s ease;
+      opacity: 0;
+    }
+    .project-card:hover .card-preview { max-height: 160px; opacity: 1; }
+    .card-preview img {
+      width: 100%;
+      height: 140px;
+      object-fit: cover;
+      border-radius: 6px;
+      border: 0.5px solid var(--border);
+      margin-top: 0.5rem;
+    }
     .card-desc { font-size: 13px; color: var(--text2); line-height: 1.65; }
     .card-chips { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 0.25rem; }
     .chip { font-family: var(--font-mono); font-size: 10px; color: var(--text2); background: var(--bg3); padding: 2px 8px; border-radius: 2px; }
@@ -279,6 +318,28 @@
     [data-theme="dark"] .theme-toggle .icon-sun { display: inline; }
     [data-theme="dark"] .theme-toggle .icon-moon { display: none; }
 
+    /* ---- PAGE TRANSITION (#3) ---- */
+    .page-transition {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: var(--bg);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.35s ease;
+    }
+    .page-transition.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    /* ---- SECTION LABEL SCRAMBLE (#9) ---- */
+    .section-label {
+      font-family: var(--font-mono); font-size: 11px; color: #b8a8f0;
+      letter-spacing: 0.12em; margin-bottom: 1.75rem;
+      display: inline-block;
+    }
+
     @media (max-width: 768px) {
       .orb { opacity: 0.08; }
       [data-theme="dark"] .orb { opacity: 0.08; }
@@ -286,6 +347,7 @@
   </style>
 </head>
 <body>
+  <div class="page-transition" id="page-transition"></div>
 
   <div class="bg-orbs">
     <div class="orb orb-1"></div>
@@ -329,11 +391,11 @@
   <div class="page">
     <div class="container">
 
-      <section class="hero fade-in" id="hero">
-        <p class="hero-eyebrow">ECE @ Carnegie Mellon &middot; 2028</p>
-        <h1 class="hero-title">Joshua Taylor<br><span class="muted">Hardware &amp; Software</span></h1>
-        <p class="hero-sub">Building systems at the boundary of silicon and software &mdash; verification, embedded, and the things in between.</p>
-        <div class="hero-badges">
+      <section class="hero" id="hero">
+        <p class="hero-eyebrow fade-in" style="transition-delay:0.1s">ECE @ Carnegie Mellon &middot; 2028</p>
+        <h1 class="hero-title fade-in" style="transition-delay:0.25s">Joshua Taylor<br><span class="muted">Hardware &amp; Software</span></h1>
+        <p class="hero-sub fade-in" style="transition-delay:0.4s">Building systems at the boundary of silicon and software &mdash; verification, embedded, and the things in between.</p>
+        <div class="hero-badges fade-in" style="transition-delay:0.55s">
           <span class="badge-dark">Ford SWE &middot; Summer 2026</span>
           <span class="badge-light">BWXT IT Architecture &middot; Summer 2025</span>
           <span class="badge-ghost">github: Coizi</span>
@@ -377,6 +439,7 @@
               <div class="card-right"><span class="card-tag">HARDWARE</span><span class="card-arrow">&#8599;</span></div>
             </div>
             <p class="card-desc">Jetson Orin Nano + global shutter camera + EMS actuators. Dual-mode PID controller running at 1kHz and SPI digital potentiometers for precise muscle stimulation control, achieving a 15ms pixel-to-stimulation response time.</p>
+            <div class="card-preview"><img src="autoreflex.png" alt="AutoReflex system" /></div>
             <div class="card-chips">
               <span class="chip">Python</span><span class="chip">SPI</span><span class="chip">PID</span>
               <span class="chip-accent">3rd place @ CMU HackberryPi</span>
@@ -512,17 +575,61 @@
     window.addEventListener('load', () => setTimeout(() => moveIndicator(links[0]), 50));
     links.forEach(link => link.addEventListener('click', () => setTimeout(() => moveIndicator(link), 50)));
 
-    // Scroll-triggered fade-ins
-    const fadeEls = document.querySelectorAll('.fade-in');
-    const fadeObserver = new IntersectionObserver((entries) => {
+    // Scroll-triggered fade-ins + divider reveals
+    const revealObserver = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           entry.target.classList.add('visible');
-          fadeObserver.unobserve(entry.target);
+          revealObserver.unobserve(entry.target);
         }
       });
     }, { threshold: 0.15 });
-    fadeEls.forEach(el => fadeObserver.observe(el));
+    document.querySelectorAll('.fade-in, .divider').forEach(el => revealObserver.observe(el));
+
+    // Section label scramble effect (#9)
+    const scrambleChars = 'abcdefghijklmnopqrstuvwxyz_-/\\|{}[]<>';
+    function scrambleText(el) {
+      const final = el.getAttribute('data-text') || el.textContent;
+      el.setAttribute('data-text', final);
+      const len = final.length;
+      let iteration = 0;
+      const interval = setInterval(() => {
+        el.textContent = final.split('').map((ch, i) => {
+          if (i < iteration) return final[i];
+          return scrambleChars[Math.floor(Math.random() * scrambleChars.length)];
+        }).join('');
+        iteration += 1 / 2;
+        if (iteration >= len) {
+          el.textContent = final;
+          clearInterval(interval);
+        }
+      }, 30);
+    }
+    const labelObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          scrambleText(entry.target);
+          labelObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.5 });
+    document.querySelectorAll('.section-label').forEach(el => labelObserver.observe(el));
+
+    // Page transitions (#3)
+    const transitionEl = document.getElementById('page-transition');
+    document.querySelectorAll('a[href]').forEach(a => {
+      const href = a.getAttribute('href');
+      if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('http')) return;
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        transitionEl.classList.add('active');
+        setTimeout(() => { window.location.href = href; }, 350);
+      });
+    });
+    // Fade in on page load
+    window.addEventListener('pageshow', () => {
+      transitionEl.classList.remove('active');
+    });
 
     // Dark mode toggle
     const toggle = document.getElementById('theme-toggle');

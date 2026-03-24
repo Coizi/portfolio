@@ -76,12 +76,21 @@
     .acomp { cursor: pointer; }
     .bottom-space { height: 5rem; }
 
+    .page-transition {
+      position: fixed; inset: 0; z-index: 9999;
+      background: var(--bg);
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.35s ease;
+    }
+    .page-transition.active { opacity: 1; pointer-events: all; }
+
     @media (max-width: 768px) {
       .orb { opacity: 0.08; }
     }
   </style>
 </head>
 <body>
+  <div class="page-transition" id="page-transition"></div>
   <div class="bg-orbs">
     <div class="orb orb-1"></div>
     <div class="orb orb-2"></div>
@@ -343,6 +352,19 @@
       });
       el.addEventListener('mouseleave', () => tip.classList.remove('visible'));
     });
+
+    // Page transitions
+    const transitionEl = document.getElementById('page-transition');
+    document.querySelectorAll('a[href]').forEach(a => {
+      const href = a.getAttribute('href');
+      if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('http')) return;
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        transitionEl.classList.add('active');
+        setTimeout(() => { window.location.href = href; }, 350);
+      });
+    });
+    window.addEventListener('pageshow', () => { transitionEl.classList.remove('active'); });
   </script>
 </body>
 </html>
