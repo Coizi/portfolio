@@ -57,6 +57,7 @@
       background-repeat: repeat;
       background-size: 180px;
     }
+    body.no-grain::after { opacity: 0; }
 
     .bg-orbs { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
     .orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.28; transition: opacity 1s ease; }
@@ -472,16 +473,6 @@
           <span class="badge-ghost"><a href="https://github.com/Coizi" target="_blank">github: Coizi &#8599;</a></span>
         </div>
 
-        <div class="gh-card fade-in" style="transition-delay:0.7s" id="gh-card">
-          <div class="gh-header">
-            <img class="gh-avatar" id="gh-avatar" src="" alt="" />
-            <div>
-              <p class="gh-name"><a href="https://github.com/Coizi" target="_blank" id="gh-display-name">Coizi</a></p>
-              <p class="gh-handle">@Coizi</p>
-            </div>
-          </div>
-          <div class="gh-repos" id="gh-repos"></div>
-        </div>
       </section>
 
       <hr class="divider" />
@@ -712,35 +703,12 @@
       transitionEl.classList.remove('active');
     });
 
-    // GitHub embed
-    const langColors = { Python:'#3572A5', 'C++':'#f34b7d', C:'#555555', SystemVerilog:'#DAE1C2', Verilog:'#b2b7f8', JavaScript:'#f1e05a', HTML:'#e34c26', MATLAB:'#e16737', Makefile:'#427819' };
-    async function loadGitHub() {
-      try {
-        const [user, repos] = await Promise.all([
-          fetch('https://api.github.com/users/Coizi').then(r => r.json()),
-          fetch('https://api.github.com/users/Coizi/repos?sort=updated&per_page=4').then(r => r.json())
-        ]);
-        const avatar = document.getElementById('gh-avatar');
-        const name = document.getElementById('gh-display-name');
-        if (user.avatar_url) avatar.src = user.avatar_url;
-        if (user.name) name.textContent = user.name;
-        const container = document.getElementById('gh-repos');
-        if (!Array.isArray(repos)) return;
-        repos.filter(r => !r.fork).slice(0, 4).forEach(r => {
-          const lang = r.language || '';
-          const dot = lang ? `<span class="gh-lang-dot" style="background:${langColors[lang]||'#888'}"></span>${lang}` : '';
-          const stars = r.stargazers_count ? `<span>&#9733; ${r.stargazers_count}</span>` : '';
-          container.innerHTML += `<a class="gh-repo" href="${r.html_url}" target="_blank">
-            <p class="gh-repo-name">${r.name}</p>
-            ${r.description ? `<p class="gh-repo-desc">${r.description}</p>` : ''}
-            <div class="gh-repo-meta">${dot}${stars}</div>
-          </a>`;
-        });
-      } catch(e) {
-        document.getElementById('gh-card').style.display = 'none';
+    // Grain toggle (press J)
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'j' || e.key === 'J') {
+        document.body.classList.toggle('no-grain');
       }
-    }
-    loadGitHub();
+    });
 
     // Dark mode toggle
     const toggle = document.getElementById('theme-toggle');
