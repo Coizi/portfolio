@@ -217,22 +217,6 @@
     .card-tag { font-family: var(--font-mono); font-size: 10px; color: var(--purple-dark); background: var(--accent-bg2); border: 0.5px solid var(--accent-border); padding: 2px 8px; border-radius: 2px; }
     .card-arrow { font-size: 14px; color: var(--text3); transition: transform 0.3s ease, color 0.3s ease; }
     .project-card:hover .card-arrow { transform: translate(3px, -3px); color: var(--purple-mid); }
-    /* Card image preview (#7) */
-    .card-preview {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.4s ease, opacity 0.3s ease;
-      opacity: 0;
-    }
-    .project-card:hover .card-preview { max-height: 160px; opacity: 1; }
-    .card-preview img {
-      width: 100%;
-      height: 140px;
-      object-fit: cover;
-      border-radius: 6px;
-      border: 0.5px solid var(--border);
-      margin-top: 0.5rem;
-    }
     .card-desc { font-size: 13px; color: var(--text2); line-height: 1.65; }
     .card-chips { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 0.25rem; }
     .chip { font-family: var(--font-mono); font-size: 10px; color: var(--text2); background: var(--bg3); padding: 2px 8px; border-radius: 2px; }
@@ -439,7 +423,6 @@
               <div class="card-right"><span class="card-tag">HARDWARE</span><span class="card-arrow">&#8599;</span></div>
             </div>
             <p class="card-desc">Jetson Orin Nano + global shutter camera + EMS actuators. Dual-mode PID controller running at 1kHz and SPI digital potentiometers for precise muscle stimulation control, achieving a 15ms pixel-to-stimulation response time.</p>
-            <div class="card-preview"><img src="autoreflex.png" alt="AutoReflex system" /></div>
             <div class="card-chips">
               <span class="chip">Python</span><span class="chip">SPI</span><span class="chip">PID</span>
               <span class="chip-accent">3rd place @ CMU HackberryPi</span>
@@ -603,7 +586,7 @@
           el.textContent = final;
           clearInterval(interval);
         }
-      }, 30);
+      }, 45);
     }
     const labelObserver = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
