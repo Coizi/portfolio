@@ -202,14 +202,9 @@
       display: flex; flex-direction: column; gap: 0.5rem;
       cursor: pointer;
       text-decoration: none; color: inherit;
-      transition: background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
-      position: relative;
+      transition: background 0.3s ease;
     }
-    .project-card:hover {
-      background: var(--accent-bg);
-      transform: translateX(4px);
-      box-shadow: -4px 0 0 0 var(--purple-mid);
-    }
+    .project-card:hover { background: var(--accent-bg); }
     .card-top { display: flex; justify-content: space-between; align-items: center; }
     .card-title { font-size: 15px; font-weight: 500; color: var(--text); transition: color 0.3s; }
     .project-card:hover .card-title { color: var(--purple-dark); }
