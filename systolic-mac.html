@@ -69,6 +69,47 @@
     .data-table tr.highlight td:first-child { color: var(--purple-dark); }
     .table-wrap { border: 0.5px solid var(--border); border-radius: 8px; overflow: hidden; margin: 0.5rem 0; }
 
+    /* Module card grid */
+    .module-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 0.5px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-top: 1rem;
+    }
+    .module-card {
+      background: var(--bg);
+      padding: 1.5rem;
+      transition: background 0.2s;
+    }
+    .module-card:hover { background: var(--accent-bg); }
+    .module-card-icon {
+      width: 2rem; height: 2rem;
+      border-radius: 5px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 1rem;
+      font-size: 1rem;
+    }
+    .icon-purple { background: var(--accent-bg2); }
+    .icon-green  { background: #dcfce7; }
+    .icon-amber  { background: #fef9c3; }
+    .module-card h3 { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 0.4rem; }
+    .module-card p  { font-family: var(--font-mono); font-size: 11px; color: var(--text2); line-height: 1.7; }
+    .module-tag {
+      display: inline-block;
+      font-family: var(--font-mono); font-size: 10px;
+      color: var(--purple-dark); background: var(--accent-bg);
+      border: 0.5px solid var(--accent-border);
+      padding: 2px 7px; border-radius: 2px; margin-top: 0.75rem;
+    }
+    .module-card.wip { background: #fffbeb; }
+    .module-card.wip:hover { background: #fef9c3; }
+    .module-card.wip .module-tag { color: #854d0e; background: #fef9c3; border-color: #fde047; }
+    @media (max-width: 600px) { .module-grid { grid-template-columns: 1fr 1fr; } }
+
     /* Status badges */
     .status-done { font-family: var(--font-mono); font-size: 10px; padding: 2px 8px; border-radius: 2px; background: #dcfce7; color: #166534; border: 0.5px solid #86efac; white-space: nowrap; }
     .status-wip  { font-family: var(--font-mono); font-size: 10px; padding: 2px 8px; border-radius: 2px; background: #fef9c3; color: #854d0e; border: 0.5px solid #fde047; white-space: nowrap; }
@@ -102,7 +143,7 @@
       0%   { stroke-dashoffset: 40; opacity: 1; }
       100% { stroke-dashoffset: 0;  opacity: 0.15; }
     }
-    .flow-line { stroke-dasharray: 8 4; animation: data-flow 1.6s linear infinite; }
+    .flow-line { stroke-dasharray: 8 4; animation: data-flow 0.85s linear infinite; }
 
     /* Pipeline */
     .pipeline {
@@ -237,8 +278,8 @@
               <marker id="arrowR" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
                 <path d="M0,0 L0,6 L6,3 Z" fill="rgba(108,79,212,0.7)" />
               </marker>
-              <marker id="arrowD" markerWidth="6" markerHeight="6" refX="3" refY="5" orient="auto">
-                <path d="M0,0 L6,0 L3,6 Z" fill="rgba(22,163,74,0.65)" />
+              <marker id="arrowD" markerWidth="6" markerHeight="6" refX="6" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L6,3 Z" fill="rgba(22,163,74,0.65)" />
               </marker>
             </defs>
 
@@ -395,21 +436,50 @@
 
       <section class="section" id="modules">
         <p class="section-label">modules</p>
-        <div class="table-wrap">
-          <table class="data-table">
-            <thead><tr><th>Module</th><th>Description</th><th>Status</th></tr></thead>
-            <tbody>
-              <tr><td>pe.sv</td><td>Single processing element — MAC unit with registered a/b pass-through</td><td><span class="status-done">✓ Done</span></td></tr>
-              <tr><td>systolic_array_4x4.sv</td><td>16-PE grid instantiation with weight registers and interconnect</td><td><span class="status-done">✓ Done</span></td></tr>
-              <tr><td>control_fsm.sv</td><td>3-state FSM — LOAD / COMPUTE / READBACK with cycle counter</td><td><span class="status-done">✓ Done</span></td></tr>
-              <tr><td>spi_slave.sv</td><td>SPI mode-0 receiver — deserializes weight and activation data</td><td><span class="status-done">✓ Done</span></td></tr>
-              <tr><td>spi_tx.sv</td><td>SPI transmitter — serializes 16 accumulator values for readback</td><td><span class="status-done">✓ Done</span></td></tr>
-              <tr><td>tt_top.sv</td><td>Tiny Tapeout top-level wrapper — pin mapping to tt_um interface</td><td><span class="status-wip">⟳ In Progress</span></td></tr>
-              <tr><td>tb_systolic.sv</td><td>Full integration testbench — matrix multiply golden model comparison</td><td><span class="status-wip">⟳ In Progress</span></td></tr>
-              <tr><td>rp2040_firmware</td><td>MicroPython / C firmware — USB-serial ↔ SPI bridge for demo board</td><td><span class="status-todo">○ Todo</span></td></tr>
-              <tr><td>gui.py</td><td>Python GUI — matrix input, live result display, visualization</td><td><span class="status-todo">○ Todo</span></td></tr>
-            </tbody>
-          </table>
+        <div class="module-grid">
+
+          <div class="module-card">
+            <div class="module-card-icon icon-purple">⬡</div>
+            <h3>Processing Element</h3>
+            <p>Single MAC unit — <em>acc += a × b</em> per clock. Registers both inputs and outputs for wave-front pipelining.</p>
+            <span class="module-tag">pe.sv</span>
+          </div>
+
+          <div class="module-card">
+            <div class="module-card-icon icon-purple">⊞</div>
+            <h3>Systolic Array 4×4</h3>
+            <p>16 PE instances in a mesh topology. A-operands stream east, B-operands stream south. Results after N+3 cycles.</p>
+            <span class="module-tag">systolic_array_4x4.sv</span>
+          </div>
+
+          <div class="module-card">
+            <div class="module-card-icon icon-amber">◈</div>
+            <h3>Control FSM</h3>
+            <p>Manages LOAD → COMPUTE → READBACK states. Generates skew-delayed feeds to correctly stagger A/B matrix inputs.</p>
+            <span class="module-tag">control_fsm.sv</span>
+          </div>
+
+          <div class="module-card">
+            <div class="module-card-icon icon-green">⇅</div>
+            <h3>SPI Slave</h3>
+            <p>Receives matrix operands from the RP2040 host. Deserializes into input buffers — SPI mode 0 up to 10 MHz.</p>
+            <span class="module-tag">spi_slave.sv</span>
+          </div>
+
+          <div class="module-card">
+            <div class="module-card-icon icon-green">⇈</div>
+            <h3>SPI TX</h3>
+            <p>Serializes the 4×4 result matrix back to the RP2040 after computation. Output-ready flag signals readback.</p>
+            <span class="module-tag">spi_tx.sv</span>
+          </div>
+
+          <div class="module-card wip">
+            <div class="module-card-icon icon-amber">⊕</div>
+            <h3>Top Wrapper</h3>
+            <p>Tiny Tapeout top-level — wires all five modules to <code style="font-family:var(--font-mono);font-size:10px;color:#854d0e">tt_um_*</code> port conventions. <em>In progress.</em></p>
+            <span class="module-tag">tt_top.sv</span>
+          </div>
+
         </div>
       </section>
 
