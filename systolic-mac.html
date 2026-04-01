@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Systolic Matrix MAC — Joshua Taylor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #fafaf8; --bg2: #f3f2ee; --bg3: #eceae4;
+      --border: #e0ddd6; --border2: #ccc9c0;
+      --text: #1a1916; --text2: #6b6860; --text3: #a8a59e;
+      --purple-dark: #4b30a8; --purple-mid: #6c4fd4; --purple-light: #9b82e8;
+      --accent-bg: #f0ecfd; --accent-bg2: #e4dcfb; --accent-border: #c4b5f4;
+      --font-sans: 'Syne', sans-serif; --font-mono: 'DM Mono', monospace;
+      --max-w: 820px;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: var(--font-sans); font-size: 16px; min-height: 100vh; -webkit-font-smoothing: antialiased; }
+    .bg-orbs { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+    .orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.28; }
+    .orb-1 { width: 600px; height: 600px; top: -150px; left: -150px; background: radial-gradient(circle, #c4b5f4, transparent); }
+    .orb-2 { width: 450px; height: 450px; top: 300px; right: -100px; background: radial-gradient(circle, #9b82e8, transparent); }
+    .orb-3 { width: 400px; height: 400px; bottom: 0; left: 30%; background: radial-gradient(circle, #ddd6fe, transparent); }
+    .page { position: relative; z-index: 1; }
+    .container { max-width: var(--max-w); margin: 0 auto; padding: 0 2rem; }
+    .back { display: inline-flex; align-items: center; gap: 0.4rem; font-family: var(--font-mono); font-size: 12px; color: var(--text3); text-decoration: none; padding: 2rem 0 0; transition: color 0.15s; }
+    .back:hover { color: var(--purple-mid); }
+    .project-header { padding: 2rem 0 2.5rem; }
+    .project-tag { font-family: var(--font-mono); font-size: 10px; color: var(--purple-dark); background: var(--accent-bg2); border: 0.5px solid var(--accent-border); padding: 2px 10px; border-radius: 2px; display: inline-block; margin-bottom: 1rem; }
+    .project-title { font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; line-height: 1.1; letter-spacing: -0.03em; color: var(--text); }
+    .project-sub { margin-top: 1rem; font-size: 15px; color: var(--text2); line-height: 1.75; max-width: 580px; }
+    .project-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 1.25rem; }
+    .chip { font-family: var(--font-mono); font-size: 10px; color: var(--text2); background: var(--bg3); padding: 3px 10px; border-radius: 2px; }
+    .chip-accent { font-family: var(--font-mono); font-size: 10px; color: var(--purple-dark); background: var(--accent-bg2); border: 0.5px solid var(--accent-border); padding: 3px 10px; border-radius: 2px; }
+    .divider { border: none; border-top: 0.5px solid var(--border); margin: 0; }
+    .section { padding: 2.5rem 0; }
+    .section-label { font-family: var(--font-mono); font-size: 11px; color: #b8a8f0; letter-spacing: 0.12em; margin-bottom: 1.5rem; }
+    .links-row { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    .project-link { font-family: var(--font-mono); font-size: 12px; color: var(--purple-dark); border: 0.5px solid var(--accent-border); background: var(--accent-bg); padding: 7px 16px; border-radius: 2px; text-decoration: none; transition: background 0.15s; }
+    .project-link:hover { background: var(--accent-bg2); }
+    .bottom-space { height: 5rem; }
+
+    /* Prose */
+    .prose { font-size: 14px; color: var(--text2); line-height: 1.8; }
+    .prose p { margin-bottom: 1rem; }
+    .prose p:last-child { margin-bottom: 0; }
+    .prose h3 { font-family: var(--font-sans); font-size: 15px; font-weight: 600; color: var(--text); margin: 1.75rem 0 0.6rem; }
+    .prose strong { color: var(--text); font-weight: 600; }
+    .prose ul { padding-left: 1.25rem; margin-bottom: 1rem; }
+    .prose li { margin-bottom: 0.4rem; }
+    .prose code { font-family: var(--font-mono); font-size: 12px; background: var(--bg3); border: 0.5px solid var(--border); padding: 1px 5px; border-radius: 3px; color: var(--purple-dark); }
+
+    /* Code block */
+    .code-block { background: var(--bg2); border: 0.5px solid var(--border); border-radius: 8px; padding: 1.25rem; overflow-x: auto; margin: 1rem 0; }
+    .code-block pre { font-family: var(--font-mono); font-size: 11px; color: var(--text2); line-height: 1.6; white-space: pre; }
+
+    /* Tables */
+    .data-table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 0.5rem 0; }
+    .data-table th { font-family: var(--font-mono); font-size: 10px; color: var(--text3); letter-spacing: 0.08em; text-align: left; padding: 6px 12px; border-bottom: 0.5px solid var(--border); background: var(--bg2); }
+    .data-table td { padding: 9px 12px; border-bottom: 0.5px solid var(--border); color: var(--text2); font-size: 13px; vertical-align: top; line-height: 1.5; }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table td:first-child { font-family: var(--font-mono); font-size: 12px; color: var(--text); }
+    .data-table td strong { color: var(--purple-dark); font-weight: 600; }
+    .data-table tr.highlight td { background: var(--accent-bg); }
+    .data-table tr.highlight td:first-child { color: var(--purple-dark); }
+    .table-wrap { border: 0.5px solid var(--border); border-radius: 8px; overflow: hidden; margin: 0.5rem 0; }
+
+    /* Status badges */
+    .status-done { font-family: var(--font-mono); font-size: 10px; padding: 2px 8px; border-radius: 2px; background: #dcfce7; color: #166534; border: 0.5px solid #86efac; white-space: nowrap; }
+    .status-wip  { font-family: var(--font-mono); font-size: 10px; padding: 2px 8px; border-radius: 2px; background: #fef9c3; color: #854d0e; border: 0.5px solid #fde047; white-space: nowrap; }
+    .status-todo { font-family: var(--font-mono); font-size: 10px; padding: 2px 8px; border-radius: 2px; background: var(--bg3); color: var(--text3); border: 0.5px solid var(--border2); white-space: nowrap; }
+
+    /* PE Grid */
+    .array-wrap {
+      background: var(--bg2);
+      border: 0.5px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      margin: 1rem 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      overflow: hidden;
+    }
+    .array-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text3);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 1.25rem;
+    }
+    .array-arrows {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+    .arrow-down {
+      width: 68px;
+      display: flex;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--purple-mid);
+      opacity: 0.6;
+      animation: flow 1.8s ease-in-out infinite;
+    }
+    .arrow-down:nth-child(2) { animation-delay: 0.2s; }
+    .arrow-down:nth-child(3) { animation-delay: 0.4s; }
+    .arrow-down:nth-child(4) { animation-delay: 0.6s; }
+    .array-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .pe-cell {
+      width: 68px;
+      height: 68px;
+      background: var(--bg);
+      border: 0.5px solid var(--border2);
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      transition: all 0.2s;
+      cursor: default;
+    }
+    .pe-cell:hover {
+      border-color: var(--accent-border);
+      background: var(--accent-bg);
+    }
+    .pe-icon { font-size: 14px; opacity: 0.5; }
+    .pe-label { font-family: var(--font-mono); font-size: 10px; color: var(--text2); }
+    .pe-coords { font-family: var(--font-mono); font-size: 9px; color: var(--text3); }
+    .dataflow-legend {
+      display: flex;
+      gap: 20px;
+      margin-top: 1.25rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text2);
+    }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+    /* Pipeline */
+    .pipeline {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin: 1rem 0;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .pipe-stage {
+      flex-shrink: 0;
+      background: var(--bg);
+      border: 0.5px solid var(--border);
+      border-radius: 6px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      min-width: 100px;
+      transition: border-color 0.2s;
+    }
+    .pipe-stage:hover { border-color: var(--accent-border); }
+    .pipe-stage-icon { font-size: 16px; }
+    .pipe-stage-name { font-family: var(--font-mono); font-size: 10px; color: var(--text2); text-align: center; }
+    .pipe-arrow { font-family: var(--font-mono); font-size: 14px; color: var(--purple-light); padding: 0 2px; flex-shrink: 0; }
+
+    /* Shuttle banner */
+    .shuttle-banner {
+      background: var(--accent-bg);
+      border: 0.5px solid var(--accent-border);
+      border-radius: 8px;
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin: 1rem 0;
+      flex-wrap: wrap;
+    }
+    .shuttle-icon { font-size: 28px; }
+    .shuttle-info { flex: 1; }
+    .shuttle-title { font-size: 14px; font-weight: 600; color: var(--purple-dark); margin-bottom: 3px; }
+    .shuttle-sub { font-family: var(--font-mono); font-size: 11px; color: var(--purple-mid); }
+    .shuttle-deadline { font-family: var(--font-mono); font-size: 11px; color: #92400e; background: #fef3c7; border: 0.5px solid #fde68a; border-radius: 4px; padding: 5px 10px; white-space: nowrap; }
+
+    @keyframes flow {
+      0%   { opacity: 0.3; transform: translateY(0); }
+      50%  { opacity: 1; }
+      100% { opacity: 0.3; transform: translateY(4px); }
+    }
+
+    /* Page transition */
+    .page-transition {
+      position: fixed; inset: 0; z-index: 9999;
+      background: var(--bg);
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.35s ease;
+    }
+    .page-transition.active { opacity: 1; pointer-events: all; }
+
+    @media (max-width: 600px) {
+      .pe-cell { width: 58px; height: 58px; }
+      .pipe-stage { min-width: 80px; padding: 10px; }
+    }
+    @media (max-width: 768px) {
+      .orb { opacity: 0.08; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-transition" id="page-transition"></div>
+  <div class="bg-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <div class="page">
+    <div class="container">
+      <a href="index.html" class="back">&#8592; back</a>
+
+      <header class="project-header">
+        <div class="project-tag">SILICON / RTL</div>
+        <h1 class="project-title">4×4 Systolic Matrix MAC</h1>
+      </header>
+
+      <div class="project-chips">
+        <span class="chip">SystemVerilog</span>
+        <span class="chip">RTL Design</span>
+        <span class="chip">SPI</span>
+        <span class="chip">FSM</span>
+        <span class="chip">RP2040</span>
+        <span class="chip">SkyWater 130nm</span>
+        <span class="chip">Tiny Tapeout</span>
+        <span class="chip">Python</span>
+        <span class="chip-accent">TTSKY26a Shuttle — May 2026</span>
+      </div>
+      <p class="project-sub" style="margin-top:1.5rem;">A fully pipelined 4×4 systolic array multiply-accumulate accelerator designed for Tiny Tapeout TTSKY26a — 16 processing elements in a weight-stationary dataflow, controlled via SPI and a custom FSM, targeting real silicon submission.</p>
+
+      <div style="margin-top:1.5rem;">
+        <div class="links-row">
+          <a href="https://github.com/Coizi/systolic-matrix-mac-tt" target="_blank" class="project-link">GitHub &#8599;</a>
+        </div>
+      </div>
+
+      <hr class="divider" style="margin-top:2.5rem;" />
+
+      <section class="section" id="overview">
+        <p class="section-label">overview</p>
+        <div class="prose">
+          <p>Systolic arrays are the core compute primitive behind modern neural network accelerators — Google's TPU, Apple's Neural Engine, and virtually every edge AI chip use variants of this dataflow architecture. This project implements one from scratch in synthesizable SystemVerilog, designed to tape out on the Tiny Tapeout community shuttle.</p>
+          <p>The design uses a <strong>weight-stationary dataflow</strong>: weights are loaded into the 4×4 grid of processing elements via SPI, then input activations are streamed row-by-row through the array. Each PE accumulates a partial sum, and the final 4×4 result matrix is read back through SPI. A control FSM handles the three-phase protocol: LOAD → COMPUTE → READBACK.</p>
+        </div>
+
+        <div class="shuttle-banner">
+          <div class="shuttle-icon">🚀</div>
+          <div class="shuttle-info">
+            <div class="shuttle-title">Tiny Tapeout — TTSKY26a Shuttle</div>
+            <div class="shuttle-sub">Efabless SkyWater 130nm open-source PDK · community multi-project wafer</div>
+          </div>
+          <div class="shuttle-deadline">⚠ Deadline: May 11, 2026</div>
+        </div>
+      </section>
+
+      <hr class="divider" />
+
+      <section class="section" id="architecture">
+        <p class="section-label">architecture</p>
+        <div class="prose">
+          <p>Each of the 16 PEs performs a MAC operation each clock cycle: <code>acc += a_in × b_in</code>. Inputs pass through in one dimension; the orthogonal dimension moves to the adjacent PE on the next cycle, creating the characteristic "wave" of computation that gives systolic arrays their name.</p>
+        </div>
+
+        <div class="array-wrap">
+          <div class="array-label">4×4 Systolic Array — Weight Stationary</div>
+          <div class="array-arrows">
+            <div class="arrow-down">↓ a₀</div>
+            <div class="arrow-down">↓ a₁</div>
+            <div class="arrow-down">↓ a₂</div>
+            <div class="arrow-down">↓ a₃</div>
+          </div>
+          <div class="array-grid" id="pe-grid">
+            <div class="pe-cell"><span class="pe-icon">⚙</span><span class="pe-label">PE</span><span class="pe-coords">[0,0]</span></div>
+            <div class="pe-cell"><span class="pe-icon">⚙</span><span class="pe-label">PE</span><span class="pe-coords">[0,1]</span></div>
+            <div class="pe-cell"><span class="pe-icon">⚙</span><span class="pe-label">PE</span><span class="pe-coords">[0,2]</span></div>
+            <div class="pe-cell"><span class="pe-icon">⚙</span><span class="pe-label">PE</span><span class="pe-coords">[0,3]</span></div>
+            <div class="pe-cell"><span class="pe-icon">⚙</span><span class="pe-label">PE</span><span class="pe-coords">[1,0]</span></div>
+            <div class="pe-cell"><span class="pe-icon">⚙</span><span class="pe-label">PE</span><span class="pe-coords">[1,1]</span></div>
+            <div class="pe-cell"><span class="pe-icon">⚙</span><span class="pe-label">PE</span><span class="pe-coords">[1,2]</span></div>
+            <div class="pe-cell"><span class="pe-icon">⚙</span><span class="pe-label">PE</span><span class="pe-coords">[1,3]</span></div>
+            <div class="pe-cell"><span class="pe-icon">⚙</span><span class="pe-label">PE</span><span class="pe-coords">[2,0]</span></div>
+            <div class="pe-cell"><span class="pe-icon">⚙</span><span class="pe-label">PE</span><span class="pe-coords">[2,1]</span></div>
+            <div class="pe-cell"><span class="pe-icon">⚙</span><span class="pe-label">PE</span><span class="pe-coords">[2,2]</span></div>
+            <div class="pe-cell"><span class="pe-icon">⚙</span><span class="pe-label">PE</span><span class="pe-coords">[2,3]</span></div>
+            <div class="pe-cell"><span class="pe-icon">⚙</span><span class="pe-label">PE</span><span class="pe-coords">[3,0]</span></div>
+            <div class="pe-cell"><span class="pe-icon">⚙</span><span class="pe-label">PE</span><span class="pe-coords">[3,1]</span></div>
+            <div class="pe-cell"><span class="pe-icon">⚙</span><span class="pe-label">PE</span><span class="pe-coords">[3,2]</span></div>
+            <div class="pe-cell"><span class="pe-icon">⚙</span><span class="pe-label">PE</span><span class="pe-coords">[3,3]</span></div>
+          </div>
+          <div class="dataflow-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:var(--purple-mid)"></div>Weights (stationary)</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#67e8f9"></div>Activations (flow ↓)</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#4ade80"></div>Partial sums (flow →)</div>
+          </div>
+        </div>
+
+        <div class="prose" style="margin-top:1.5rem;">
+          <h3>System Pipeline</h3>
+        </div>
+        <div class="pipeline">
+          <div class="pipe-stage"><span class="pipe-stage-icon">💻</span><span class="pipe-stage-name">Python GUI</span></div>
+          <span class="pipe-arrow">→</span>
+          <div class="pipe-stage"><span class="pipe-stage-icon">🔌</span><span class="pipe-stage-name">USB / RP2040</span></div>
+          <span class="pipe-arrow">→</span>
+          <div class="pipe-stage"><span class="pipe-stage-icon">📡</span><span class="pipe-stage-name">SPI Slave</span></div>
+          <span class="pipe-arrow">→</span>
+          <div class="pipe-stage"><span class="pipe-stage-icon">🧠</span><span class="pipe-stage-name">Control FSM</span></div>
+          <span class="pipe-arrow">→</span>
+          <div class="pipe-stage"><span class="pipe-stage-icon">⚙</span><span class="pipe-stage-name">4×4 Array</span></div>
+          <span class="pipe-arrow">→</span>
+          <div class="pipe-stage"><span class="pipe-stage-icon">📤</span><span class="pipe-stage-name">SPI TX</span></div>
+          <span class="pipe-arrow">→</span>
+          <div class="pipe-stage"><span class="pipe-stage-icon">📊</span><span class="pipe-stage-name">Result Display</span></div>
+        </div>
+      </section>
+
+      <hr class="divider" />
+
+      <section class="section" id="modules">
+        <p class="section-label">modules</p>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Module</th><th>Description</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>pe.sv</td><td>Single processing element — MAC unit with registered a/b pass-through</td><td><span class="status-done">✓ Done</span></td></tr>
+              <tr><td>systolic_array_4x4.sv</td><td>16-PE grid instantiation with weight registers and interconnect</td><td><span class="status-done">✓ Done</span></td></tr>
+              <tr><td>control_fsm.sv</td><td>3-state FSM — LOAD / COMPUTE / READBACK with cycle counter</td><td><span class="status-done">✓ Done</span></td></tr>
+              <tr><td>spi_slave.sv</td><td>SPI mode-0 receiver — deserializes weight and activation data</td><td><span class="status-done">✓ Done</span></td></tr>
+              <tr><td>spi_tx.sv</td><td>SPI transmitter — serializes 16 accumulator values for readback</td><td><span class="status-done">✓ Done</span></td></tr>
+              <tr><td>tt_top.sv</td><td>Tiny Tapeout top-level wrapper — pin mapping to tt_um interface</td><td><span class="status-wip">⟳ In Progress</span></td></tr>
+              <tr><td>tb_systolic.sv</td><td>Full integration testbench — matrix multiply golden model comparison</td><td><span class="status-wip">⟳ In Progress</span></td></tr>
+              <tr><td>rp2040_firmware</td><td>MicroPython / C firmware — USB-serial ↔ SPI bridge for demo board</td><td><span class="status-todo">○ Todo</span></td></tr>
+              <tr><td>gui.py</td><td>Python GUI — matrix input, live result display, visualization</td><td><span class="status-todo">○ Todo</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <hr class="divider" />
+
+      <section class="section" id="code">
+        <p class="section-label">code</p>
+        <div class="prose">
+          <p>Each PE is a registered MAC with pass-through — weights are latched once during LOAD, inputs flow through every cycle during COMPUTE.</p>
+        </div>
+        <div class="code-block" style="margin-top:1rem;">
+          <pre>// Processing Element — weight-stationary MAC
+module pe #(
+  parameter int DATA_W = 8,
+  parameter int ACC_W  = 24
+) (
+  input  logic                  clk, rst_n,
+  input  logic                  load_en,
+  input  logic [DATA_W-1:0]    a_in, b_in,
+  input  logic [DATA_W-1:0]    weight_in,
+  output logic [DATA_W-1:0]    a_out, b_out,
+  output logic [ACC_W-1:0]     acc_out
+);
+
+  logic [DATA_W-1:0] weight_reg;
+
+  always_ff @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+      weight_reg &lt;= '0;
+      acc_out    &lt;= '0;
+      a_out      &lt;= '0;
+      b_out      &lt;= '0;
+    end else begin
+      if (load_en) weight_reg &lt;= weight_in;
+      a_out   &lt;= a_in;                          // pass through
+      b_out   &lt;= b_in;
+      acc_out &lt;= acc_out + (a_in * weight_reg); // MAC
+    end
+  end
+endmodule</pre>
+        </div>
+      </section>
+
+    </div>
+    <div class="bottom-space"></div>
+  </div>
+
+  <script>
+    // PE grid ripple on hover
+    const grid = document.getElementById('pe-grid');
+    if (grid) {
+      const cells = Array.from(grid.querySelectorAll('.pe-cell'));
+      cells.forEach((cell, i) => {
+        cell.addEventListener('mouseenter', () => {
+          const row = Math.floor(i / 4), col = i % 4;
+          cells.forEach((c, j) => {
+            const r = Math.floor(j / 4), cc = j % 4;
+            const dist = Math.abs(r - row) + Math.abs(cc - col);
+            setTimeout(() => {
+              c.style.borderColor = dist === 0
+                ? 'var(--accent-border)'
+                : `rgba(180,149,240,${Math.max(0, 0.5 - dist * 0.15)})`;
+            }, dist * 40);
+          });
+        });
+        cell.addEventListener('mouseleave', () => {
+          cells.forEach(c => { c.style.borderColor = ''; });
+        });
+      });
+    }
+  </script>
+</body>
+</html>
