@@ -485,6 +485,19 @@
 
       <hr class="divider" />
 
+      <section class="section" id="verification">
+        <p class="section-label">verification</p>
+        <div class="prose">
+          <h3>Constrained Random Simulation</h3>
+          <p>The testbench drives the array using constrained random stimulus — 1,000-cycle simulations with randomized 8-bit A and B matrix inputs generated each run. Each output is checked against a software golden model computing the same matrix multiply in Python, and any mismatch asserts a failure flag with the cycle number, PE coordinates, expected value, and actual value printed to the log.</p>
+          <p>Constraints bound the inputs to interesting corner cases — all-zeros, all-ones, max positive, and mixed-sign patterns — ensuring the accumulator overflow boundary and reset behavior are exercised alongside the random baseline.</p>
+          <h3>FPGA Synthesis on Basys3</h3>
+          <p>Before tapeout submission, the design is synthesized and implemented on a <strong>Basys3 (Artix-7)</strong> board as a pre-silicon sanity check. Vivado synthesis confirms timing closure and resource utilization — the 4×4 array fits comfortably within the FPGA's DSP slices with no critical path violations at the target clock frequency. This catches any synthesis-blocking constructs or mismatches between simulation behavior and actual gate-level implementation before the design is locked for the shuttle.</p>
+        </div>
+      </section>
+
+      <hr class="divider" />
+
       <section class="section" id="code">
         <p class="section-label">code</p>
         <div class="prose">
@@ -522,6 +535,7 @@ module pe #(
 endmodule</pre>
         </div>
       </section>
+
 
     </div>
     <div class="bottom-space"></div>
