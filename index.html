@@ -295,6 +295,7 @@
     .card-chips { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 0.25rem; }
     .chip { font-family: var(--font-mono); font-size: 10px; color: var(--text2); background: var(--bg3); padding: 2px 8px; border-radius: 2px; }
     .chip-accent { font-family: var(--font-mono); font-size: 10px; color: #a3400a; background: #feecd0; border: 0.5px solid #f59e0b; padding: 2px 8px; border-radius: 2px; }
+    .chip-accent-green { font-family: var(--font-mono); font-size: 10px; color: #166534; background: #dcfce7; border: 0.5px solid #22c55e; padding: 2px 8px; border-radius: 2px; }
 
     .stack-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem 4rem; }
     .stack-label { font-family: var(--font-mono); font-size: 10px; color: var(--purple-mid); letter-spacing: 0.08em; margin-bottom: 0.6rem; }
@@ -509,10 +510,10 @@
               <h3 class="card-title">4×4 Systolic Matrix MAC</h3>
               <div class="card-right"><span class="card-tag">SILICON / RTL</span><span class="card-arrow">&#8599;</span></div>
             </div>
-            <p class="card-desc">Fully pipelined 4×4 systolic array MAC accelerator in SystemVerilog targeting the Tiny Tapeout TTSKY26a community silicon shuttle — 16 processing elements in a weight-stationary dataflow with SPI control and a custom FSM.</p>
+            <p class="card-desc">Fully pipelined 4×4 systolic array MAC accelerator in SystemVerilog submitted to the Tiny Tapeout TTSKY26a community silicon shuttle — 16 processing elements in a weight-stationary dataflow with SPI control and a custom FSM. Submitted and awaiting silicon.</p>
             <div class="card-chips">
               <span class="chip">SystemVerilog</span><span class="chip">SPI</span><span class="chip">FSM</span><span class="chip">RP2040</span>
-              <span class="chip-accent">TTSKY26a — May 2026</span>
+              <span class="chip-accent-green">TTSKY26a — May 2026</span>
             </div>
           </a>
 
@@ -525,14 +526,14 @@
             <div class="card-chips"><span class="chip">SystemVerilog</span><span class="chip">Basys3</span><span class="chip">RISC-V</span></div>
           </a>
 
-          <a class="project-card" href="vending-machine.html">
+          <div class="project-card">
             <div class="card-top">
               <h3 class="card-title">FPGA Vending Machine Controller</h3>
-              <div class="card-right"><span class="card-tag">FPGA / RTL</span><span class="card-arrow">&#8599;</span></div>
+              <div class="card-right"><span class="card-tag">FPGA / RTL</span></div>
             </div>
             <p class="card-desc">SystemVerilog FSM-based coin acceptor on a Boolean FPGA board. Detects nickels, dimes, and quarters via pulse counting, with two-flop input synchronizers for metastability handling and 7-segment display output.</p>
             <div class="card-chips"><span class="chip">SystemVerilog</span><span class="chip">FSM</span><span class="chip">Boolean Board</span><span class="chip">RTL</span></div>
-          </a>
+          </div>
 
           <div class="project-card">
             <div class="card-top">
