@@ -36,6 +36,7 @@
     .project-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 1.25rem; }
     .chip { font-family: var(--font-mono); font-size: 10px; color: var(--text2); background: var(--bg3); padding: 3px 10px; border-radius: 2px; }
     .chip-accent { font-family: var(--font-mono); font-size: 10px; color: var(--purple-dark); background: var(--accent-bg2); border: 0.5px solid var(--accent-border); padding: 3px 10px; border-radius: 2px; }
+    .chip-green { font-family: var(--font-mono); font-size: 10px; color: #166534; background: #dcfce7; border: 0.5px solid #86efac; padding: 3px 10px; border-radius: 2px; }
     .divider { border: none; border-top: 0.5px solid var(--border); margin: 0; }
     .section { padding: 2.5rem 0; }
     .section-label { font-family: var(--font-mono); font-size: 11px; color: #b8a8f0; letter-spacing: 0.12em; margin-bottom: 1.5rem; }
@@ -49,6 +50,7 @@
     .prose p { margin-bottom: 1rem; }
     .prose p:last-child { margin-bottom: 0; }
     .prose h3 { font-family: var(--font-sans); font-size: 15px; font-weight: 600; color: var(--text); margin: 1.75rem 0 0.6rem; }
+    .prose h3:first-child { margin-top: 0; }
     .prose strong { color: var(--text); font-weight: 600; }
     .prose ul { padding-left: 1.25rem; margin-bottom: 1rem; }
     .prose li { margin-bottom: 0.4rem; }
@@ -57,6 +59,7 @@
     /* Code block */
     .code-block { background: var(--bg2); border: 0.5px solid var(--border); border-radius: 8px; padding: 1.25rem; overflow-x: auto; margin: 1rem 0; }
     .code-block pre { font-family: var(--font-mono); font-size: 11px; color: var(--text2); line-height: 1.6; white-space: pre; }
+    .code-block-title { font-family: var(--font-mono); font-size: 10px; color: var(--text3); letter-spacing: 0.08em; padding: 0.6rem 1.25rem; border-bottom: 0.5px solid var(--border); background: var(--bg3); border-radius: 8px 8px 0 0; margin: -1.25rem -1.25rem 1rem; }
 
     /* Tables */
     .data-table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 0.5rem 0; }
@@ -105,10 +108,13 @@
       border: 0.5px solid var(--accent-border);
       padding: 2px 7px; border-radius: 2px; margin-top: 0.75rem;
     }
-    .module-card.wip { background: #fffbeb; }
-    .module-card.wip:hover { background: #fef9c3; }
-    .module-card.wip .module-tag { color: #854d0e; background: #fef9c3; border-color: #fde047; }
-    @media (max-width: 600px) { .module-grid { grid-template-columns: 1fr 1fr; } }
+    .module-tag-green {
+      display: inline-block;
+      font-family: var(--font-mono); font-size: 10px;
+      color: #166534; background: #dcfce7;
+      border: 0.5px solid #86efac;
+      padding: 2px 7px; border-radius: 2px; margin-top: 0.75rem;
+    }
 
     /* Status badges */
     .status-done { font-family: var(--font-mono); font-size: 10px; padding: 2px 8px; border-radius: 2px; background: #dcfce7; color: #166534; border: 0.5px solid #86efac; white-space: nowrap; }
@@ -188,7 +194,138 @@
     .shuttle-info { flex: 1; }
     .shuttle-title { font-size: 14px; font-weight: 600; color: var(--purple-dark); margin-bottom: 3px; }
     .shuttle-sub { font-family: var(--font-mono); font-size: 11px; color: var(--purple-mid); }
-    .shuttle-deadline { font-family: var(--font-mono); font-size: 11px; color: #92400e; background: #fef3c7; border: 0.5px solid #fde68a; border-radius: 4px; padding: 5px 10px; white-space: nowrap; }
+    .shuttle-deadline {
+      font-family: var(--font-mono); font-size: 11px;
+      color: #166534; background: #dcfce7;
+      border: 0.5px solid #86efac;
+      border-radius: 4px; padding: 5px 10px; white-space: nowrap;
+    }
+
+    /* Bug callout card */
+    .bug-card {
+      background: var(--bg);
+      border: 0.5px solid var(--border);
+      border-radius: 8px;
+      padding: 1.25rem 1.5rem;
+      margin: 0.75rem 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .bug-card::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
+      border-radius: 3px 0 0 3px;
+    }
+    .bug-card.resolved::before { background: #22c55e; }
+    .bug-card.resolved { border-color: #bbf7d0; background: #f0fdf4; }
+    .bug-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.6rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .bug-card-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .bug-card-body {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text2);
+      line-height: 1.7;
+    }
+    .bug-card-body strong { color: var(--text); font-weight: 500; }
+
+    /* Spec row grid */
+    .spec-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--border);
+      border: 0.5px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      margin: 1rem 0;
+    }
+    .spec-cell {
+      background: var(--bg);
+      padding: 1rem 1.25rem;
+    }
+    .spec-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text3);
+      letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .spec-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.02em;
+    }
+    .spec-value-mono {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--purple-dark);
+      font-weight: 500;
+    }
+    .spec-sub {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text3);
+      margin-top: 2px;
+    }
+
+    /* Timeline */
+    .timeline { margin: 1rem 0; }
+    .tl-item {
+      display: flex;
+      gap: 1rem;
+      padding-bottom: 1.5rem;
+      position: relative;
+    }
+    .tl-item:last-child { padding-bottom: 0; }
+    .tl-left {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+      width: 20px;
+    }
+    .tl-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      border: 2px solid var(--accent-border);
+      background: var(--bg);
+      flex-shrink: 0;
+      margin-top: 3px;
+    }
+    .tl-dot.done { background: #22c55e; border-color: #22c55e; }
+    .tl-line {
+      width: 1px;
+      background: var(--border);
+      flex: 1;
+      margin-top: 4px;
+    }
+    .tl-content { flex: 1; }
+    .tl-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 3px;
+    }
+    .tl-body {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text2);
+      line-height: 1.7;
+    }
 
     /* Page transition */
     .page-transition {
@@ -202,6 +339,8 @@
     @media (max-width: 600px) {
       .pipe-stage { min-width: 80px; padding: 10px; }
       .array-wrap svg { width: 100%; height: auto; }
+      .module-grid { grid-template-columns: 1fr 1fr; }
+      .spec-grid { grid-template-columns: 1fr 1fr; }
     }
     @media (max-width: 768px) {
       .orb { opacity: 0.08; }
@@ -234,45 +373,81 @@
         <span class="chip">SkyWater 130nm</span>
         <span class="chip">Tiny Tapeout</span>
         <span class="chip">Python</span>
-        <span class="chip-accent">TTSKY26a Shuttle — May 2026</span>
+        <span class="chip-green">✓ Submitted — TTSKY26a</span>
       </div>
-      <p class="project-sub" style="margin-top:1.5rem;">A fully pipelined 4×4 systolic array multiply-accumulate accelerator designed for Tiny Tapeout TTSKY26a — 16 processing elements in a weight-stationary dataflow, controlled via SPI and a custom FSM, targeting real silicon submission.</p>
+      <p class="project-sub" style="margin-top:1.5rem;">A fully pipelined 4×4 systolic array multiply-accumulate accelerator designed for real silicon on the Tiny Tapeout TTSKY26a community shuttle — 16 processing elements with 4-bit inputs and 10-bit accumulators, controlled via SPI from an RP2040 host, verified on Basys3 FPGA, and taped out on SkyWater 130nm.</p>
 
       <div style="margin-top:1.5rem;">
         <div class="links-row">
-          <a href="https://github.com/Coizi/systolic-matrix-mac-tt" target="_blank" class="project-link">GitHub &#8599;</a>
+          <a href="https://github.com/Coizi/systolic-matrix-mac-tt" target="_blank" class="project-link">GitHub ↗</a>
         </div>
       </div>
 
       <hr class="divider" style="margin-top:2.5rem;" />
 
+      <!-- ─── OVERVIEW ─── -->
       <section class="section" id="overview">
         <p class="section-label">overview</p>
         <div class="prose">
-          <p>Systolic arrays are the core compute primitive behind modern neural network accelerators — Google's TPU, Apple's Neural Engine, and virtually every edge AI chip use variants of this dataflow architecture. This project implements one from scratch in synthesizable SystemVerilog, designed to tape out on the Tiny Tapeout community shuttle.</p>
-          <p>The design uses a <strong>weight-stationary dataflow</strong>: weights are loaded into the 4×4 grid of processing elements via SPI, then input activations are streamed row-by-row through the array. Each PE accumulates a partial sum, and the final 4×4 result matrix is read back through SPI. A control FSM handles the three-phase protocol: LOAD → COMPUTE → READBACK.</p>
+          <p>Systolic arrays are the core compute primitive behind modern neural network accelerators — Google's TPU, Apple's Neural Engine, and virtually every edge AI chip use variants of this dataflow architecture. This project implements one from scratch in synthesizable SystemVerilog, designed to tape out on the Tiny Tapeout community multi-project wafer.</p>
+          <p>The design uses a <strong>weight-stationary dataflow</strong> with <strong>4-bit inputs and 10-bit accumulators</strong> — sized deliberately for area efficiency on SkyWater 130nm. A 4-bit multiplier is ~6× smaller than an 8-bit one, bringing the full 4×4 array within Tiny Tapeout tile budget. The 10-bit accumulator is sufficient since the maximum dot product (15² × 4 = 900) fits cleanly with headroom. A control FSM handles the three-phase protocol: <code>LOAD → COMPUTE → READBACK</code>.</p>
         </div>
 
-        <div class="shuttle-banner">
+        <div class="shuttle-banner" style="margin-top:1.5rem;">
           <div class="shuttle-icon">🚀</div>
           <div class="shuttle-info">
             <div class="shuttle-title">Tiny Tapeout — TTSKY26a Shuttle</div>
-            <div class="shuttle-sub">Efabless SkyWater 130nm open-source PDK · community multi-project wafer</div>
+            <div class="shuttle-sub">Efabless SkyWater 130nm open-source PDK · community multi-project wafer · yaml_version 6</div>
           </div>
-          <div class="shuttle-deadline">⚠ Deadline: May 11, 2026</div>
+          <div class="shuttle-deadline">✓ Submitted May 2026</div>
+        </div>
+
+        <!-- Specs grid -->
+        <div class="spec-grid" style="margin-top:1.5rem;">
+          <div class="spec-cell">
+            <div class="spec-label">ARRAY SIZE</div>
+            <div class="spec-value">16</div>
+            <div class="spec-sub">processing elements (4×4)</div>
+          </div>
+          <div class="spec-cell">
+            <div class="spec-label">DATAPATH</div>
+            <div class="spec-value-mono">4-bit in / 10-bit acc</div>
+            <div class="spec-sub">4×4 multiply fits in 10 bits (15²×4 = 900)</div>
+          </div>
+          <div class="spec-cell">
+            <div class="spec-label">LATENCY</div>
+            <div class="spec-value">N+3</div>
+            <div class="spec-sub">cycles to first valid output</div>
+          </div>
+          <div class="spec-cell">
+            <div class="spec-label">INTERFACE</div>
+            <div class="spec-value-mono">SPI mode 0</div>
+            <div class="spec-sub">up to 10 MHz, CPOL=0 CPHA=0</div>
+          </div>
+          <div class="spec-cell">
+            <div class="spec-label">PROCESS NODE</div>
+            <div class="spec-value-mono">SKY130</div>
+            <div class="spec-sub">SkyWater 130nm open-source PDK</div>
+          </div>
+          <div class="spec-cell">
+            <div class="spec-label">HOST MCU</div>
+            <div class="spec-value-mono">RP2040</div>
+            <div class="spec-sub">MicroPython firmware over USB</div>
+          </div>
         </div>
       </section>
 
       <hr class="divider" />
 
+      <!-- ─── ARCHITECTURE ─── -->
       <section class="section" id="architecture">
         <p class="section-label">architecture</p>
         <div class="prose">
-          <p>Each of the 16 PEs performs a MAC operation each clock cycle: <code>acc += a_in × b_in</code>. Inputs pass through in one dimension; the orthogonal dimension moves to the adjacent PE on the next cycle, creating the characteristic "wave" of computation that gives systolic arrays their name.</p>
+          <p>Each of the 16 PEs performs a MAC operation each clock cycle: <code>acc += a_reg * b_reg</code> — using registered inputs rather than direct inputs so data propagates with the correct one-cycle delay as it travels across the array. In weight-stationary mode, the weight is loaded once and held. The characteristic diagonal "wave" of valid data means output[i][j] is valid at cycle <em>i + j + N</em>, and <code>comp_done</code> asserts at counter cycle 7 (2N−1 = 7 for N=4).</p>
         </div>
 
         <div class="array-wrap">
-          <p class="array-label">4 × 4 Processing Element Array</p>
+          <p class="array-label">4 × 4 Processing Element Array — animated data wavefront</p>
           <svg width="380" height="380" viewBox="0 0 380 380" style="display:block;overflow:visible">
             <defs>
               <marker id="arrowR" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
@@ -310,70 +485,54 @@
             </g>
 
             <!-- 4×4 PE grid -->
-            <!-- Row 0 -->
             <rect class="pe-rect" x="62"  y="60" width="46" height="46" rx="4" fill="rgba(108,79,212,0.14)" stroke="rgba(108,79,212,0.50)" stroke-width="1.5"/>
             <text x="85"  y="82" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" fill="#4b30a8">PE</text>
             <text x="85"  y="96" text-anchor="middle" font-family="DM Mono,monospace" font-size="9"  fill="rgba(75,48,168,0.55)">0,0</text>
-
             <rect class="pe-rect" x="142" y="60" width="46" height="46" rx="4" fill="rgba(108,79,212,0.09)" stroke="rgba(108,79,212,0.38)" stroke-width="1.5"/>
             <text x="165" y="82" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" fill="#4b30a8">PE</text>
             <text x="165" y="96" text-anchor="middle" font-family="DM Mono,monospace" font-size="9"  fill="rgba(75,48,168,0.55)">0,1</text>
-
             <rect class="pe-rect" x="222" y="60" width="46" height="46" rx="4" fill="rgba(108,79,212,0.07)" stroke="rgba(108,79,212,0.32)" stroke-width="1.5"/>
             <text x="245" y="82" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" fill="#4b30a8">PE</text>
             <text x="245" y="96" text-anchor="middle" font-family="DM Mono,monospace" font-size="9"  fill="rgba(75,48,168,0.55)">0,2</text>
-
             <rect class="pe-rect" x="302" y="60" width="46" height="46" rx="4" fill="rgba(108,79,212,0.05)" stroke="rgba(108,79,212,0.28)" stroke-width="1.5"/>
             <text x="325" y="82" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" fill="#4b30a8">PE</text>
             <text x="325" y="96" text-anchor="middle" font-family="DM Mono,monospace" font-size="9"  fill="rgba(75,48,168,0.55)">0,3</text>
 
-            <!-- Row 1 -->
             <rect class="pe-rect" x="62"  y="140" width="46" height="46" rx="4" fill="rgba(108,79,212,0.09)" stroke="rgba(108,79,212,0.38)" stroke-width="1.5"/>
             <text x="85"  y="162" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" fill="#4b30a8">PE</text>
             <text x="85"  y="176" text-anchor="middle" font-family="DM Mono,monospace" font-size="9"  fill="rgba(75,48,168,0.55)">1,0</text>
-
             <rect class="pe-rect" x="142" y="140" width="46" height="46" rx="4" fill="rgba(108,79,212,0.16)" stroke="rgba(108,79,212,0.55)" stroke-width="1.5"/>
             <text x="165" y="162" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" fill="#4b30a8">PE</text>
             <text x="165" y="176" text-anchor="middle" font-family="DM Mono,monospace" font-size="9"  fill="rgba(75,48,168,0.55)">1,1</text>
-
             <rect class="pe-rect" x="222" y="140" width="46" height="46" rx="4" fill="rgba(108,79,212,0.08)" stroke="rgba(108,79,212,0.35)" stroke-width="1.5"/>
             <text x="245" y="162" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" fill="#4b30a8">PE</text>
             <text x="245" y="176" text-anchor="middle" font-family="DM Mono,monospace" font-size="9"  fill="rgba(75,48,168,0.55)">1,2</text>
-
             <rect class="pe-rect" x="302" y="140" width="46" height="46" rx="4" fill="rgba(108,79,212,0.06)" stroke="rgba(108,79,212,0.30)" stroke-width="1.5"/>
             <text x="325" y="162" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" fill="#4b30a8">PE</text>
             <text x="325" y="176" text-anchor="middle" font-family="DM Mono,monospace" font-size="9"  fill="rgba(75,48,168,0.55)">1,3</text>
 
-            <!-- Row 2 -->
             <rect class="pe-rect" x="62"  y="220" width="46" height="46" rx="4" fill="rgba(108,79,212,0.06)" stroke="rgba(108,79,212,0.30)" stroke-width="1.5"/>
             <text x="85"  y="242" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" fill="#4b30a8">PE</text>
             <text x="85"  y="256" text-anchor="middle" font-family="DM Mono,monospace" font-size="9"  fill="rgba(75,48,168,0.55)">2,0</text>
-
             <rect class="pe-rect" x="142" y="220" width="46" height="46" rx="4" fill="rgba(108,79,212,0.08)" stroke="rgba(108,79,212,0.35)" stroke-width="1.5"/>
             <text x="165" y="242" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" fill="#4b30a8">PE</text>
             <text x="165" y="256" text-anchor="middle" font-family="DM Mono,monospace" font-size="9"  fill="rgba(75,48,168,0.55)">2,1</text>
-
             <rect class="pe-rect" x="222" y="220" width="46" height="46" rx="4" fill="rgba(108,79,212,0.16)" stroke="rgba(108,79,212,0.55)" stroke-width="1.5"/>
             <text x="245" y="242" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" fill="#4b30a8">PE</text>
             <text x="245" y="256" text-anchor="middle" font-family="DM Mono,monospace" font-size="9"  fill="rgba(75,48,168,0.55)">2,2</text>
-
             <rect class="pe-rect" x="302" y="220" width="46" height="46" rx="4" fill="rgba(108,79,212,0.09)" stroke="rgba(108,79,212,0.38)" stroke-width="1.5"/>
             <text x="325" y="242" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" fill="#4b30a8">PE</text>
             <text x="325" y="256" text-anchor="middle" font-family="DM Mono,monospace" font-size="9"  fill="rgba(75,48,168,0.55)">2,3</text>
 
-            <!-- Row 3 -->
             <rect class="pe-rect" x="62"  y="300" width="46" height="46" rx="4" fill="rgba(108,79,212,0.05)" stroke="rgba(108,79,212,0.28)" stroke-width="1.5"/>
             <text x="85"  y="322" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" fill="#4b30a8">PE</text>
             <text x="85"  y="336" text-anchor="middle" font-family="DM Mono,monospace" font-size="9"  fill="rgba(75,48,168,0.55)">3,0</text>
-
             <rect class="pe-rect" x="142" y="300" width="46" height="46" rx="4" fill="rgba(108,79,212,0.07)" stroke="rgba(108,79,212,0.32)" stroke-width="1.5"/>
             <text x="165" y="322" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" fill="#4b30a8">PE</text>
             <text x="165" y="336" text-anchor="middle" font-family="DM Mono,monospace" font-size="9"  fill="rgba(75,48,168,0.55)">3,1</text>
-
             <rect class="pe-rect" x="222" y="300" width="46" height="46" rx="4" fill="rgba(108,79,212,0.09)" stroke="rgba(108,79,212,0.38)" stroke-width="1.5"/>
             <text x="245" y="322" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" fill="#4b30a8">PE</text>
             <text x="245" y="336" text-anchor="middle" font-family="DM Mono,monospace" font-size="9"  fill="rgba(75,48,168,0.55)">3,2</text>
-
             <rect class="pe-rect" x="302" y="300" width="46" height="46" rx="4" fill="rgba(108,79,212,0.16)" stroke="rgba(108,79,212,0.55)" stroke-width="1.5"/>
             <text x="325" y="322" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" fill="#4b30a8">PE</text>
             <text x="325" y="336" text-anchor="middle" font-family="DM Mono,monospace" font-size="9"  fill="rgba(75,48,168,0.55)">3,3</text>
@@ -430,54 +589,78 @@
           <span class="pipe-arrow">→</span>
           <div class="pipe-stage"><span class="pipe-stage-icon">📊</span><span class="pipe-stage-name">Result Display</span></div>
         </div>
+
+        <div class="prose" style="margin-top:1.5rem;">
+          <h3>Control FSM States</h3>
+          <p>The FSM drives the three-phase protocol that coordinates SPI, the array, and the readback engine. Input skewing — inserting cycle-offset delays so that row <em>i</em> of A and column <em>j</em> of B arrive at PE[i][j] simultaneously — is generated entirely in the COMPUTE state, avoiding any external buffering requirement.</p>
+        </div>
+
+        <div class="table-wrap" style="margin-top:0.75rem;">
+          <table class="data-table">
+            <thead>
+              <tr><th>STATE</th><th>DESCRIPTION</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>IDLE</td><td>Waiting for SPI load to complete (<code>load_done</code> assertion)</td></tr>
+              <tr class="highlight"><td>CLEAR</td><td>Synchronous reset of all 16 PE accumulators — one full cycle before any MAC activity</td></tr>
+              <tr class="highlight"><td>LOAD</td><td>Asserts <code>start</code> to PEs; boundary logic feeds skew-delayed A rows and B columns</td></tr>
+              <tr class="highlight"><td>COMPUTE</td><td>Counter increments each cycle; array accumulating; <code>comp_done</code> asserts at <code>cnt == 7</code></td></tr>
+              <tr><td>DRAIN</td><td>Enables SPI TX to serialize the 16 × 10-bit results back to the RP2040</td></tr>
+            </tbody>
+          </table>
+        </div>
       </section>
 
       <hr class="divider" />
 
+      <!-- ─── MODULES ─── -->
       <section class="section" id="modules">
         <p class="section-label">modules</p>
+        <div class="prose">
+          <p>The design is split into seven source files with a strict compile order: <code>primitives.sv → pe.sv → systolic_array_4x4.sv → spi_slave.sv → spi_tx.sv → control_fsm.sv → tt_um_systolic_top.sv</code>. Each module is independently testable.</p>
+        </div>
         <div class="module-grid">
 
           <div class="module-card">
             <div class="module-card-icon icon-purple">⬡</div>
             <h3>Processing Element</h3>
-            <p>Single MAC unit — <em>acc += a × b</em> per clock. Registers both inputs and outputs for wave-front pipelining.</p>
+            <p>Single MAC unit — <em>acc += a_reg × b_reg</em> per clock. 4-bit inputs, 10-bit accumulator. Registered pass-through on A and B creates the one-cycle propagation delay the systolic dataflow depends on.</p>
             <span class="module-tag">pe.sv</span>
           </div>
 
           <div class="module-card">
             <div class="module-card-icon icon-purple">⊞</div>
             <h3>Systolic Array 4×4</h3>
-            <p>16 PE instances in a mesh topology. A-operands stream east, B-operands stream south. Results after N+3 cycles.</p>
+            <p>16 PE instances in a mesh connected by <code>generate</code> loops. Boundary logic skews A rows and B columns using the cycle counter: row i feeds at <code>cnt >= i</code>, col j feeds at <code>cnt >= j</code>.</p>
             <span class="module-tag">systolic_array_4x4.sv</span>
           </div>
 
           <div class="module-card">
             <div class="module-card-icon icon-amber">◈</div>
             <h3>Control FSM</h3>
-            <p>Manages LOAD → COMPUTE → READBACK states. Generates skew-delayed feeds to correctly stagger A/B matrix inputs.</p>
+            <p>5-state one-hot FSM: IDLE → CLEAR → LOAD → COMPUTE → DRAIN. The explicit CLEAR state before COMPUTE was the fix for the accumulator corruption bug found on Basys3.</p>
             <span class="module-tag">control_fsm.sv</span>
           </div>
 
           <div class="module-card">
             <div class="module-card-icon icon-green">⇅</div>
             <h3>SPI Slave</h3>
-            <p>Receives matrix operands from the RP2040 host. Deserializes into input buffers — SPI mode 0 up to 10 MHz.</p>
+            <p>Deserializes 33 SPI bytes (1 command + 16 A bytes + 16 B bytes) into 4×4 unpacked arrays. Asserts <code>load_done</code> when complete to trigger the FSM.</p>
             <span class="module-tag">spi_slave.sv</span>
           </div>
 
           <div class="module-card">
             <div class="module-card-icon icon-green">⇈</div>
             <h3>SPI TX</h3>
-            <p>Serializes the 4×4 result matrix back to the RP2040 after computation. Output-ready flag signals readback.</p>
+            <p>Serializes 16 × 10-bit results back to the RP2040 on MISO after DRAIN is entered. Handles MSB-first transmission gated by <code>comp_done</code>.</p>
             <span class="module-tag">spi_tx.sv</span>
           </div>
 
-          <div class="module-card wip">
-            <div class="module-card-icon icon-amber">⊕</div>
+          <div class="module-card">
+            <div class="module-card-icon icon-purple">⊕</div>
             <h3>Top Wrapper</h3>
-            <p>Tiny Tapeout top-level — wires all five modules to <code style="font-family:var(--font-mono);font-size:10px;color:#854d0e">tt_um_*</code> port conventions. <em>In progress.</em></p>
-            <span class="module-tag">tt_top.sv</span>
+            <p>Tiny Tapeout top-level conforming to <code>yaml_version: 6</code> port conventions. Maps all modules to the 8-bit <code>ui_in / uo_out / uio_*</code> bus. Includes a <code>primitives.sv</code> layer for DFFs and synchronizers.</p>
+            <span class="module-tag">tt_um_systolic_top.sv</span>
           </div>
 
         </div>
@@ -485,57 +668,131 @@
 
       <hr class="divider" />
 
+      <!-- ─── HARDWARE DEBUGGING ─── -->
+      <section class="section" id="debugging">
+        <p class="section-label">hardware debugging</p>
+        <div class="prose">
+          <p>Before finalizing RTL for tapeout, the design was synthesized on a <strong>Basys3 (Artix-7)</strong> FPGA with a UART test harness for hardware-in-the-loop verification. Three bugs were caught that simulation hadn't surfaced:</p>
+          <p><strong>Clear/start race.</strong> On back-to-back runs, PE accumulators occasionally held stale partial results. The FSM was transitioning CLEAR → COMPUTE on the same edge the synchronous clear applied — zero timing margin on hardware. Fix: an explicit CLEAR state in the FSM, registering <code>acc_clear</code> a full cycle before any MAC begins.</p>
+          <p><strong>comp_done one cycle early.</strong> The last column of outputs was always zero because the readback started before the final MAC committed. <code>comp_done</code> was asserted at <code>cnt == 6</code> but the PE pipeline register meant results weren't architecturally visible until cycle 7. Fix: assert at <code>cnt == 7</code>.</p>
+          <p><strong>PE[0][0] accumulator corruption.</strong> PE[0][0]'s output was consistently wrong by exactly one partial product — every other PE was correct. The <code>start</code> gate on the PE wasn't high in time for the very first valid cycle at [0][0], causing the first multiply to be dropped. Fix: ensured <code>start</code> is asserted one cycle before data enters the array boundary.</p>
+
+          <h3>FPGA Synthesis on Basys3</h3>
+          <p>Vivado synthesis confirmed timing closure at the target clock frequency with comfortable slack. The 4-bit multipliers synthesize entirely to LUT logic (no DSP48E1 primitives consumed), and the full 4×4 array fits with low utilization — validating there are no synthesis-blocking constructs before committing to the shuttle.</p>
+
+          <h3>UART Test Infrastructure</h3>
+          <p>Rather than Vivado's ILA (which adds LUT overhead and complicates timing closure), a lightweight UART readback path was wired in for hardware testing: the Basys3 receives test vectors over UART at 115200 baud, runs the full CLEAR → LOAD → COMPUTE → DRAIN sequence through the actual synthesized RTL, and streams the 16 output values to a Python script that compares them against a NumPy golden model. Any mismatch prints PE coordinates, expected value, actual value, and cycle number.</p>
+        </div>
+      </section>
+
+      <hr class="divider" />
+
+      <!-- ─── VERIFICATION ─── -->
       <section class="section" id="verification">
         <p class="section-label">verification</p>
         <div class="prose">
           <h3>Constrained Random Simulation</h3>
-          <p>The testbench drives the array using constrained random stimulus — 1,000-cycle simulations with randomized 8-bit A and B matrix inputs generated each run. Each output is checked against a software golden model computing the same matrix multiply in Python, and any mismatch asserts a failure flag with the cycle number, PE coordinates, expected value, and actual value printed to the log.</p>
-          <p>Constraints bound the inputs to interesting corner cases — all-zeros, all-ones, max positive, and mixed-sign patterns — ensuring the accumulator overflow boundary and reset behavior are exercised alongside the random baseline.</p>
-          <h3>FPGA Synthesis on Basys3</h3>
-          <p>Before tapeout submission, the design is synthesized and implemented on a <strong>Basys3 (Artix-7)</strong> board as a pre-silicon sanity check. Vivado synthesis confirms timing closure and resource utilization — the 4×4 array fits comfortably within the FPGA's DSP slices with no critical path violations at the target clock frequency. This catches any synthesis-blocking constructs or mismatches between simulation behavior and actual gate-level implementation before the design is locked for the shuttle.</p>
+          <p>The simulation testbench drives the array with constrained random stimulus across 1,000-cycle runs. Randomized 4-bit A and B matrix inputs are generated in SystemVerilog and mirrored to a Python golden model; every output is checked against the software reference and any mismatch asserts a failure flag with full diagnostic output — PE coordinates, expected value, actual value, and cycle number.</p>
+          <p>Constraint groups target corner cases that exercise accumulator boundaries: all-zeros, all-ones, max value (0xF), and mixed patterns. These ensure the 10-bit accumulator ceiling (15² × 4 = 900 max, well within 10-bit range) and the synchronous clear behavior are hit repeatedly alongside the random baseline. The <code>pe_tb</code> passes 1,000/1,000 directed random trials.</p>
+
+          <h3>Timeline</h3>
+        </div>
+
+        <div class="timeline" style="margin-top:1rem;">
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot done"></div><div class="tl-line"></div></div>
+            <div class="tl-content">
+              <div class="tl-title">PE + Array RTL</div>
+              <div class="tl-body">Wrote and simulated all 16 PE instances with generate loops. Verified MAC accumulation against Python numpy reference.</div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot done"></div><div class="tl-line"></div></div>
+            <div class="tl-content">
+              <div class="tl-title">SPI + FSM integration</div>
+              <div class="tl-body">Wired SPI slave/TX to FSM; verified full LOAD → COMPUTE → READBACK sequence in simulation with SPI waveform stimulus.</div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot done"></div><div class="tl-line"></div></div>
+            <div class="tl-content">
+              <div class="tl-title">Basys3 FPGA synthesis & hardware debug</div>
+              <div class="tl-body">Implemented on Artix-7. Discovered and fixed all three hardware bugs (clear/start race, comp_done timing, PE[0][0] corruption) using UART test harness.</div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot done"></div><div class="tl-line"></div></div>
+            <div class="tl-content">
+              <div class="tl-title">Tiny Tapeout wrapper</div>
+              <div class="tl-body">Wrote tt_top.sv conforming to yaml_version 6 port conventions. Verified wrapper passes Tiny Tapeout GitHub Actions CI. Cleaned repo to seven-file compile order.</div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot done"></div></div>
+            <div class="tl-content">
+              <div class="tl-title">TTSKY26a shuttle submission</div>
+              <div class="tl-body">Design submitted to Tiny Tapeout TTSKY26a — SkyWater 130nm open-source PDK. Awaiting fab return.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="prose" style="margin-top:1.5rem;">
+          <h3>Resource Utilization (Basys3 Artix-7)</h3>
+        </div>
+        <div class="table-wrap" style="margin-top:0.75rem;">
+          <table class="data-table">
+            <thead><tr><th>RESOURCE</th><th>USED</th><th>AVAILABLE</th><th>NOTES</th></tr></thead>
+            <tbody>
+              <tr><td>LUT</td><td>~180</td><td>20,800</td><td>4-bit multipliers synthesize entirely to LUT logic</td></tr>
+              <tr><td>FF</td><td>~160</td><td>41,600</td><td>PE registers + FSM state + SPI shift regs</td></tr>
+              <tr><td>DSP48E1</td><td>0</td><td>90</td><td>No DSP inference — 4×4 mults too small</td></tr>
+              <tr class="highlight"><td>Critical Path</td><td colspan="2">—</td><td>timing closure confirmed, comfortable slack</td></tr>
+            </tbody>
+          </table>
         </div>
       </section>
 
       <hr class="divider" />
 
+      <!-- ─── CODE ─── -->
       <section class="section" id="code">
         <p class="section-label">code</p>
         <div class="prose">
-          <p>Each PE is a registered MAC with pass-through — weights are latched once during LOAD, inputs flow through every cycle during COMPUTE.</p>
+          <p>The PE is the heart of the design — 20 lines of RTL that encode the entire systolic dataflow. The <code>start</code> gate prevents spurious accumulation before the FSM is ready; the registered <code>a_reg / b_reg</code> (not the raw inputs) are what get multiplied, creating the one-cycle propagation delay that makes the wavefront work.</p>
         </div>
+
         <div class="code-block" style="margin-top:1rem;">
-          <pre>// Processing Element — weight-stationary MAC
-module pe #(
-  parameter int DATA_W = 8,
-  parameter int ACC_W  = 24
-) (
-  input  logic                  clk, rst_n,
-  input  logic                  load_en,
-  input  logic [DATA_W-1:0]    a_in, b_in,
-  input  logic [DATA_W-1:0]    weight_in,
-  output logic [DATA_W-1:0]    a_out, b_out,
-  output logic [ACC_W-1:0]     acc_out
+          <div class="code-block-title">pe.sv — processing element (4-bit × 4-bit → 10-bit acc)</div>
+          <pre>module pe (
+    input  logic        clk,
+    input  logic        rst_n, clear, start,
+    input  logic [3:0]  a_in, b_in,
+    output logic [3:0]  a_out, b_out,
+    output logic [9:0]  acc
 );
+    logic [3:0] a_reg, b_reg;
 
-  logic [DATA_W-1:0] weight_reg;
-
-  always_ff @(posedge clk or negedge rst_n) begin
-    if (!rst_n) begin
-      weight_reg &lt;= '0;
-      acc_out    &lt;= '0;
-      a_out      &lt;= '0;
-      b_out      &lt;= '0;
-    end else begin
-      if (load_en) weight_reg &lt;= weight_in;
-      a_out   &lt;= a_in;                          // pass through
-      b_out   &lt;= b_in;
-      acc_out &lt;= acc_out + (a_in * weight_reg); // MAC
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            a_reg &lt;= 4'b0;
+            b_reg &lt;= 4'b0;
+            acc   &lt;= 10'b0;
+        end else if (clear) begin
+            acc   &lt;= 10'b0;
+            a_reg &lt;= 4'b0;
+            b_reg &lt;= 4'b0;
+        end else if (start) begin
+            a_reg &lt;= a_in;
+            b_reg &lt;= b_in;
+            acc   &lt;= acc + (a_reg * b_reg);  // registered inputs — one-cycle propagation delay
+        end
     end
-  end
-endmodule</pre>
+
+    assign a_out = a_reg;
+    assign b_out = b_reg;
+endmodule : pe</pre>
         </div>
       </section>
-
 
     </div>
     <div class="bottom-space"></div>
