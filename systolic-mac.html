@@ -899,13 +899,16 @@ endmodule : pe</pre>
       <section class="section" id="silicon">
         <p class="section-label">3d layout viewer</p>
         <div class="gds-bottom-row" style="margin-bottom:0.75rem;">
-          <div></div>
+          <button class="gds-ext-btn" id="gds-toggle-btn" onclick="gdsToggle()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></svg>
+            Launch 3D viewer
+          </button>
           <button class="gds-ext-btn" onclick="gdsOpenExternal()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
             Open full 3D viewer
           </button>
         </div>
-        <div class="gds-iframe-wrap" id="gds-iframe-wrap" style="display:block;">
+        <div class="gds-iframe-wrap" id="gds-iframe-wrap" style="display:none;">
           <iframe id="gds-viewer-iframe" title="3D GDS viewer" allowfullscreen></iframe>
         </div>
       </section>
@@ -916,8 +919,22 @@ endmodule : pe</pre>
 
   <script>
     var GDS_VIEWER_URL = 'https://gds-viewer.tinytapeout.com/?model=' + encodeURIComponent('https://coizi.github.io/tt_um_systolicmac/tinytapeout.oas') + '&pdk=sky130A';
+    var gdsOpen = false;
 
-    document.getElementById('gds-viewer-iframe').src = GDS_VIEWER_URL;
+    function gdsToggle() {
+      var wrap = document.getElementById('gds-iframe-wrap');
+      var ifrm = document.getElementById('gds-viewer-iframe');
+      var btn = document.getElementById('gds-toggle-btn');
+      gdsOpen = !gdsOpen;
+      if (gdsOpen) {
+        wrap.style.display = 'block';
+        if (!ifrm.src) ifrm.src = GDS_VIEWER_URL;
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg> Close 3D viewer';
+      } else {
+        wrap.style.display = 'none';
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></svg> Launch 3D viewer';
+      }
+    }
 
     function gdsOpenExternal() {
       window.open(GDS_VIEWER_URL, '_blank');
