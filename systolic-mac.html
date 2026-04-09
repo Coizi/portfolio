@@ -345,6 +345,118 @@
     @media (max-width: 768px) {
       .orb { opacity: 0.08; }
     }
+
+    /* GDS viewer */
+    .gds-viewer-wrap {
+      position: relative;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #09090f;
+      border: 0.5px solid var(--border);
+      cursor: pointer;
+    }
+    .gds-img {
+      width: 100%;
+      display: block;
+      image-rendering: pixelated;
+      opacity: 0.88;
+      transition: opacity 0.3s;
+    }
+    .gds-viewer-wrap:hover .gds-img { opacity: 1; }
+    .gds-scan-line {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent 0%, var(--purple-mid) 40%, var(--purple-light) 50%, var(--purple-mid) 60%, transparent 100%);
+      animation: gds-scan 3s linear infinite;
+      pointer-events: none;
+      opacity: 0.7;
+    }
+    @keyframes gds-scan {
+      0%   { top: 0%; }
+      100% { top: 100%; }
+    }
+    .gds-corner {
+      position: absolute;
+      width: 14px; height: 14px;
+      border-color: var(--accent-border);
+      border-style: solid;
+      pointer-events: none;
+    }
+    .gds-tl { top: 8px; left: 8px; border-width: 2px 0 0 2px; }
+    .gds-tr { top: 8px; right: 8px; border-width: 2px 2px 0 0; }
+    .gds-bl { bottom: 8px; left: 8px; border-width: 0 0 2px 2px; }
+    .gds-br { bottom: 8px; right: 8px; border-width: 0 2px 2px 0; }
+    .gds-overlay-btn {
+      position: absolute;
+      bottom: 14px; right: 14px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      background: rgba(240,236,253,0.88);
+      color: var(--purple-dark);
+      border: 0.5px solid var(--accent-border);
+      border-radius: 2px;
+      padding: 7px 14px;
+      cursor: pointer;
+      transition: background 0.15s;
+      backdrop-filter: blur(4px);
+    }
+    .gds-overlay-btn:hover { background: var(--accent-bg2); }
+    .gds-iframe-wrap {
+      display: none;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 0.5px solid var(--accent-border);
+      margin-top: 12px;
+    }
+    .gds-iframe-wrap iframe {
+      width: 100%;
+      height: 420px;
+      border: none;
+      display: block;
+    }
+    .gds-bottom-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .gds-legend {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .gds-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text3);
+    }
+    .gds-legend-dot {
+      width: 8px; height: 8px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+    .gds-ext-btn {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      background: transparent;
+      color: var(--purple-dark);
+      border: 0.5px solid var(--accent-border);
+      border-radius: 2px;
+      padding: 7px 16px;
+      cursor: pointer;
+      transition: background 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .gds-ext-btn:hover { background: var(--accent-bg); }
+    .gds-ext-btn svg { width: 13px; height: 13px; }
   </style>
 </head>
 <body>
@@ -794,9 +906,77 @@ endmodule : pe</pre>
         </div>
       </section>
 
+      <hr class="divider" />
+
+      <!-- ─── SILICON LAYOUT ─── -->
+      <section class="section" id="silicon">
+        <p class="section-label">silicon layout</p>
+        <div class="prose" style="margin-bottom:1rem;">
+          <p>Routed GDS-II layout from OpenLane place-and-route on SkyWater 130nm. Click <strong>Launch 3D viewer</strong> to inspect the physical layer stack interactively, or open the full viewer in a new tab.</p>
+        </div>
+
+        <div class="gds-viewer-wrap" id="gds-img-wrap">
+          <img
+            class="gds-img"
+            src="https://coizi.github.io/tt_um_systolicmac/gds_render.png"
+            alt="GDS layout render of 4×4 systolic MAC accelerator"
+            onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22300%22><rect width=%22800%22 height=%22300%22 fill=%22%2309090f%22/><text x=%22400%22 y=%22148%22 text-anchor=%22middle%22 fill=%22%232a2538%22 font-size=%2214%22 font-family=%22monospace%22>gds_render.png</text></svg>'"
+          />
+          <div class="gds-scan-line"></div>
+          <div class="gds-corner gds-tl"></div>
+          <div class="gds-corner gds-tr"></div>
+          <div class="gds-corner gds-bl"></div>
+          <div class="gds-corner gds-br"></div>
+          <button class="gds-overlay-btn" onclick="gdsToggle3D()">⬡ Launch 3D viewer</button>
+        </div>
+
+        <div class="gds-iframe-wrap" id="gds-iframe-wrap">
+          <iframe id="gds-viewer-iframe" title="3D GDS viewer" allowfullscreen></iframe>
+        </div>
+
+        <div class="gds-bottom-row">
+          <div class="gds-legend">
+            <div class="gds-legend-item"><div class="gds-legend-dot" style="background:#4ade80;"></div>diff</div>
+            <div class="gds-legend-item"><div class="gds-legend-dot" style="background:#f59e0b;"></div>poly</div>
+            <div class="gds-legend-item"><div class="gds-legend-dot" style="background:#60a5fa;"></div>met1</div>
+            <div class="gds-legend-item"><div class="gds-legend-dot" style="background:#c084fc;"></div>met2</div>
+            <div class="gds-legend-item"><div class="gds-legend-dot" style="background:#f87171;"></div>met3</div>
+          </div>
+          <button class="gds-ext-btn" onclick="gdsOpenExternal()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            Open full 3D viewer
+          </button>
+        </div>
+      </section>
+
     </div>
     <div class="bottom-space"></div>
   </div>
+
+  <script>
+    var gds3dOpen = false;
+    var GDS_VIEWER_URL = 'https://gds-viewer.tinytapeout.com/?model=' + encodeURIComponent('https://coizi.github.io/tt_um_systolicmac/tinytapeout.oas') + '&pdk=sky130A';
+
+    function gdsToggle3D() {
+      var wrap = document.getElementById('gds-iframe-wrap');
+      var btn = document.querySelector('.gds-overlay-btn');
+      var ifrm = document.getElementById('gds-viewer-iframe');
+      gds3dOpen = !gds3dOpen;
+      if (gds3dOpen) {
+        wrap.style.display = 'block';
+        ifrm.src = GDS_VIEWER_URL;
+        btn.textContent = '✕ Close 3D viewer';
+      } else {
+        wrap.style.display = 'none';
+        ifrm.src = '';
+        btn.textContent = '⬡ Launch 3D viewer';
+      }
+    }
+
+    function gdsOpenExternal() {
+      window.open(GDS_VIEWER_URL, '_blank');
+    }
+  </script>
 
 </body>
 </html>
