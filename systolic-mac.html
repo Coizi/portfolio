@@ -363,19 +363,6 @@
       transition: opacity 0.3s;
     }
     .gds-viewer-wrap:hover .gds-img { opacity: 1; }
-    .gds-scan-line {
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, transparent 0%, var(--purple-mid) 40%, var(--purple-light) 50%, var(--purple-mid) 60%, transparent 100%);
-      animation: gds-scan 3s linear infinite;
-      pointer-events: none;
-      opacity: 0.7;
-    }
-    @keyframes gds-scan {
-      0%   { top: 0%; }
-      100% { top: 100%; }
-    }
     .gds-corner {
       position: absolute;
       width: 14px; height: 14px;
@@ -922,7 +909,6 @@ endmodule : pe</pre>
             alt="GDS layout render of 4×4 systolic MAC accelerator"
             onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22300%22><rect width=%22800%22 height=%22300%22 fill=%22%2309090f%22/><text x=%22400%22 y=%22148%22 text-anchor=%22middle%22 fill=%22%232a2538%22 font-size=%2214%22 font-family=%22monospace%22>gds_render.png</text></svg>'"
           />
-          <div class="gds-scan-line"></div>
           <div class="gds-corner gds-tl"></div>
           <div class="gds-corner gds-tr"></div>
           <div class="gds-corner gds-bl"></div>
