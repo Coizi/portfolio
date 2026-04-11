@@ -54,7 +54,6 @@
       overflow-x: hidden;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
-      transition: background 1s ease, color 1s ease;
     }
 
     .bg-orbs { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
@@ -349,62 +348,6 @@
       transform: translateY(0);
     }
 
-    /* ---- DARK MODE TOGGLE ---- */
-    .theme-toggle {
-      position: relative;
-      z-index: 1;
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 6px 10px;
-      border-radius: 999px;
-      font-size: 15px;
-      line-height: 1;
-      transition: opacity 0.2s;
-      color: var(--text);
-    }
-    .theme-toggle:hover { opacity: 0.7; }
-    .theme-toggle .icon-sun { display: none; }
-    .theme-toggle .icon-moon { display: inline; }
-
-    /* ---- DARK THEME ---- */
-    [data-theme="dark"] {
-      --bg: #121214;
-      --bg2: #1a1a1e;
-      --bg3: #242428;
-      --border: #2a2a30;
-      --border2: #3a3a42;
-      --text: #e8e6e1;
-      --text2: #a09d96;
-      --text3: #6b6860;
-      --purple-dark: #b8a4f8;
-      --purple-mid: #9b82e8;
-      --purple-light: #7a60d4;
-      --accent-bg: #1e1a2e;
-      --accent-bg2: #252040;
-      --accent-border: #3d3460;
-    }
-    [data-theme="dark"] .pill-glass {
-      background: rgba(0,0,0,0.15);
-      border-color: rgba(255,255,255,0.1);
-      box-shadow:
-        0 1.5px 0 rgba(255,255,255,0.08) inset,
-        0 -1px 0 rgba(200,180,255,0.05) inset,
-        0 8px 32px rgba(0,0,0,0.3),
-        0 2px 8px rgba(0,0,0,0.2);
-    }
-    [data-theme="dark"] .pill-glass::before { background: rgba(255,255,255,0.1); }
-    [data-theme="dark"] .pill-indicator { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.15); }
-    [data-theme="dark"] .pill-link { text-shadow: none; }
-    [data-theme="dark"] .exp-logo { background: var(--bg2); border-color: var(--border); }
-    [data-theme="dark"] .exp-logo img { mix-blend-mode: normal; filter: brightness(0.9); }
-    [data-theme="dark"] .contact-btn { background: var(--bg2); }
-    [data-theme="dark"] .project-card { background: var(--bg); }
-    [data-theme="dark"] .project-card:hover { background: var(--accent-bg); }
-    [data-theme="dark"] .orb { opacity: 0.15; }
-    [data-theme="dark"] .theme-toggle .icon-sun { display: inline; }
-    [data-theme="dark"] .theme-toggle .icon-moon { display: none; }
-
     /* ---- PAGE TRANSITION (#3) ---- */
     .page-transition {
       position: fixed;
@@ -429,7 +372,6 @@
 
     @media (max-width: 768px) {
       .orb { opacity: 0.08; }
-      [data-theme="dark"] .orb { opacity: 0.08; }
     }
   </style>
 </head>
@@ -469,7 +411,7 @@
           <a href="#projects"   class="pill-link" data-section="projects">work</a>
           <a href="#stack"      class="pill-link" data-section="stack">stack</a>
           <a href="#contact"    class="pill-link" data-section="contact">contact</a>
-          <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode"><span class="icon-moon">☽</span><span class="icon-sun">☀</span></button>
+
         </div>
       </div>
     </div>
@@ -486,6 +428,7 @@
           <span class="badge-dark">Ford SWE &middot; Summer 2026</span>
           <span class="badge-light">BWXT IT Architecture &middot; Summer 2025</span>
           <span class="badge-ghost"><a href="https://github.com/Coizi" target="_blank">github: Coizi &#8599;</a></span>
+          <span class="badge-ghost"><a href="J_Taylor_Resume_V.docx.pdf" target="_blank">résumé &#8599;</a></span>
         </div>
 
       </section>
@@ -542,12 +485,11 @@
             <div class="card-content">
               <div class="card-top">
                 <h3 class="card-title">AI-Powered Aim Assist System</h3>
-                <div class="card-right"><span class="card-tag">HARDWARE</span><span class="card-arrow">&#8599;</span></div>
+                <div class="card-right"><span class="chip-accent">🥉 3rd place @ CMU HackberryPi</span><span class="card-tag">HARDWARE</span><span class="card-arrow">&#8599;</span></div>
               </div>
               <p class="card-desc">Jetson Orin Nano + global shutter camera + EMS actuators. Dual-mode PID controller running at 1kHz and SPI digital potentiometers for precise muscle stimulation control, achieving a 15ms pixel-to-stimulation response time.</p>
               <div class="card-chips">
                 <span class="chip">Python</span><span class="chip">SPI</span><span class="chip">PID</span>
-                <span class="chip-accent">3rd place @ CMU HackberryPi</span>
               </div>
             </div>
             <div class="card-img-wrap">
@@ -556,21 +498,25 @@
           </a>
 
           <a class="project-card" href="riscv.html">
-            <div class="card-top">
-              <h3 class="card-title">8-bit RISC-V Processor</h3>
-              <div class="card-right"><span class="card-tag">FPGA / RTL</span><span class="card-arrow">&#8599;</span></div>
+            <div class="card-content">
+              <div class="card-top">
+                <h3 class="card-title">8-bit RISC-V Processor</h3>
+                <div class="card-right"><span class="card-tag">FPGA / RTL</span><span class="card-arrow">&#8599;</span></div>
+              </div>
+              <p class="card-desc">Full processor implementation in Verilog on Basys3 FPGA. Includes instruction decoder, testbench, and SystemVerilog FSM design.</p>
+              <div class="card-chips"><span class="chip">SystemVerilog</span><span class="chip">Basys3</span><span class="chip">RISC-V</span></div>
             </div>
-            <p class="card-desc">Full processor implementation in Verilog on Basys3 FPGA. Includes instruction decoder, testbench, and SystemVerilog FSM design.</p>
-            <div class="card-chips"><span class="chip">SystemVerilog</span><span class="chip">Basys3</span><span class="chip">RISC-V</span></div>
           </a>
 
           <div class="project-card">
-            <div class="card-top">
-              <h3 class="card-title">PCB Design &amp; Fabrication</h3>
-              <div class="card-right"><span class="card-tag">PCB DESIGN</span><span class="card-arrow">&#8599;</span></div>
+            <div class="card-content">
+              <div class="card-top">
+                <h3 class="card-title">PCB Design &amp; Fabrication</h3>
+                <div class="card-right"><span class="card-tag">PCB DESIGN</span><span class="card-arrow">&#8599;</span></div>
+              </div>
+              <p class="card-desc">Designed and fabricated a PCB with defined test patterns, going end-to-end from schematic to physical board via JLCPCB with full BOM and CPL files.</p>
+              <div class="card-chips"><span class="chip">Eagle/Fusion</span><span class="chip">JLCPCB</span><span class="chip">BOM / CPL</span></div>
             </div>
-            <p class="card-desc">Designed and fabricated a PCB with defined test patterns, going end-to-end from schematic to physical board via JLCPCB with full BOM and CPL files.</p>
-            <div class="card-chips"><span class="chip">Eagle/Fusion</span><span class="chip">JLCPCB</span><span class="chip">BOM / CPL</span></div>
           </div>
 
         </div>
@@ -732,19 +678,6 @@
       transitionEl.classList.remove('active');
     });
 
-    // Dark mode toggle
-    const toggle = document.getElementById('theme-toggle');
-    function setTheme(dark) {
-      document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
-      localStorage.setItem('theme', dark ? 'dark' : 'light');
-    }
-    toggle.addEventListener('click', () => {
-      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-      setTheme(!isDark);
-    });
-    // Load saved preference, default to light
-    const saved = localStorage.getItem('theme');
-    setTheme(saved === 'dark');
   </script>
 </body>
 </html>
