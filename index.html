@@ -4,6 +4,18 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Joshua Taylor — ECE @ CMU</title>
+  <meta name="description" content="Joshua Taylor — ECE student at CMU building hardware accelerators, FPGAs, and embedded systems." />
+  <!-- Open Graph / link preview -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://joshuataylor.xyz" />
+  <meta property="og:title" content="Joshua Taylor — ECE @ CMU" />
+  <meta property="og:description" content="Hardware/software engineer building silicon, FPGAs, and embedded systems. ECE @ CMU 2028." />
+  <meta property="og:image" content="https://joshuataylor.xyz/Chip3D.png" />
+  <!-- Twitter card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Joshua Taylor — ECE @ CMU" />
+  <meta name="twitter:description" content="Hardware/software engineer building silicon, FPGAs, and embedded systems. ECE @ CMU 2028." />
+  <meta name="twitter:image" content="https://joshuataylor.xyz/Chip3D.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -291,6 +303,18 @@
     .card-tag { font-family: var(--font-mono); font-size: 10px; color: var(--purple-dark); background: var(--accent-bg2); border: 0.5px solid var(--accent-border); padding: 2px 8px; border-radius: 2px; }
     .card-arrow { font-size: 14px; color: var(--text3); transition: transform 0.3s ease, color 0.3s ease; }
     .project-card:hover .card-arrow { transform: translate(3px, -3px); color: var(--purple-mid); }
+    .card-img {
+      display: block;
+      width: calc(100% + 3.2rem);
+      margin-left: -1.6rem;
+      margin-right: -1.6rem;
+      margin-top: -1.4rem;
+      height: 200px;
+      object-fit: cover;
+      border-bottom: 0.5px solid var(--border);
+      margin-bottom: 0.5rem;
+      transition: border-color 1s ease;
+    }
     .card-desc { font-size: 13px; color: var(--text2); line-height: 1.65; }
     .card-chips { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 0.25rem; }
     .chip { font-family: var(--font-mono); font-size: 10px; color: var(--text2); background: var(--bg3); padding: 2px 8px; border-radius: 2px; }
@@ -494,6 +518,7 @@
         <div class="projects-list">
 
           <a class="project-card" href="systolic-mac.html">
+            <img class="card-img" src="Chip3D.png" alt="4×4 Systolic Matrix MAC chip render" />
             <div class="card-top">
               <h3 class="card-title">4×4 Systolic Matrix MAC</h3>
               <div class="card-right"><span class="card-tag">SILICON / RTL</span><span class="card-arrow">&#8599;</span></div>
@@ -506,6 +531,7 @@
           </a>
 
           <a class="project-card" href="aim-assist.html">
+            <img class="card-img" src="autoreflex.png" alt="AutoReflex aim assist system demo" />
             <div class="card-top">
               <h3 class="card-title">AI-Powered Aim Assist System</h3>
               <div class="card-right"><span class="card-tag">HARDWARE</span><span class="card-arrow">&#8599;</span></div>
