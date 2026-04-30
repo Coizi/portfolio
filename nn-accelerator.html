@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FPGA Neural Network Accelerator — Joshua Taylor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #fafaf8; --bg2: #f3f2ee; --bg3: #eceae4;
+      --border: #e0ddd6; --border2: #ccc9c0;
+      --text: #1a1916; --text2: #6b6860; --text3: #a8a59e;
+      --purple-dark: #4b30a8; --purple-mid: #6c4fd4; --purple-light: #9b82e8;
+      --accent-bg: #f0ecfd; --accent-bg2: #e4dcfb; --accent-border: #c4b5f4;
+      --font-sans: 'Syne', sans-serif; --font-mono: 'DM Mono', monospace;
+      --max-w: 820px;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: var(--font-sans); font-size: 16px; min-height: 100vh; -webkit-font-smoothing: antialiased; }
+    .bg-orbs { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+    .orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.28; }
+    .orb-1 { width: 600px; height: 600px; top: -150px; left: -150px; background: radial-gradient(circle, #c4b5f4, transparent); }
+    .orb-2 { width: 450px; height: 450px; top: 300px; right: -100px; background: radial-gradient(circle, #9b82e8, transparent); }
+    .orb-3 { width: 400px; height: 400px; bottom: 0; left: 30%; background: radial-gradient(circle, #ddd6fe, transparent); }
+    .page { position: relative; z-index: 1; }
+    .container { max-width: var(--max-w); margin: 0 auto; padding: 0 2rem; }
+    .back { display: inline-flex; align-items: center; gap: 0.4rem; font-family: var(--font-mono); font-size: 12px; color: var(--text3); text-decoration: none; padding: 2rem 0 0; transition: color 0.15s; }
+    .back:hover { color: var(--purple-mid); }
+    .project-header { padding: 2rem 0 1.5rem; }
+    .project-tag { font-family: var(--font-mono); font-size: 10px; color: var(--purple-dark); background: var(--accent-bg2); border: 0.5px solid var(--accent-border); padding: 2px 10px; border-radius: 2px; display: inline-block; margin-bottom: 1rem; }
+    .project-title { font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; line-height: 1.1; letter-spacing: -0.03em; color: var(--text); }
+    .project-sub { margin-top: 1rem; font-size: 15px; color: var(--text2); line-height: 1.75; max-width: 600px; }
+    .project-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 1.25rem; }
+    .chip { font-family: var(--font-mono); font-size: 10px; color: var(--text2); background: var(--bg3); padding: 3px 10px; border-radius: 2px; }
+    .chip-accent { font-family: var(--font-mono); font-size: 10px; color: var(--purple-dark); background: var(--accent-bg2); border: 0.5px solid var(--accent-border); padding: 3px 10px; border-radius: 2px; }
+    .divider { border: none; border-top: 0.5px solid var(--border); margin: 0; }
+    .section { padding: 2.5rem 0; }
+    .section-label { font-family: var(--font-mono); font-size: 11px; color: #b8a8f0; letter-spacing: 0.12em; margin-bottom: 1.5rem; }
+    .prose { font-size: 14px; color: var(--text2); line-height: 1.8; }
+    .prose p { margin-bottom: 1rem; }
+    .prose p:last-child { margin-bottom: 0; }
+    .prose strong { color: var(--text); font-weight: 600; }
+    .prose ul { padding-left: 1.25rem; margin-bottom: 1rem; }
+    .prose li { margin-bottom: 0.4rem; }
+    .prose code { font-family: var(--font-mono); font-size: 12px; background: var(--bg3); border: 0.5px solid var(--border); padding: 1px 5px; border-radius: 3px; color: var(--purple-dark); }
+    .table-wrap { border: 0.5px solid var(--border); border-radius: 8px; overflow: hidden; margin: 0.5rem 0; }
+    .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .data-table th { font-family: var(--font-mono); font-size: 10px; color: var(--text3); letter-spacing: 0.08em; text-align: left; padding: 6px 12px; border-bottom: 0.5px solid var(--border); background: var(--bg2); }
+    .data-table td { padding: 9px 12px; border-bottom: 0.5px solid var(--border); color: var(--text2); font-size: 13px; vertical-align: top; line-height: 1.5; }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table td:first-child { font-family: var(--font-mono); font-size: 12px; color: var(--text); }
+    .data-table td code { font-family: var(--font-mono); font-size: 11px; background: var(--bg3); border: 0.5px solid var(--border); padding: 1px 5px; border-radius: 3px; color: var(--purple-dark); }
+    .links-row { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    .project-link { font-family: var(--font-mono); font-size: 12px; color: var(--purple-dark); border: 0.5px solid var(--accent-border); background: var(--accent-bg); padding: 7px 16px; border-radius: 2px; text-decoration: none; transition: background 0.15s; }
+    .project-link:hover { background: var(--accent-bg2); }
+    .bottom-space { height: 5rem; }
+    .page-transition { position: fixed; inset: 0; z-index: 9999; background: var(--bg); opacity: 0; pointer-events: none; transition: opacity 0.35s ease; }
+    .page-transition.active { opacity: 1; pointer-events: all; }
+    @media (max-width: 768px) { .orb { opacity: 0.08; } }
+
+    /* ── Demo ── */
+    .demo-wrap {
+      background: var(--bg2);
+      border: 0.5px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2.5rem;
+      align-items: flex-start;
+    }
+    .canvas-side { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; }
+    #digit-canvas {
+      border: 0.5px solid var(--border2);
+      border-radius: 6px;
+      cursor: crosshair;
+      image-rendering: pixelated;
+      display: block;
+    }
+    #digit-canvas.disabled { opacity: 0.4; pointer-events: none; }
+    .canvas-btns { display: flex; gap: 0.6rem; }
+    .btn-clear {
+      font-family: var(--font-mono); font-size: 11px; color: var(--text3);
+      background: transparent; border: 0.5px solid var(--border2);
+      padding: 6px 14px; border-radius: 2px; cursor: pointer; transition: color 0.15s;
+    }
+    .btn-clear:hover { color: var(--text); }
+    .btn-run {
+      font-family: var(--font-mono); font-size: 11px; color: var(--purple-dark);
+      background: var(--accent-bg); border: 0.5px solid var(--accent-border);
+      padding: 6px 16px; border-radius: 2px; cursor: pointer; transition: background 0.15s;
+    }
+    .btn-run:hover { background: var(--accent-bg2); }
+    .btn-run:disabled { opacity: 0.4; cursor: not-allowed; }
+    .result-side { flex: 1; min-width: 220px; min-height: 200px; display: flex; flex-direction: column; justify-content: center; }
+    .status-row { display: flex; align-items: center; gap: 0.5rem; font-family: var(--font-mono); font-size: 11px; color: var(--text3); margin-bottom: 1.5rem; }
+    .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border2); flex-shrink: 0; }
+    .status-dot.online { background: #5a9e6f; }
+    .prediction-label { font-family: var(--font-mono); font-size: 10px; color: var(--text3); letter-spacing: 0.12em; margin-bottom: 0.4rem; }
+    .prediction-num { font-size: 5rem; font-weight: 700; line-height: 1; color: var(--text); letter-spacing: -0.04em; }
+    .prediction-latency { font-family: var(--font-mono); font-size: 11px; color: var(--text3); margin-top: 0.3rem; margin-bottom: 1.25rem; }
+    .logit-row { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 5px; }
+    .logit-idx { font-family: var(--font-mono); font-size: 10px; color: var(--text3); width: 10px; text-align: right; flex-shrink: 0; }
+    .logit-track { flex: 1; height: 5px; background: var(--bg3); border-radius: 99px; overflow: hidden; }
+    .logit-fill { height: 100%; border-radius: 99px; background: var(--border2); transition: width 0.3s ease; }
+    .logit-fill.predicted { background: var(--purple-mid); }
+    .logit-val { font-family: var(--font-mono); font-size: 10px; color: var(--text3); width: 28px; text-align: right; flex-shrink: 0; }
+    .demo-placeholder { font-family: var(--font-mono); font-size: 12px; color: var(--text3); text-align: center; }
+    .demo-error { font-family: var(--font-mono); font-size: 12px; color: #c0524a; text-align: center; }
+    .demo-loading { font-family: var(--font-mono); font-size: 12px; color: var(--text3); text-align: center; animation: pulse 1.4s ease-in-out infinite; }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+    .stack-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; }
+    .stack-card { background: var(--bg2); border: 0.5px solid var(--border); border-radius: 8px; padding: 1rem 1.25rem; }
+    .stack-card-label { font-family: var(--font-mono); font-size: 10px; color: var(--purple-light); letter-spacing: 0.1em; margin-bottom: 0.6rem; }
+    .stack-card-detail { font-size: 13px; color: var(--text2); line-height: 1.65; }
+  </style>
+</head>
+<body>
+  <div class="page-transition" id="page-transition"></div>
+  <div class="bg-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <div class="page">
+    <div class="container">
+      <a href="index.html" class="back">&#8592; back</a>
+
+      <header class="project-header">
+        <div class="project-tag">FPGA / RTL</div>
+        <h1 class="project-title">FPGA Neural Network Accelerator</h1>
+      </header>
+
+      <div class="project-chips">
+        <span class="chip">SystemVerilog</span>
+        <span class="chip">Python</span>
+        <span class="chip">UART</span>
+        <span class="chip">INT8</span>
+        <span class="chip">Basys3 Artix-7</span>
+        <span class="chip">Vivado</span>
+        <span class="chip-accent">Live demo</span>
+      </div>
+
+      <p class="project-sub" style="margin-top:1.5rem;">
+        A handwritten digit classifier running directly on an Artix-7 FPGA. Draw a digit below — 784 pixel values stream over UART at 115,200 baud, the hardware runs a quantized INT8 MLP through three layers (784→128→64→10), and the prediction comes back in roughly 78 ms.
+      </p>
+
+      <hr class="divider" style="margin-top:2.5rem;" />
+
+      <section class="section" id="demo">
+        <p class="section-label">live demo</p>
+        <div class="demo-wrap">
+
+          <div class="canvas-side">
+            <div class="status-row">
+              <span class="status-dot" id="status-dot"></span>
+              <span id="status-text">checking…</span>
+            </div>
+            <canvas id="digit-canvas" width="280" height="280"></canvas>
+            <div class="canvas-btns">
+              <button class="btn-clear" id="btn-clear">Clear</button>
+              <button class="btn-run" id="btn-run" disabled>Run on FPGA &#8599;</button>
+            </div>
+          </div>
+
+          <div class="result-side" id="result-side">
+            <p class="demo-placeholder" id="result-placeholder">Result will appear here</p>
+          </div>
+
+        </div>
+      </section>
+
+      <hr class="divider" />
+
+      <section class="section" id="how-it-works">
+        <p class="section-label">how it works</p>
+        <div class="stack-grid">
+          <div class="stack-card">
+            <p class="stack-card-label">BROWSER</p>
+            <p class="stack-card-detail">28×28 canvas captures pixel values 0–127, MNIST-style centered and scaled before sending</p>
+          </div>
+          <div class="stack-card">
+            <p class="stack-card-label">API PROXY</p>
+            <p class="stack-card-detail">Vercel serverless function forwards the 784 pixel values to the FastAPI bridge</p>
+          </div>
+          <div class="stack-card">
+            <p class="stack-card-label">UART 115200</p>
+            <p class="stack-card-detail">784 raw bytes sent to the Basys3 over serial; 13-byte response returned</p>
+          </div>
+          <div class="stack-card">
+            <p class="stack-card-label">INT8 MLP</p>
+            <p class="stack-card-detail">784→128→64→10 network in SystemVerilog, per-layer right-shift quantization, argmax output</p>
+          </div>
+        </div>
+      </section>
+
+      <hr class="divider" />
+
+      <section class="section" id="architecture">
+        <p class="section-label">architecture</p>
+        <div class="prose">
+          <p>Weights are stored in three <strong>BRAMs</strong> on the Artix-7 (34.5 BRAM36 total), keeping the LUT count low (~4,400 LUTs). Each layer uses a <strong>MAC unit</strong> with a 24-bit accumulator and DSP inference, followed by a ReLU and a per-layer right-shift to stay in INT8 range.</p>
+          <p>The host sends 784 raw bytes over UART at 115,200 baud. The FPGA accumulates them into an input buffer, fires the inference FSM on the final byte, and sends back a 13-byte packet: <code>0xBB</code> + predicted class (1 byte) + 10 signed logit bytes + <code>0x66</code>.</p>
+          <p>The Python bridge on the host deserializes the packet, computes the argmax for verification, and returns JSON to the caller. Round-trip latency including UART is ~78 ms.</p>
+        </div>
+      </section>
+
+      <hr class="divider" />
+
+      <section class="section" id="results">
+        <p class="section-label">results</p>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Metric</th><th>Value</th></tr></thead>
+            <tbody>
+              <tr><td>MNIST test accuracy</td><td>10 / 10 spot-checked digits correct</td></tr>
+              <tr><td>Round-trip latency</td><td>~78 ms (UART + inference + bridge)</td></tr>
+              <tr><td>BRAM usage</td><td>34.5 BRAM36 (weights)</td></tr>
+              <tr><td>LUT usage</td><td>~4,400 LUTs</td></tr>
+              <tr><td>Clock</td><td>100 MHz (Artix-7 XC7A35T)</td></tr>
+              <tr><td>Weight precision</td><td>INT8, 24-bit accumulator</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <hr class="divider" />
+
+      <section class="section" id="links">
+        <p class="section-label">links</p>
+        <div class="links-row">
+          <a href="https://github.com/Coizi/live-nn-acc" target="_blank" class="project-link">GitHub &#8599;</a>
+        </div>
+      </section>
+
+    </div>
+    <div class="bottom-space"></div>
+  </div>
+
+  <script>
+    const GRID = 28, CELL = 10;
+    const canvas = document.getElementById('digit-canvas');
+    const ctx = canvas.getContext('2d');
+    const btnRun = document.getElementById('btn-run');
+    const btnClear = document.getElementById('btn-clear');
+    const statusDot = document.getElementById('status-dot');
+    const statusText = document.getElementById('status-text');
+    const resultSide = document.getElementById('result-side');
+
+    let grid = new Array(GRID * GRID).fill(0);
+    let drawing = false;
+    let fpgaOnline = false;
+
+    // Init canvas white
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, GRID * CELL, GRID * CELL);
+
+    function getCell(e) {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      return {
+        x: Math.floor((e.clientX - rect.left) * scaleX / CELL),
+        y: Math.floor((e.clientY - rect.top)  * scaleY / CELL),
+      };
+    }
+
+    function paint(x, y) {
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+          const nx = x + dx, ny = y + dy;
+          if (nx < 0 || ny < 0 || nx >= GRID || ny >= GRID) continue;
+          const strength = (dx === 0 && dy === 0) ? 127 : 60;
+          const idx = ny * GRID + nx;
+          grid[idx] = Math.min(127, grid[idx] + strength);
+          const v = 255 - Math.round((grid[idx] / 127) * 255);
+          ctx.fillStyle = `rgb(${v},${v},${v})`;
+          ctx.fillRect(nx * CELL, ny * CELL, CELL, CELL);
+        }
+      }
+    }
+
+    canvas.addEventListener('mousedown', e => { drawing = true; const c = getCell(e); paint(c.x, c.y); });
+    canvas.addEventListener('mousemove', e => { if (drawing) { const c = getCell(e); paint(c.x, c.y); } });
+    canvas.addEventListener('mouseup',   () => drawing = false);
+    canvas.addEventListener('mouseleave',() => drawing = false);
+
+    // Touch support
+    canvas.addEventListener('touchstart', e => { e.preventDefault(); drawing = true; const t = e.touches[0]; const c = getCell(t); paint(c.x, c.y); }, { passive: false });
+    canvas.addEventListener('touchmove',  e => { e.preventDefault(); if (drawing) { const t = e.touches[0]; const c = getCell(t); paint(c.x, c.y); } }, { passive: false });
+    canvas.addEventListener('touchend',   () => drawing = false);
+
+    btnClear.addEventListener('click', () => {
+      grid.fill(0);
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, GRID * CELL, GRID * CELL);
+      resultSide.innerHTML = '<p class="demo-placeholder">Result will appear here</p>';
+    });
+
+    // MNIST preprocessing: center and scale to 20×20 within 28×28
+    function preprocess(raw) {
+      let minX = GRID, maxX = -1, minY = GRID, maxY = -1;
+      for (let y = 0; y < GRID; y++) {
+        for (let x = 0; x < GRID; x++) {
+          if (raw[y * GRID + x] > 0) {
+            if (x < minX) minX = x; if (x > maxX) maxX = x;
+            if (y < minY) minY = y; if (y > maxY) maxY = y;
+          }
+        }
+      }
+      if (maxX < 0) return raw;
+      const srcW = maxX - minX + 1, srcH = maxY - minY + 1;
+      const scale = 20 / Math.max(srcW, srcH);
+      const dstW = Math.round(srcW * scale), dstH = Math.round(srcH * scale);
+      const offX = Math.round((GRID - dstW) / 2), offY = Math.round((GRID - dstH) / 2);
+      const out = new Array(GRID * GRID).fill(0);
+      for (let dy = 0; dy < dstH; dy++) {
+        for (let dx = 0; dx < dstW; dx++) {
+          const sx = dx / scale + minX, sy = dy / scale + minY;
+          const x0 = Math.floor(sx), y0 = Math.floor(sy);
+          const x1 = Math.min(x0 + 1, GRID - 1), y1 = Math.min(y0 + 1, GRID - 1);
+          const fx = sx - x0, fy = sy - y0;
+          const v = raw[y0*GRID+x0]*(1-fx)*(1-fy) + raw[y0*GRID+x1]*fx*(1-fy)
+                  + raw[y1*GRID+x0]*(1-fx)*fy     + raw[y1*GRID+x1]*fx*fy;
+          const ox = offX + dx, oy = offY + dy;
+          if (ox >= 0 && ox < GRID && oy >= 0 && oy < GRID)
+            out[oy * GRID + ox] = Math.min(127, Math.round(v));
+        }
+      }
+      return out;
+    }
+
+    btnRun.addEventListener('click', async () => {
+      btnRun.disabled = true;
+      resultSide.innerHTML = '<p class="demo-loading">Running on FPGA…</p>';
+      try {
+        const pixels = preprocess([...grid]);
+        const res = await fetch('/api/infer', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ pixels }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error ?? `HTTP ${res.status}`);
+        renderResult(data);
+      } catch (err) {
+        resultSide.innerHTML = `<p class="demo-error">Error: ${err.message}</p>`;
+      } finally {
+        if (fpgaOnline) btnRun.disabled = false;
+      }
+    });
+
+    function renderResult(data) {
+      const { predicted, logits, latency_ms } = data;
+      const max = Math.max(...logits), min = Math.min(...logits);
+      const range = max - min || 1;
+      const bars = logits.map((v, i) => `
+        <div class="logit-row">
+          <span class="logit-idx">${i}</span>
+          <div class="logit-track"><div class="logit-fill${i === predicted ? ' predicted' : ''}" style="width:${((v-min)/range*100).toFixed(1)}%"></div></div>
+          <span class="logit-val">${v}</span>
+        </div>`).join('');
+      resultSide.innerHTML = `
+        <p class="prediction-label">PREDICTION</p>
+        <p class="prediction-num">${predicted}</p>
+        <p class="prediction-latency">${latency_ms.toFixed(0)} ms</p>
+        ${bars}`;
+    }
+
+    // FPGA health polling
+    async function checkHealth() {
+      try {
+        const r = await fetch('/api/fpga-health');
+        const d = await r.json();
+        fpgaOnline = d.fpga_connected === true;
+      } catch {
+        fpgaOnline = false;
+      }
+      statusDot.className = 'status-dot' + (fpgaOnline ? ' online' : '');
+      statusText.textContent = fpgaOnline ? 'FPGA online' : 'FPGA offline';
+      canvas.classList.toggle('disabled', !fpgaOnline);
+      btnRun.disabled = !fpgaOnline;
+    }
+    checkHealth();
+    setInterval(checkHealth, 5000);
+
+    // Page transitions
+    const transitionEl = document.getElementById('page-transition');
+    document.querySelectorAll('a[href]').forEach(a => {
+      const href = a.getAttribute('href');
+      if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('http')) return;
+      a.addEventListener('click', e => {
+        e.preventDefault();
+        transitionEl.classList.add('active');
+        setTimeout(() => { window.location.href = href; }, 350);
+      });
+    });
+    window.addEventListener('pageshow', () => transitionEl.classList.remove('active'));
+  </script>
+</body>
+</html>
