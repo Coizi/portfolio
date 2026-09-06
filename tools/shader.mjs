@@ -110,7 +110,7 @@ export const SITE_PALETTE = {
   colA: rgba("#c4b5f4"),
   colB: rgba("#9b82e8"),
   colC: rgba("#ddd6fe"),
-  intensity: 0.52,
+  intensity: 0.34,
   grain: 0.012,
   // scale 0.68: tighter than the OG presets, so the three blobs stay as
   // readable as the .orb divs they replace instead of blurring into one wash.
@@ -124,7 +124,7 @@ export const SITE_PALETTE_DARK = {
   colA: rgba("#6c4fd4"),
   colB: rgba("#9b82e8"),
   colC: rgba("#4b30a8"),
-  intensity: 0.38,
+  intensity: 0.26,
   grain: 0.010,
   motion: [7.0, 0.06, 0.68, 0.0],
   grid: [0.0, 0.0, 0.0, 0.0],
