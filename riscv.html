@@ -3,126 +3,380 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>RISC-V Processor — Joshua Taylor</title>
-  <meta name="description" content="8-bit RISC-V processor implemented in Verilog on a Basys3 FPGA — instruction decoder, testbench, and SystemVerilog FSM design." />
+  <title>5-Stage RV32I Pipelined CPU — Joshua Taylor</title>
+  <meta name="description" content="A classic five-stage (IF/ID/EX/MEM/WB) RV32I processor in SystemVerilog for the Basys3 Artix-7, with forwarding, load-use stalls and branch flushes verified by 163,090 checks across 7 constrained-random testbenches." />
   <!-- Open Graph / link preview -->
   <meta property="og:type" content="article" />
   <meta property="og:url" content="https://joshuataylor.xyz/riscv.html" />
-  <meta property="og:title" content="RISC-V Processor — Joshua Taylor" />
-  <meta property="og:description" content="8-bit RISC-V processor implemented in Verilog on a Basys3 FPGA — instruction decoder, testbench, and SystemVerilog FSM design." />
+  <meta property="og:title" content="5-Stage RV32I Pipelined CPU — Joshua Taylor" />
+  <meta property="og:description" content="A classic five-stage (IF/ID/EX/MEM/WB) RV32I processor in SystemVerilog for the Basys3 Artix-7, with forwarding, load-use stalls and branch flushes verified by 163,090 checks across 7 constrained-random testbenches." />
   <meta property="og:image" content="https://joshuataylor.xyz/og/og-riscv.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <!-- Twitter card -->
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="RISC-V Processor — Joshua Taylor" />
-  <meta name="twitter:description" content="8-bit RISC-V processor implemented in Verilog on a Basys3 FPGA — instruction decoder, testbench, and SystemVerilog FSM design." />
+  <meta name="twitter:title" content="5-Stage RV32I Pipelined CPU — Joshua Taylor" />
+  <meta name="twitter:description" content="A classic five-stage RV32I processor in SystemVerilog for the Basys3 Artix-7 — forwarding, load-use stalls and branch flushes, verified by 163,090 checks." />
   <meta name="twitter:image" content="https://joshuataylor.xyz/og/og-riscv.png" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="alternate icon" href="/favicon.png" />
+  <link rel="apple-touch-icon" href="/favicon.png" />
+  <script>
+    (function(){
+      var t = 'light';
+      try { t = localStorage.getItem('riscv-theme') || 'light'; } catch(e) {}
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.2/anime.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── Shared tokens (theme-independent) ── */
     :root {
+      --font-sans: 'Syne', sans-serif; --font-mono: 'DM Mono', monospace;
+      --max-w: 860px;
+    }
+    /* ── Theme: light (default) ──
+       Light owns bare :root so it is what you get with no data-theme at all.
+       The dark block must stay AFTER this one: [data-theme="dark"] and :root
+       have equal specificity, so source order is what lets dark win. */
+    :root, [data-theme="light"] {
       --bg: #fafaf8; --bg2: #f3f2ee; --bg3: #eceae4;
       --border: #e0ddd6; --border2: #ccc9c0;
       --text: #1a1916; --text2: #6b6860; --text3: #a8a59e;
       --purple-dark: #4b30a8; --purple-mid: #6c4fd4; --purple-light: #9b82e8;
       --accent-bg: #f0ecfd; --accent-bg2: #e4dcfb; --accent-border: #c4b5f4;
-      --font-sans: 'Syne', sans-serif; --font-mono: 'DM Mono', monospace;
-      --max-w: 820px;
+      --ok-text: #166534; --ok-bg: #dcfce7; --ok-border: #86efac;
+      --warn-text: #854d0e; --warn-bg: #fef9c3; --warn-border: #fde047;
+      --err-text: #9f1239; --err-bg: #ffe4e6; --err-border: #fda4af;
+      --grid-line: rgba(75,48,168,0.045);
+      --glow: none;
+      --glow-strong: 0 8px 30px rgba(75,48,168,0.10);
+      --orb-opacity: 0.28;
+      --card-bg: #fafaf8;
+      color-scheme: light;
     }
+    /* ── Theme: dark ── */
+    [data-theme="dark"] {
+      --bg: #0a0a11; --bg2: #101019; --bg3: #171725;
+      --border: #22223a; --border2: #32324e;
+      --text: #eae8f4; --text2: #a29fb8; --text3: #5f5c7a;
+      --purple-dark: #c0aef7; --purple-mid: #9b82e8; --purple-light: #6c4fd4;
+      --accent-bg: rgba(108,79,212,0.10); --accent-bg2: rgba(108,79,212,0.20); --accent-border: rgba(155,130,232,0.38);
+      --ok-text: #4ade80; --ok-bg: rgba(34,197,94,0.10); --ok-border: rgba(74,222,128,0.30);
+      --warn-text: #fbbf24; --warn-bg: rgba(251,191,36,0.10); --warn-border: rgba(251,191,36,0.30);
+      --err-text: #fb7185; --err-bg: rgba(244,63,94,0.10); --err-border: rgba(251,113,133,0.30);
+      --grid-line: rgba(155,130,232,0.055);
+      --glow: 0 0 28px rgba(124,92,232,0.18);
+      --glow-strong: 0 0 42px rgba(124,92,232,0.32);
+      --orb-opacity: 0.13;
+      --card-bg: #0e0e17;
+      color-scheme: dark;
+    }
+
     html { scroll-behavior: smooth; }
-    body { background: var(--bg); color: var(--text); font-family: var(--font-sans); font-size: 16px; min-height: 100vh; -webkit-font-smoothing: antialiased; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: var(--font-sans); font-size: 16px; min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+      transition: background 0.35s, color 0.35s;
+    }
+
     .bg-orbs { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
-    .orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.28; }
-    .orb-1 { width: 600px; height: 600px; top: -150px; left: -150px; background: radial-gradient(circle, #c4b5f4, transparent); }
+    .orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: var(--orb-opacity); transition: opacity 0.35s; }
+    .orb-1 { width: 600px; height: 600px; top: -150px; left: -150px; background: radial-gradient(circle, #6c4fd4, transparent); }
     .orb-2 { width: 450px; height: 450px; top: 300px; right: -100px; background: radial-gradient(circle, #9b82e8, transparent); }
-    .orb-3 { width: 400px; height: 400px; bottom: 0; left: 30%; background: radial-gradient(circle, #ddd6fe, transparent); }
+    .orb-3 { width: 400px; height: 400px; bottom: 0; left: 30%; background: radial-gradient(circle, #4b30a8, transparent); }
 
     /* Shader background (assets/bg.js, same WGSL as the OG images in og/).
-       The .bg-orbs above stay as the fallback: they remain visible unless the
-       shader actually reaches its first frame and sets body.gpu-bg. */
+       The .bg-orbs above stay as the fallback. */
     #bg-canvas {
-      position: fixed;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      display: block;
-      z-index: 0;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 1.2s ease;
+      position: fixed; inset: 0; width: 100%; height: 100%;
+      display: block; z-index: 0; pointer-events: none;
+      opacity: 0; transition: opacity 1.2s ease;
     }
     .bg-orbs { transition: opacity 1.2s ease; }
     body.gpu-bg #bg-canvas { opacity: 1; }
     body.gpu-bg .bg-orbs { opacity: 0; }
+
     .page { position: relative; z-index: 1; }
     .container { max-width: var(--max-w); margin: 0 auto; padding: 0 2rem; }
-    .back { display: inline-flex; align-items: center; gap: 0.4rem; font-family: var(--font-mono); font-size: 12px; color: var(--text3); text-decoration: none; padding: 2rem 0 0; transition: color 0.15s; }
+
+    /* ── Top bar ── */
+    .topbar { display: flex; align-items: center; justify-content: space-between; padding-top: 2rem; }
+    .back { display: inline-flex; align-items: center; gap: 0.4rem; font-family: var(--font-mono); font-size: 12px; color: var(--text3); text-decoration: none; transition: color 0.15s; }
     .back:hover { color: var(--purple-mid); }
-    .project-header { padding: 2rem 0 1.5rem; }
-    .project-tag { font-family: var(--font-mono); font-size: 10px; color: var(--purple-dark); background: var(--accent-bg2); border: 0.5px solid var(--accent-border); padding: 2px 10px; border-radius: 2px; display: inline-block; margin-bottom: 1rem; }
-    .project-title { font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; line-height: 1.1; letter-spacing: -0.03em; color: var(--text); }
-    .project-sub { margin-top: 1rem; font-size: 15px; color: var(--text2); line-height: 1.75; max-width: 600px; }
-    .project-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 1.25rem; }
-    .chip { font-family: var(--font-mono); font-size: 10px; color: var(--text2); background: var(--bg3); padding: 3px 10px; border-radius: 2px; }
+    .theme-toggle {
+      display: inline-flex; align-items: center; gap: 7px;
+      font-family: var(--font-mono); font-size: 11px; color: var(--text2);
+      background: var(--bg2); border: 0.5px solid var(--border);
+      border-radius: 999px; padding: 6px 14px; cursor: pointer;
+      transition: border-color 0.2s, color 0.2s, box-shadow 0.2s;
+    }
+    .theme-toggle:hover { border-color: var(--accent-border); color: var(--purple-dark); box-shadow: var(--glow); }
+    .theme-toggle svg { width: 13px; height: 13px; }
+
+    /* ── Hero ── */
+    .project-header { padding: 3rem 0 2rem; }
+    .project-tag {
+      font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.22em;
+      color: var(--purple-dark); background: var(--accent-bg2);
+      border: 0.5px solid var(--accent-border); padding: 3px 12px; border-radius: 2px;
+      display: inline-block; margin-bottom: 1.25rem;
+    }
+    .project-title { font-size: clamp(2.2rem, 6vw, 3.4rem); font-weight: 800; line-height: 1.08; letter-spacing: -0.03em; color: var(--text); }
+    .project-title .w { display: inline-block; overflow: hidden; vertical-align: bottom; }
+    .project-title .w > span { display: inline-block; }
+    .project-sub { margin-top: 1.25rem; font-size: 15px; color: var(--text2); line-height: 1.75; max-width: 620px; }
+    .project-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 1.5rem; }
+    .chip { font-family: var(--font-mono); font-size: 10px; color: var(--text2); background: var(--bg3); border: 0.5px solid var(--border); padding: 3px 10px; border-radius: 2px; }
     .chip-accent { font-family: var(--font-mono); font-size: 10px; color: var(--purple-dark); background: var(--accent-bg2); border: 0.5px solid var(--accent-border); padding: 3px 10px; border-radius: 2px; }
+    .chip-green { font-family: var(--font-mono); font-size: 10px; color: var(--ok-text); background: var(--ok-bg); border: 0.5px solid var(--ok-border); padding: 3px 10px; border-radius: 2px; }
+
     .divider { border: none; border-top: 0.5px solid var(--border); margin: 0; }
-    .section { padding: 2.5rem 0; }
-    .section-label { font-family: var(--font-mono); font-size: 11px; color: #b8a8f0; letter-spacing: 0.12em; margin-bottom: 1.5rem; }
+    .section { padding: 2.75rem 0; }
+    .section-label {
+      display: flex; align-items: center; gap: 12px;
+      font-family: var(--font-mono); font-size: 11px; color: var(--purple-mid);
+      letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 1.5rem;
+    }
+    .section-label::before { content: '//'; color: var(--text3); letter-spacing: 0; }
+    .section-label::after { content: ''; flex: 1; height: 0.5px; background: var(--border); }
+
+    .links-row { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    .project-link {
+      font-family: var(--font-mono); font-size: 12px; color: var(--purple-dark);
+      border: 0.5px solid var(--accent-border); background: var(--accent-bg);
+      padding: 7px 16px; border-radius: 2px; text-decoration: none;
+      transition: background 0.15s, box-shadow 0.2s;
+    }
+    .project-link:hover { background: var(--accent-bg2); box-shadow: var(--glow); }
+    .bottom-space { height: 5rem; }
+
+    /* ── Prose ── */
     .prose { font-size: 14px; color: var(--text2); line-height: 1.8; }
     .prose p { margin-bottom: 1rem; }
     .prose p:last-child { margin-bottom: 0; }
     .prose h3 { font-family: var(--font-sans); font-size: 15px; font-weight: 600; color: var(--text); margin: 1.75rem 0 0.6rem; }
+    .prose h3:first-child { margin-top: 0; }
     .prose strong { color: var(--text); font-weight: 600; }
     .prose ul { padding-left: 1.25rem; margin-bottom: 1rem; }
     .prose li { margin-bottom: 0.4rem; }
     .prose code { font-family: var(--font-mono); font-size: 12px; background: var(--bg3); border: 0.5px solid var(--border); padding: 1px 5px; border-radius: 3px; color: var(--purple-dark); }
-    .prose em { font-style: italic; }
-    .code-block { background: var(--bg2); border: 0.5px solid var(--border); border-radius: 8px; padding: 1.25rem; overflow-x: auto; margin: 1rem 0; }
-    .code-block pre { font-family: var(--font-mono); font-size: 11px; color: var(--text2); line-height: 1.65; white-space: pre; }
-    .table-wrap { border: 0.5px solid var(--border); border-radius: 8px; overflow: hidden; margin: 0.5rem 0; }
-    .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    .data-table th { font-family: var(--font-mono); font-size: 10px; color: var(--text3); letter-spacing: 0.08em; text-align: left; padding: 6px 12px; border-bottom: 0.5px solid var(--border); background: var(--bg2); }
-    .data-table td { padding: 9px 12px; border-bottom: 0.5px solid var(--border); color: var(--text2); font-size: 13px; vertical-align: top; line-height: 1.5; }
-    .data-table tr:last-child td { border-bottom: none; }
-    .data-table td:first-child { font-family: var(--font-mono); font-size: 12px; color: var(--text); }
-    .data-table td code { font-family: var(--font-mono); font-size: 11px; background: var(--bg3); border: 0.5px solid var(--border); padding: 1px 5px; border-radius: 3px; color: var(--purple-dark); }
-    .links-row { display: flex; gap: 0.75rem; flex-wrap: wrap; }
-    .project-link { font-family: var(--font-mono); font-size: 12px; color: var(--purple-dark); border: 0.5px solid var(--accent-border); background: var(--accent-bg); padding: 7px 16px; border-radius: 2px; text-decoration: none; transition: background 0.15s; }
-    .project-link:hover { background: var(--accent-bg2); }
-    .project-link.disabled { opacity: 0.45; cursor: not-allowed; pointer-events: none; }
 
-    /* Architecture diagram */
-    .arch-wrap { width: 100%; background: #f8f7f3; border: 0.5px solid var(--border); border-radius: 12px; overflow: hidden; position: relative; cursor: grab; user-select: none; aspect-ratio: 16/9; }
-    .arch-wrap:active { cursor: grabbing; }
-    .arch-hint { position: absolute; bottom: 12px; right: 14px; font-family: var(--font-mono); font-size: 10px; color: var(--text3); pointer-events: none; z-index: 10; }
-    .zoom-controls { position: absolute; top: 12px; right: 14px; display: flex; flex-direction: column; gap: 4px; z-index: 10; }
-    .zoom-btn { width: 28px; height: 28px; border-radius: 4px; border: 0.5px solid var(--border2); background: rgba(255,255,255,0.85); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; font-size: 15px; color: var(--text2); cursor: pointer; line-height: 1; transition: background 0.15s; }
-    .zoom-btn:hover { background: var(--accent-bg); color: var(--purple-mid); }
-    #arch-svg { width: 100%; height: 100%; transform-origin: 0 0; display: block; }
-    .a-tooltip { position: absolute; background: white; border: 0.5px solid var(--accent-border); border-radius: 8px; padding: 9px 13px; font-family: var(--font-mono); font-size: 11px; color: var(--text2); pointer-events: none; opacity: 0; transition: opacity 0.15s; z-index: 20; max-width: 230px; line-height: 1.65; box-shadow: 0 4px 20px rgba(108,79,212,0.12); }
-    .a-tooltip.visible { opacity: 1; }
-    .a-tooltip strong { color: var(--purple-dark); display: block; margin-bottom: 3px; font-size: 11px; }
-    .acomp { cursor: pointer; }
-    .bottom-space { height: 5rem; }
-
-    .page-transition {
-      position: fixed; inset: 0; z-index: 9999;
-      background: var(--bg);
-      opacity: 0; pointer-events: none;
-      transition: opacity 0.35s ease;
+    /* ── Code block ── */
+    .code-block { background: var(--bg2); border: 0.5px solid var(--border); border-radius: 10px; padding: 1.25rem; overflow-x: auto; margin: 1rem 0; box-shadow: var(--glow); }
+    .code-block pre { font-family: var(--font-mono); font-size: 11.5px; color: var(--text2); line-height: 1.65; white-space: pre; }
+    .code-block-title {
+      display: flex; align-items: center; gap: 8px;
+      font-family: var(--font-mono); font-size: 10px; color: var(--text3); letter-spacing: 0.08em;
+      padding: 0.6rem 1.25rem; border-bottom: 0.5px solid var(--border);
+      background: var(--bg3); border-radius: 10px 10px 0 0; margin: -1.25rem -1.25rem 1rem;
     }
-    .page-transition.active { opacity: 1; pointer-events: all; }
+    .code-dots { display: inline-flex; gap: 5px; }
+    .code-dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--border2); }
+    .code-dots i:first-child { background: rgba(155,130,232,0.6); }
 
-    @media (max-width: 768px) {
-      .orb { opacity: 0.08; }
+    /* ── Tables ── */
+    .data-table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 0.5rem 0; }
+    .data-table th { font-family: var(--font-mono); font-size: 10px; color: var(--text3); letter-spacing: 0.08em; text-align: left; padding: 6px 12px; border-bottom: 0.5px solid var(--border); background: var(--bg2); }
+    .data-table td { padding: 9px 12px; border-bottom: 0.5px solid var(--border); color: var(--text2); font-size: 13px; vertical-align: top; line-height: 1.5; transition: background 0.15s; }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tbody tr:hover td { background: var(--accent-bg); }
+    .data-table td:first-child { font-family: var(--font-mono); font-size: 12px; color: var(--text); }
+    .data-table td strong { color: var(--purple-dark); font-weight: 600; }
+    .data-table td.num { font-family: var(--font-mono); font-size: 12px; text-align: right; white-space: nowrap; }
+    .table-wrap { border: 0.5px solid var(--border); border-radius: 10px; overflow: hidden; margin: 0.5rem 0; background: var(--card-bg); overflow-x: auto; }
+
+    /* ── Module card grid ── */
+    .module-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
+      background: var(--border); border: 0.5px solid var(--border);
+      border-radius: 10px; overflow: hidden; margin-top: 1rem;
+    }
+    .module-card { background: var(--card-bg); padding: 1.5rem; position: relative; overflow: hidden; }
+    .module-card::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background: radial-gradient(220px circle at var(--mx, 50%) var(--my, 50%), var(--accent-bg2), transparent 65%);
+      opacity: 0; transition: opacity 0.3s;
+    }
+    .module-card:hover::before { opacity: 1; }
+    .module-card > * { position: relative; }
+    .module-card-icon {
+      width: 2rem; height: 2rem; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 1rem; font-size: 1rem;
+    }
+    .icon-purple { background: var(--accent-bg2); color: var(--purple-dark); }
+    .icon-green  { background: var(--ok-bg); color: var(--ok-text); }
+    .icon-amber  { background: var(--warn-bg); color: var(--warn-text); }
+    .module-card h3 { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 0.4rem; }
+    .module-card p  { font-family: var(--font-mono); font-size: 11px; color: var(--text2); line-height: 1.7; }
+    .module-card p code { font-size: 10px; }
+    .module-tag {
+      display: inline-block; font-family: var(--font-mono); font-size: 10px;
+      color: var(--purple-dark); background: var(--accent-bg);
+      border: 0.5px solid var(--accent-border);
+      padding: 2px 7px; border-radius: 2px; margin-top: 0.75rem;
+    }
+
+    .status-done { font-family: var(--font-mono); font-size: 10px; padding: 2px 8px; border-radius: 2px; background: var(--ok-bg); color: var(--ok-text); border: 0.5px solid var(--ok-border); white-space: nowrap; }
+    .status-todo { font-family: var(--font-mono); font-size: 10px; padding: 2px 8px; border-radius: 2px; background: var(--warn-bg); color: var(--warn-text); border: 0.5px solid var(--warn-border); white-space: nowrap; }
+
+    /* ── Spec grid ── */
+    .spec-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
+      background: var(--border); border: 0.5px solid var(--border);
+      border-radius: 10px; overflow: hidden; margin: 1rem 0;
+    }
+    .spec-cell { background: var(--card-bg); padding: 1.1rem 1.25rem; transition: background 0.2s; }
+    .spec-cell:hover { background: var(--accent-bg); }
+    .spec-label { font-family: var(--font-mono); font-size: 10px; color: var(--text3); letter-spacing: 0.08em; margin-bottom: 4px; }
+    .spec-value { font-size: 22px; font-weight: 700; color: var(--text); letter-spacing: -0.02em; }
+    .spec-value-mono { font-family: var(--font-mono); font-size: 13px; color: var(--purple-dark); font-weight: 500; padding-top: 5px; }
+    .spec-sub { font-family: var(--font-mono); font-size: 10px; color: var(--text3); margin-top: 2px; }
+
+    /* ── Pipeline ── */
+    .pipeline { display: flex; align-items: center; gap: 0; margin: 1rem 0; overflow-x: auto; padding: 4px 2px 8px; }
+    .pipe-stage {
+      flex-shrink: 0; background: var(--card-bg); border: 0.5px solid var(--border);
+      border-radius: 8px; padding: 12px 14px;
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      min-width: 108px; transition: border-color 0.35s, box-shadow 0.35s, transform 0.35s;
+    }
+    .pipe-stage.lit { border-color: var(--accent-border); box-shadow: var(--glow); transform: translateY(-2px); }
+    .pipe-stage-icon { font-family: var(--font-mono); font-size: 13px; font-weight: 500; color: var(--purple-dark); }
+    .pipe-stage-name { font-family: var(--font-mono); font-size: 10px; color: var(--text2); text-align: center; }
+    .pipe-arrow { font-family: var(--font-mono); font-size: 14px; color: var(--purple-light); padding: 0 4px; flex-shrink: 0; transition: color 0.35s; }
+    .pipe-arrow.lit { color: var(--purple-dark); }
+
+    /* ── Decision / limitation cards ── */
+    .bug-card {
+      background: var(--card-bg); border: 0.5px solid var(--border);
+      border-radius: 10px; padding: 1.25rem 1.5rem; margin: 0.75rem 0;
+      position: relative; overflow: hidden;
+    }
+    .bug-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--purple-mid); }
+    .bug-card.limit::before { background: var(--warn-text); }
+    .bug-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.6rem; flex-wrap: wrap; gap: 0.5rem; }
+    .bug-card-title { font-size: 13px; font-weight: 600; color: var(--text); }
+    .bug-card-body { font-family: var(--font-mono); font-size: 11px; color: var(--text2); line-height: 1.75; }
+    .bug-card-body strong { color: var(--text); font-weight: 500; }
+    .bug-card-body code { font-family: var(--font-mono); font-size: 10px; background: var(--bg3); border: 0.5px solid var(--border); padding: 1px 4px; border-radius: 3px; color: var(--purple-dark); }
+
+    /* ── Timeline ── */
+    .timeline { margin: 1rem 0; }
+    .tl-item { display: flex; gap: 1rem; padding-bottom: 1.5rem; position: relative; }
+    .tl-item:last-child { padding-bottom: 0; }
+    .tl-left { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; width: 20px; }
+    .tl-dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--accent-border); background: var(--bg); flex-shrink: 0; margin-top: 3px; }
+    .tl-dot.done { background: var(--ok-text); border-color: var(--ok-text); box-shadow: 0 0 10px rgba(74,222,128,0.35); }
+    .tl-line { width: 1px; background: var(--border2); flex: 1; margin-top: 4px; transform-origin: top; }
+    .tl-content { flex: 1; }
+    .tl-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+    .tl-body { font-family: var(--font-mono); font-size: 11px; color: var(--text2); line-height: 1.7; }
+
+    /* ── Pipeline trace simulator ── */
+    .sim-wrap {
+      background: var(--bg2); border: 0.5px solid var(--border);
+      border-radius: 14px; padding: 1.75rem; margin: 1.25rem 0;
+      box-shadow: var(--glow);
+    }
+    .sim-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 1.25rem; }
+    .sim-title { font-family: var(--font-mono); font-size: 10px; color: var(--text3); letter-spacing: 0.12em; text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
+    .sim-live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ok-text); box-shadow: 0 0 8px rgba(74,222,128,0.6); animation: pulse-dot 1.6s ease-in-out infinite; }
+    @keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+    .sim-controls { display: flex; gap: 6px; flex-wrap: wrap; }
+    .sim-btn {
+      font-family: var(--font-mono); font-size: 11px; color: var(--purple-dark);
+      background: var(--accent-bg); border: 0.5px solid var(--accent-border);
+      border-radius: 4px; padding: 6px 13px; cursor: pointer;
+      transition: background 0.15s, box-shadow 0.2s;
+    }
+    .sim-btn:hover { background: var(--accent-bg2); box-shadow: var(--glow); }
+    .sim-btn:disabled { opacity: 0.4; cursor: default; box-shadow: none; }
+    .sim-status { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 1rem; font-family: var(--font-mono); font-size: 11px; color: var(--text2); }
+    .sim-cycle b { color: var(--purple-dark); font-weight: 500; }
+    .sim-phase { font-size: 10px; padding: 2px 8px; border-radius: 2px; background: var(--bg3); border: 0.5px solid var(--border); color: var(--text3); }
+    .sim-phase.stall { color: var(--warn-text); background: var(--warn-bg); border-color: var(--warn-border); }
+    .sim-phase.flush { color: var(--err-text); background: var(--err-bg); border-color: var(--err-border); }
+    .sim-phase.fwd   { color: var(--purple-dark); background: var(--accent-bg2); border-color: var(--accent-border); }
+
+    .trace-scroll { overflow-x: auto; padding-bottom: 4px; }
+    .trace { border-collapse: separate; border-spacing: 3px; font-family: var(--font-mono); }
+    .trace th.cyc {
+      font-size: 9px; font-weight: 400; color: var(--text3);
+      text-align: center; width: 34px; padding-bottom: 2px;
+    }
+    .trace th.cyc.now { color: var(--purple-dark); }
+    .trace td.asm {
+      font-size: 10.5px; color: var(--text2); white-space: nowrap;
+      padding-right: 12px; text-align: left;
+    }
+    .trace tr.active td.asm { color: var(--text); }
+    .trace td.cell {
+      width: 34px; height: 22px; text-align: center; vertical-align: middle;
+      font-size: 9px; border-radius: 3px;
+      background: transparent; color: transparent;
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    }
+    .trace td.cell.on {
+      background: var(--bg3); border: 0.5px solid var(--border); color: var(--text2);
+    }
+    .trace td.cell.fwd {
+      background: var(--accent-bg2); border-color: var(--accent-border); color: var(--purple-dark);
+    }
+    .trace td.cell.stall {
+      background: var(--warn-bg); border-color: var(--warn-border); color: var(--warn-text);
+    }
+    .trace td.cell.flush {
+      background: var(--err-bg); border-color: var(--err-border); color: var(--err-text);
+    }
+    .trace td.cell.now { box-shadow: 0 0 0 1.5px var(--purple-mid); }
+    .trace td.cell.future { opacity: 0.18; }
+
+    .sim-legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 1rem; font-family: var(--font-mono); font-size: 10px; color: var(--text3); }
+    .sim-legend span { display: inline-flex; align-items: center; gap: 5px; }
+    .sim-legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; border: 0.5px solid var(--border); }
+    .lg-on { background: var(--bg3); }
+    .lg-fwd { background: var(--accent-bg2); border-color: var(--accent-border); }
+    .lg-stall { background: var(--warn-bg); border-color: var(--warn-border); }
+    .lg-flush { background: var(--err-bg); border-color: var(--err-border); }
+
+    .sim-note {
+      margin-top: 1rem; font-family: var(--font-mono); font-size: 11px;
+      color: var(--text2); line-height: 1.7; min-height: 3.4em;
+      background: var(--card-bg); border: 0.5px solid var(--border);
+      border-radius: 6px; padding: 10px 14px;
+    }
+    .sim-note b { color: var(--purple-dark); font-weight: 500; }
+    .sim-note code { font-size: 10px; color: var(--purple-mid); }
+
+    /* ── Scroll reveal (only when JS + anime present) ── */
+    html.anim .reveal { opacity: 0; }
+    html.anim [data-stagger] > * { opacity: 0; }
+
+    @media (max-width: 700px) {
+      .container { padding: 0 1.25rem; }
+      .module-grid { grid-template-columns: 1fr 1fr; }
+      .spec-grid { grid-template-columns: 1fr 1fr; }
+      .pipe-stage { min-width: 86px; padding: 10px; }
+      .sim-wrap { padding: 1.25rem 1rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .sim-live-dot { animation: none; }
+      html { scroll-behavior: auto; }
+      * { transition-duration: 0.01ms !important; }
     }
   </style>
 </head>
 <body>
-  <div class="page-transition" id="page-transition"></div>
+
   <div class="bg-orbs">
     <div class="orb orb-1"></div>
     <div class="orb orb-2"></div>
@@ -132,177 +386,101 @@
 
   <div class="page">
     <div class="container">
-      <a href="index.html" class="back">&#8592; back</a>
 
-      <header class="project-header">
-        <div class="project-tag">FPGA / RTL</div>
-        <h1 class="project-title">8-bit RISC-V Processor</h1>
-      </header>
-
-      <img src="rv32i-table.png" alt="RV32I instruction set table" style="width:100%;border-radius:8px;border:0.5px solid var(--border);display:block;" />
-
-      <div class="project-chips" style="margin-top:1rem;">
-        <span class="chip">SystemVerilog</span>
-        <span class="chip">RISC-V ISA</span>
-        <span class="chip">Basys3 FPGA</span>
-        <span class="chip">RTL Design</span>
-        <span class="chip">Vivado</span>
-        <span class="chip">Testbench</span>
+      <div class="topbar">
+        <a class="back" href="index.html">&larr; back</a>
+        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle color theme">
+          <span id="theme-toggle-icon"></span>
+          <span id="theme-toggle-text">dark mode</span>
+        </button>
       </div>
 
-      <p class="project-sub" style="margin-top:1.5rem;">A RISC-V instruction decoder implemented in SystemVerilog and synthesized on a Basys3 FPGA. Decodes all major instruction formats — R, I, S, B, U, and J-type — extracting register fields, immediates, and control signals from a 32-bit instruction word. Includes a complete testbench verifying ADD, ADDI, LW, SW, BEQ, LUI, and JAL.</p>
-
-      <hr class="divider" style="margin-top:2.5rem;" />
-
-      <section class="section" id="architecture">
-        <p class="section-label">datapath diagram</p>
-        <div class="arch-wrap" id="arch-wrap">
-          <div class="zoom-controls">
-            <button class="zoom-btn" id="zoom-in">+</button>
-            <button class="zoom-btn" id="zoom-out">−</button>
-            <button class="zoom-btn" id="zoom-reset" style="font-size:11px;">⌂</button>
-          </div>
-          <div class="arch-hint">scroll to zoom · drag to pan · hover for details</div>
-          <div class="a-tooltip" id="a-tooltip"></div>
-
-          <svg id="arch-svg" viewBox="0 0 960 540" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <pattern id="agrid" width="24" height="24" patternUnits="userSpaceOnUse">
-                <path d="M 24 0 L 0 0 0 24" fill="none" stroke="#e5e2d8" stroke-width="0.5"/>
-              </pattern>
-              <marker id="aarr"   markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0,0 L0,7 L7,3.5 z" fill="#8a7cc8"/></marker>
-              <marker id="aarr-g" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0,0 L0,7 L7,3.5 z" fill="#5a9e6f"/></marker>
-              <marker id="aarr-b" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0,0 L0,7 L7,3.5 z" fill="#4a7fb5"/></marker>
-              <marker id="aarr-o" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0,0 L0,7 L7,3.5 z" fill="#c47c30"/></marker>
-              <marker id="aarr-r" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0,0 L0,7 L7,3.5 z" fill="#c0524a"/></marker>
-            </defs>
-            <rect width="960" height="540" fill="url(#agrid)"/>
-
-            <!-- 32-bit instruction input -->
-            <line x1="40" y1="270" x2="120" y2="270" stroke="#c47c30" stroke-width="2" marker-end="url(#aarr-o)"/>
-            <text x="44" y="262" font-family="DM Mono,monospace" font-size="9" fill="#c47c30">instr[31:0]</text>
-
-            <!-- Decoder box -->
-            <g class="acomp" data-tip="riscv_decoder" data-desc="Combinational decode of a 32-bit RISC-V instruction. Extracts rd, rs1, rs2, funct3, funct7 directly from fixed bit positions. Performs sign-extended immediate reconstruction for each format. Outputs five control signals: reg_write, mem_read, mem_write, branch, alu_src.">
-              <rect x="120" y="180" width="180" height="180" rx="8" fill="#f0ecfd" stroke="#c4b5f4" stroke-width="1.5"/>
-              <text x="210" y="215" text-anchor="middle" font-family="Syne,sans-serif" font-size="13" font-weight="700" fill="#6c4fd4">Decoder</text>
-              <text x="210" y="233" text-anchor="middle" font-family="DM Mono,monospace" font-size="8.5" fill="#9b82e8">riscv_decoder</text>
-              <line x1="120" y1="248" x2="300" y2="248" stroke="#c4b5f4" stroke-width="0.7" stroke-dasharray="4,3"/>
-              <text x="210" y="266" text-anchor="middle" font-family="DM Mono,monospace" font-size="8" fill="#9b82e8">instr[6:0]  opcode</text>
-              <text x="210" y="282" text-anchor="middle" font-family="DM Mono,monospace" font-size="8" fill="#9b82e8">instr[11:7]  rd</text>
-              <text x="210" y="298" text-anchor="middle" font-family="DM Mono,monospace" font-size="8" fill="#9b82e8">instr[14:12] funct3</text>
-              <text x="210" y="314" text-anchor="middle" font-family="DM Mono,monospace" font-size="8" fill="#9b82e8">instr[19:15] rs1</text>
-              <text x="210" y="330" text-anchor="middle" font-family="DM Mono,monospace" font-size="8" fill="#9b82e8">instr[24:20] rs2</text>
-              <text x="210" y="346" text-anchor="middle" font-family="DM Mono,monospace" font-size="8" fill="#9b82e8">instr[31:25] funct7</text>
-            </g>
-
-            <!-- Register file outputs: rd, rs1, rs2 -->
-            <line x1="300" y1="220" x2="420" y2="220" stroke="#5a9e6f" stroke-width="1.8" marker-end="url(#aarr-g)"/>
-            <text x="308" y="213" font-family="DM Mono,monospace" font-size="8" fill="#5a9e6f">rd [4:0]</text>
-            <line x1="300" y1="240" x2="420" y2="240" stroke="#5a9e6f" stroke-width="1.8" marker-end="url(#aarr-g)"/>
-            <text x="308" y="233" font-family="DM Mono,monospace" font-size="8" fill="#5a9e6f">rs1 [4:0]</text>
-            <line x1="300" y1="260" x2="420" y2="260" stroke="#5a9e6f" stroke-width="1.8" marker-end="url(#aarr-g)"/>
-            <text x="308" y="253" font-family="DM Mono,monospace" font-size="8" fill="#5a9e6f">rs2 [4:0]</text>
-            <line x1="300" y1="285" x2="420" y2="285" stroke="#5a9e6f" stroke-width="1.8" marker-end="url(#aarr-g)"/>
-            <text x="308" y="278" font-family="DM Mono,monospace" font-size="8" fill="#5a9e6f">funct3 [2:0]</text>
-            <line x1="300" y1="305" x2="420" y2="305" stroke="#5a9e6f" stroke-width="1.8" marker-end="url(#aarr-g)"/>
-            <text x="308" y="298" font-family="DM Mono,monospace" font-size="8" fill="#5a9e6f">funct7 [6:0]</text>
-            <line x1="300" y1="330" x2="420" y2="330" stroke="#8a7cc8" stroke-width="1.8" marker-end="url(#aarr)"/>
-            <text x="308" y="323" font-family="DM Mono,monospace" font-size="8" fill="#8a7cc8">imm [31:0]</text>
-
-            <!-- Register file -->
-            <g class="acomp" data-tip="Register File" data-desc="32 general-purpose registers (x0–x31). x0 is hardwired to 0. rd is the destination register written on reg_write=1. rs1 and rs2 are source registers read combinationally. 5-bit addresses allow addressing all 32 registers.">
-              <rect x="420" y="190" width="140" height="130" rx="8" fill="#edf7f0" stroke="#a8d5b5" stroke-width="1.5"/>
-              <text x="490" y="218" text-anchor="middle" font-family="Syne,sans-serif" font-size="12" font-weight="700" fill="#5a9e6f">Register File</text>
-              <text x="490" y="236" text-anchor="middle" font-family="DM Mono,monospace" font-size="8.5" fill="#5a9e6f">x0–x31</text>
-              <line x1="420" y1="248" x2="560" y2="248" stroke="#a8d5b5" stroke-width="0.7" stroke-dasharray="4,3"/>
-              <text x="490" y="266" text-anchor="middle" font-family="DM Mono,monospace" font-size="8" fill="#5a9e6f">rd  → write addr</text>
-              <text x="490" y="282" text-anchor="middle" font-family="DM Mono,monospace" font-size="8" fill="#5a9e6f">rs1 → read port A</text>
-              <text x="490" y="298" text-anchor="middle" font-family="DM Mono,monospace" font-size="8" fill="#5a9e6f">rs2 → read port B</text>
-            </g>
-
-            <!-- Immediate gen -->
-            <g class="acomp" data-tip="Immediate Generator" data-desc="Sign-extends and assembles the immediate value from scattered bits depending on instruction format. R-type: imm=0. I-type: sign-extend instr[31:20]. S-type: {instr[31:25], instr[11:7]}. B-type: {instr[31], instr[7], instr[30:25], instr[11:8], 1'b0}. U-type: {instr[31:12], 12'b0}. J-type: {instr[31], instr[19:12], instr[20], instr[30:21], 1'b0}.">
-              <rect x="420" y="370" width="140" height="90" rx="8" fill="#eaf1fb" stroke="#a8c4e8" stroke-width="1.5"/>
-              <text x="490" y="398" text-anchor="middle" font-family="Syne,sans-serif" font-size="12" font-weight="700" fill="#4a7fb5">Imm Gen</text>
-              <text x="490" y="416" text-anchor="middle" font-family="DM Mono,monospace" font-size="8.5" fill="#4a7fb5">sign-extend</text>
-              <text x="490" y="432" text-anchor="middle" font-family="DM Mono,monospace" font-size="8.5" fill="#4a7fb5">R/I/S/B/U/J</text>
-              <text x="490" y="448" text-anchor="middle" font-family="DM Mono,monospace" font-size="8.5" fill="#4a7fb5">→ 32-bit imm</text>
-              <line x1="330" y1="330" x2="330" y2="415" stroke="#8a7cc8" stroke-width="1.4" stroke-dasharray="4,3"/>
-              <line x1="330" y1="415" x2="420" y2="415" stroke="#8a7cc8" stroke-width="1.4" marker-end="url(#aarr)"/>
-            </g>
-
-            <!-- Control signals -->
-            <g class="acomp" data-tip="Control Signals" data-desc="Five 1-bit control outputs derived from the opcode: reg_write (write result to rd), mem_read (load from memory), mem_write (store to memory), branch (PC-relative branch), alu_src (ALU second operand is imm instead of rs2).">
-              <rect x="680" y="180" width="180" height="145" rx="8" fill="#fdf0ef" stroke="#e8b8b5" stroke-width="1.5"/>
-              <text x="770" y="208" text-anchor="middle" font-family="Syne,sans-serif" font-size="12" font-weight="700" fill="#c0524a">Control</text>
-              <text x="770" y="226" text-anchor="middle" font-family="DM Mono,monospace" font-size="8.5" fill="#c0524a">reg_write</text>
-              <text x="770" y="244" text-anchor="middle" font-family="DM Mono,monospace" font-size="8.5" fill="#c0524a">mem_read</text>
-              <text x="770" y="262" text-anchor="middle" font-family="DM Mono,monospace" font-size="8.5" fill="#c0524a">mem_write</text>
-              <text x="770" y="280" text-anchor="middle" font-family="DM Mono,monospace" font-size="8.5" fill="#c0524a">branch</text>
-              <text x="770" y="298" text-anchor="middle" font-family="DM Mono,monospace" font-size="8.5" fill="#c0524a">alu_src</text>
-            </g>
-
-            <!-- Decoder → Control signals -->
-            <line x1="300" y1="360" x2="640" y2="360" stroke="#c0524a" stroke-width="1.8"/>
-            <line x1="640" y1="253" x2="680" y2="253" stroke="#c0524a" stroke-width="1.8" marker-end="url(#aarr-r)"/>
-            <line x1="640" y1="253" x2="640" y2="360" stroke="#c0524a" stroke-width="1.8"/>
-            <text x="308" y="354" font-family="DM Mono,monospace" font-size="8" fill="#c0524a">control signals</text>
-
-            <!-- ALU -->
-            <g class="acomp" data-tip="ALU" data-desc="Arithmetic Logic Unit. Takes two operands: rs1 from the register file, and either rs2 (alu_src=0, R-type) or the sign-extended immediate (alu_src=1, I/S/B/U/J-type). Operation selected by funct3 and funct7. Outputs result and zero flag for branch decisions.">
-              <rect x="680" y="370" width="180" height="100" rx="8" fill="#edf7f0" stroke="#a8d5b5" stroke-width="1.5"/>
-              <text x="770" y="400" text-anchor="middle" font-family="Syne,sans-serif" font-size="12" font-weight="700" fill="#5a9e6f">ALU</text>
-              <text x="770" y="418" text-anchor="middle" font-family="DM Mono,monospace" font-size="8.5" fill="#5a9e6f">op: funct3 / funct7</text>
-              <text x="770" y="436" text-anchor="middle" font-family="DM Mono,monospace" font-size="8.5" fill="#5a9e6f">src: rs2 or imm</text>
-              <text x="770" y="454" text-anchor="middle" font-family="DM Mono,monospace" font-size="8.5" fill="#5a9e6f">out: result, zero</text>
-            </g>
-
-            <!-- Register file → ALU -->
-            <line x1="560" y1="265" x2="620" y2="265" stroke="#5a9e6f" stroke-width="1.6"/>
-            <line x1="620" y1="265" x2="620" y2="410" stroke="#5a9e6f" stroke-width="1.6"/>
-            <line x1="620" y1="410" x2="680" y2="410" stroke="#5a9e6f" stroke-width="1.6" marker-end="url(#aarr-g)"/>
-
-            <!-- Imm → ALU (via alu_src mux) -->
-            <line x1="560" y1="415" x2="600" y2="415" stroke="#8a7cc8" stroke-width="1.6"/>
-            <line x1="600" y1="415" x2="600" y2="435" stroke="#8a7cc8" stroke-width="1.6"/>
-            <line x1="600" y1="435" x2="680" y2="435" stroke="#8a7cc8" stroke-width="1.6" marker-end="url(#aarr)"/>
-            <text x="564" y="410" font-family="DM Mono,monospace" font-size="8" fill="#8a7cc8">imm</text>
-            <text x="564" y="424" font-family="DM Mono,monospace" font-size="8" fill="#888">(alu_src mux)</text>
-
-            <!-- Instruction format label -->
-            <text x="480" y="500" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#a8a59e">R · I · I(load) · S · B · U(LUI) · U(AUIPC) · J(JAL) · I(JALR)</text>
-          </svg>
+      <header class="project-header">
+        <span class="project-tag">RISC-V / RTL</span>
+        <h1 class="project-title" id="hero-title">5-Stage RV32I Pipelined CPU</h1>
+        <p class="project-sub">
+          A classic five-stage (IF / ID / EX / MEM / WB) RISC-V processor in SystemVerilog,
+          targeting a Basys3 (Artix-7 XC7A35T). Implements RV32I less <code>FENCE</code>,
+          <code>ECALL</code> and <code>EBREAK</code> &mdash; about 35 instructions, with full
+          forwarding, load-use interlocks and branch flushing.
+        </p>
+        <div class="project-chips">
+          <span class="chip-accent">SystemVerilog</span>
+          <span class="chip">RV32I</span>
+          <span class="chip">Basys3 / Artix-7</span>
+          <span class="chip">Vivado 2025.1</span>
+          <span class="chip">Constrained-random UVM-style TB</span>
+          <span class="chip-green">163,090 checks passing</span>
         </div>
-      </section>
+        <div class="links-row hero-links" style="margin-top:1.5rem;">
+          <a class="project-link" href="https://github.com/Coizi/5-stage-riscv" target="_blank" rel="noopener noreferrer">GitHub repo &#8599;</a>
+        </div>
+      </header>
 
       <hr class="divider" />
 
+      <!-- ══════════ OVERVIEW ══════════ -->
       <section class="section" id="overview">
-        <p class="section-label">overview</p>
-        <div class="prose">
-          <p>The decoder is the first stage of a single-cycle RISC-V pipeline. It takes a 32-bit instruction and extracts all fields needed by downstream stages: register addresses, the immediate value, and five control signals that drive the register file, ALU, and memory.</p>
-          <p>All logic is purely combinational — no clock, no state. The opcode in <code>instr[6:0]</code> selects which instruction format to interpret, and each format scatters its immediate across different bit fields of the instruction word.</p>
+        <h2 class="section-label">overview</h2>
+        <div class="prose reveal">
+          <p>
+            The pipeline is textbook in shape and deliberately un-clever in its choices, but every
+            structural claim about it is <strong>measured rather than asserted</strong>. The
+            testbench counts the cycles the execute stage sits empty after a redirect and the cycles
+            the front end is held for a load-use hazard, so the penalties below come out of
+            simulation rather than out of design intent.
+          </p>
+          <p>
+            Each stage module owns the pipeline register on its <strong>output</strong> boundary, so
+            the inter-stage structs (<code>if_id_t</code>, <code>id_ex_t</code>,
+            <code>ex_mem_t</code>, <code>mem_wb_t</code>) are always already registered by the time
+            a stage receives them. That one convention removes most of the ambiguity about where a
+            value lives on any given cycle.
+          </p>
         </div>
-      </section>
 
-      <hr class="divider" />
+        <div class="spec-grid" style="margin-top:1.5rem;" data-stagger>
+          <div class="spec-cell">
+            <div class="spec-label">CHECKS PASSING</div>
+            <div class="spec-value"><span data-count="163090">163,090</span></div>
+            <div class="spec-sub">across 7 testbenches</div>
+          </div>
+          <div class="spec-cell">
+            <div class="spec-label">BRANCH PENALTY</div>
+            <div class="spec-value">2 <span style="font-size:13px;font-weight:400;">cycles</span></div>
+            <div class="spec-sub">measured, taken branch</div>
+          </div>
+          <div class="spec-cell">
+            <div class="spec-label">LOAD-USE STALL</div>
+            <div class="spec-value">1 <span style="font-size:13px;font-weight:400;">cycle</span></div>
+            <div class="spec-sub">measured</div>
+          </div>
+          <div class="spec-cell">
+            <div class="spec-label">RTL</div>
+            <div class="spec-value">1,063 <span style="font-size:13px;font-weight:400;">lines</span></div>
+            <div class="spec-sub">11 modules</div>
+          </div>
+          <div class="spec-cell">
+            <div class="spec-label">TESTBENCH</div>
+            <div class="spec-value">1,433 <span style="font-size:13px;font-weight:400;">lines</span></div>
+            <div class="spec-sub">7 files</div>
+          </div>
+          <div class="spec-cell">
+            <div class="spec-label">ISA COVERAGE</div>
+            <div class="spec-value">~35 <span style="font-size:13px;font-weight:400;">instr</span></div>
+            <div class="spec-sub">RV32I less FENCE/ECALL/EBREAK</div>
+          </div>
+        </div>
 
-      <section class="section" id="instruction-formats">
-        <p class="section-label">instruction formats</p>
-        <div class="table-wrap">
+        <div class="table-wrap reveal" style="margin-top:1.5rem;">
           <table class="data-table">
-            <thead><tr><th>Type</th><th>Opcode</th><th>Instructions</th><th>Immediate encoding</th><th>Control</th></tr></thead>
+            <thead>
+              <tr><th>AREA</th><th>STATUS</th></tr>
+            </thead>
             <tbody>
-              <tr><td>R</td><td><code>0110011</code></td><td>ADD, SUB, AND, OR, XOR</td><td>none (imm = 0)</td><td>reg_write, alu_src=0</td></tr>
-              <tr><td>I</td><td><code>0010011</code></td><td>ADDI, ANDI, ORI</td><td>sign-extend instr[31:20]</td><td>reg_write, alu_src=1</td></tr>
-              <tr><td>I (load)</td><td><code>0000011</code></td><td>LW, LB, LH</td><td>sign-extend instr[31:20]</td><td>reg_write, mem_read, alu_src=1</td></tr>
-              <tr><td>S</td><td><code>0100011</code></td><td>SW, SB, SH</td><td>{instr[31:25], instr[11:7]}</td><td>mem_write, alu_src=1</td></tr>
-              <tr><td>B</td><td><code>1100011</code></td><td>BEQ, BNE, BLT</td><td>scrambled across [31,7,30:25,11:8]</td><td>branch, alu_src=0</td></tr>
-              <tr><td>U (LUI)</td><td><code>0110111</code></td><td>LUI</td><td>{instr[31:12], 12'b0}</td><td>reg_write, alu_src=1</td></tr>
-              <tr><td>U (AUIPC)</td><td><code>0010111</code></td><td>AUIPC</td><td>{instr[31:12], 12'b0}</td><td>reg_write, alu_src=1</td></tr>
-              <tr><td>J</td><td><code>1101111</code></td><td>JAL</td><td>scrambled across [31,19:12,20,30:21]</td><td>reg_write, alu_src=1</td></tr>
-              <tr><td>I (JALR)</td><td><code>1100111</code></td><td>JALR</td><td>sign-extend instr[31:20]</td><td>reg_write, alu_src=1</td></tr>
+              <tr><td>RTL</td><td>Complete, elaborates clean under Vivado 2025.1 &nbsp;<span class="status-done">done</span></td></tr>
+              <tr><td>Verification</td><td>163,090 checks passing across 7 testbenches &nbsp;<span class="status-done">done</span></td></tr>
+              <tr><td>FPGA bring-up</td><td>Not started &mdash; no UART loader, no XDC constraints &nbsp;<span class="status-todo">todo</span></td></tr>
             </tbody>
           </table>
         </div>
@@ -310,33 +488,427 @@
 
       <hr class="divider" />
 
-      <section class="section" id="testbench">
-        <p class="section-label">testbench</p>
-        <div class="prose">
-          <p>The <code>decoder_tb</code> module applies seven test vectors covering all major instruction formats. Each test drives a 32-bit instruction encoding, waits 10 time units for combinational propagation, then calls a <code>check()</code> task that compares all nine outputs against expected values and prints PASS or FAIL with a full diff on failure.</p>
+      <!-- ══════════ PIPELINE + SIMULATOR ══════════ -->
+      <section class="section" id="pipeline-section">
+        <h2 class="section-label">the pipeline</h2>
+
+        <div class="pipeline" id="pipeline">
+          <div class="pipe-stage"><span class="pipe-stage-icon">IF</span><span class="pipe-stage-name">fetch<br>PC + IMEM</span></div>
+          <span class="pipe-arrow">&rarr;</span>
+          <div class="pipe-stage"><span class="pipe-stage-icon">ID</span><span class="pipe-stage-name">decode<br>imm gen</span></div>
+          <span class="pipe-arrow">&rarr;</span>
+          <div class="pipe-stage"><span class="pipe-stage-icon">EX</span><span class="pipe-stage-name">ALU<br>branch resolve</span></div>
+          <span class="pipe-arrow">&rarr;</span>
+          <div class="pipe-stage"><span class="pipe-stage-icon">MEM</span><span class="pipe-stage-name">DMEM<br>store align</span></div>
+          <span class="pipe-arrow">&rarr;</span>
+          <div class="pipe-stage"><span class="pipe-stage-icon">WB</span><span class="pipe-stage-name">load extend<br>regfile write</span></div>
         </div>
-        <div class="table-wrap" style="margin-top:1rem;">
-          <table class="data-table">
-            <thead><tr><th>Test</th><th>Instruction</th><th>Encoding</th><th>Key check</th></tr></thead>
-            <tbody>
-              <tr><td>R-type</td><td>ADD x3, x1, x2</td><td><code>0x0020_81B3</code></td><td>reg_write=1, alu_src=0, imm=0</td></tr>
-              <tr><td>I-type</td><td>ADDI x1, x1, 4</td><td><code>0x0040_8093</code></td><td>reg_write=1, alu_src=1, imm=4</td></tr>
-              <tr><td>I-load</td><td>LW x2, 8(x1)</td><td><code>0x0080_A103</code></td><td>mem_read=1, alu_src=1, imm=8</td></tr>
-              <tr><td>S-type</td><td>SW x2, 8(x1)</td><td><code>0x0020_A423</code></td><td>mem_write=1, reg_write=0, imm=8</td></tr>
-              <tr><td>B-type</td><td>BEQ x1, x2, 16</td><td><code>0x0020_8863</code></td><td>branch=1, alu_src=0, imm=16</td></tr>
-              <tr><td>U-type</td><td>LUI x5, 0x12345</td><td><code>0x1234_52B7</code></td><td>reg_write=1, imm=0x12345000</td></tr>
-              <tr><td>J-type</td><td>JAL x1, 32</td><td><code>0x0200_00EF</code></td><td>reg_write=1, alu_src=1, imm=32</td></tr>
-            </tbody>
-          </table>
+
+        <div class="prose reveal" style="margin-top:1.5rem;">
+          <p>
+            The simulator below runs a hand-written program chosen because it triggers all three
+            interesting behaviours in sequence: an <strong>EX/MEM forward</strong>, a
+            <strong>load-use stall</strong>, and a <strong>taken branch flush</strong>. It is the
+            same sequence <code>tb_top</code> measures the penalties from.
+          </p>
+        </div>
+
+        <div class="sim-wrap reveal" id="sim">
+          <div class="sim-head">
+            <div class="sim-title"><span class="sim-live-dot"></span> pipeline trace</div>
+            <div class="sim-controls">
+              <button class="sim-btn" id="sim-play">&#9654; run</button>
+              <button class="sim-btn" id="sim-step">step</button>
+              <button class="sim-btn" id="sim-reset">reset</button>
+            </div>
+          </div>
+
+          <div class="sim-status">
+            <span class="sim-cycle">cycle <b id="sim-cycle-num">0</b> / 13</span>
+            <span class="sim-phase" id="sim-phase">IDLE</span>
+          </div>
+
+          <div class="trace-scroll">
+            <table class="trace" id="trace"></table>
+          </div>
+
+          <div class="sim-legend">
+            <span><i class="lg-on"></i> in flight</span>
+            <span><i class="lg-fwd"></i> operand forwarded</span>
+            <span><i class="lg-stall"></i> stalled</span>
+            <span><i class="lg-flush"></i> flushed</span>
+          </div>
+
+          <div class="sim-note" id="sim-note">
+            Press <b>run</b> to step the program through the pipeline one cycle at a time.
+          </div>
         </div>
       </section>
 
       <hr class="divider" />
 
-      <section class="section" id="links">
-        <p class="section-label">links</p>
-        <div class="links-row">
-          <a href="https://github.com/Coizi" target="_blank" class="project-link">GitHub &#8599;</a>
+      <!-- ══════════ MODULES ══════════ -->
+      <section class="section" id="modules">
+        <h2 class="section-label">modules</h2>
+        <div class="prose reveal">
+          <p>Eleven RTL modules, 1,063 lines. Stage modules own their output pipeline register; the rest are combinational blocks or storage.</p>
+        </div>
+        <div class="module-grid" data-stagger>
+          <div class="module-card">
+            <div class="module-card-icon icon-purple">IF</div>
+            <h3>fetch.sv</h3>
+            <p>PC, instruction memory and the IF/ID register. Kills the instruction entering IF/ID itself on a taken redirect.</p>
+            <span class="module-tag">50 lines</span>
+          </div>
+          <div class="module-card">
+            <div class="module-card-icon icon-purple">ID</div>
+            <h3>decode.sv</h3>
+            <p>Instruction decode, immediate generation, ID/EX register. Resolves everything &mdash; EX never sees raw instruction bits.</p>
+            <span class="module-tag">236 lines</span>
+          </div>
+          <div class="module-card">
+            <div class="module-card-icon icon-purple">EX</div>
+            <h3>execute.sv</h3>
+            <p>Forwarding muxes, ALU, branch resolve and the separate target adder. Owns EX/MEM.</p>
+            <span class="module-tag">151 lines</span>
+          </div>
+          <div class="module-card">
+            <div class="module-card-icon icon-purple">MEM</div>
+            <h3>mem_stage.sv</h3>
+            <p>Data memory and store alignment, MEM/WB register. The BRAM output register <em>is</em> the pipeline register.</p>
+            <span class="module-tag">102 lines</span>
+          </div>
+          <div class="module-card">
+            <div class="module-card-icon icon-purple">WB</div>
+            <h3>writeback.sv</h3>
+            <p>Load lane select and sign extension, register file write port.</p>
+            <span class="module-tag">70 lines</span>
+          </div>
+          <div class="module-card">
+            <div class="module-card-icon icon-green">&Sigma;</div>
+            <h3>alu.sv</h3>
+            <p>Combinational ALU, 11 operations. Six branch types collapse onto SUB / SLT / SLTU.</p>
+            <span class="module-tag">29 lines</span>
+          </div>
+          <div class="module-card">
+            <div class="module-card-icon icon-green">R</div>
+            <h3>regfile.sv</h3>
+            <p>32&times;32 register file with write-through: a WB write is visible to an ID read in the same cycle.</p>
+            <span class="module-tag">41 lines</span>
+          </div>
+          <div class="module-card">
+            <div class="module-card-icon icon-amber">&#8644;</div>
+            <h3>forward_unit.sv</h3>
+            <p>EX/MEM and MEM/WB bypass selects. EX/MEM holds the younger instruction, so it wins.</p>
+            <span class="module-tag">57 lines</span>
+          </div>
+          <div class="module-card">
+            <div class="module-card-icon icon-amber">&#9888;</div>
+            <h3>hazard_unit.sv</h3>
+            <p>Load-use stall and branch flush controls for the front end. Purely combinational.</p>
+            <span class="module-tag">50 lines</span>
+          </div>
+          <div class="module-card">
+            <div class="module-card-icon icon-green">&#123;&#125;</div>
+            <h3>pipeline_regs.sv</h3>
+            <p><code>pipeline_pkg</code>: the inter-stage structs and enums every module imports.</p>
+            <span class="module-tag">138 lines</span>
+          </div>
+          <div class="module-card">
+            <div class="module-card-icon icon-green">&#9633;</div>
+            <h3>top.sv</h3>
+            <p>Interconnect. Wires the five stages, the two hazard blocks and the register file together.</p>
+            <span class="module-tag">139 lines</span>
+          </div>
+        </div>
+      </section>
+
+      <hr class="divider" />
+
+      <!-- ══════════ DESIGN DECISIONS ══════════ -->
+      <section class="section" id="decisions">
+        <h2 class="section-label">design decisions</h2>
+        <div class="prose reveal">
+          <p>The choices below are the ones that were not forced by the shape of a five-stage pipe.</p>
+        </div>
+        <div data-stagger>
+          <div class="bug-card">
+            <div class="bug-card-header"><span class="bug-card-title">Branches resolve in EX, not ID</span><span class="chip-accent">2-cycle penalty</span></div>
+            <div class="bug-card-body">
+              Branch operands need forwarding, and forwarded values only exist in EX. Resolving there
+              costs a measured 2 cycles on a taken branch: <code>fetch</code> invalidates the
+              instruction entering IF/ID, and <code>hazard_unit</code> flushes ID/EX.
+            </div>
+          </div>
+          <div class="bug-card">
+            <div class="bug-card-header"><span class="bug-card-title">Decode resolves everything; EX never sees instruction bits</span></div>
+            <div class="bug-card-body">
+              <code>id_ex_t</code> carries a fully-decoded <code>alu_op</code>, operand selects and a
+              <code>jalr</code> flag rather than the raw opcode. All ISA knowledge stays in one module.
+            </div>
+          </div>
+          <div class="bug-card">
+            <div class="bug-card-header"><span class="bug-card-title">A separate target adder in EX</span></div>
+            <div class="bug-card-body">
+              The main ALU is already busy on every control-flow instruction &mdash; comparing operands
+              for a branch, or computing <code>PC+4</code> for a jump &mdash; so the redirect target gets
+              its own adder with a 2:1 base mux (<code>PC</code> for branch/JAL, forwarded
+              <code>rs1</code> for JALR).
+            </div>
+          </div>
+          <div class="bug-card">
+            <div class="bug-card-header"><span class="bug-card-title">JALR's mandatory LSB clear is unconditional</span><span class="chip">saves a mux</span></div>
+            <div class="bug-card-body">
+              B- and J-type encodings have no <code>imm[0]</code> bit at all, and the PC is always
+              4-aligned, so forcing bit 0 low is a no-op for branches and JAL. One less mux.
+            </div>
+          </div>
+          <div class="bug-card">
+            <div class="bug-card-header"><span class="bug-card-title">Forwarding resolves once, in EX</span></div>
+            <div class="bug-card-body">
+              <code>ex_mem_t.rs2_data</code> holds the <strong>forwarded</strong> store data, so MEM
+              never re-forwards. The muxes sit ahead of operand select, so store data and the JALR
+              target base get bypassed too &mdash; both are consumed outside the ALU datapath.
+            </div>
+          </div>
+          <div class="bug-card">
+            <div class="bug-card-header"><span class="bug-card-title"><code>reg_write</code> is suppressed in decode when <code>rd == x0</code></span></div>
+            <div class="bug-card-body">
+              One fix makes the register file write guard, the write-through bypass and the forwarding
+              unit all safe at once, instead of each needing its own <code>!= 0</code> test.
+            </div>
+          </div>
+          <div class="bug-card">
+            <div class="bug-card-header"><span class="bug-card-title">The register file bypasses writes to reads</span></div>
+            <div class="bug-card-body">
+              A WB write is visible to an ID read in the same cycle. Without this, an instruction three
+              after its producer reads a stale value &mdash; the producer retires before the consumer
+              reaches EX, so no forwarding path can rescue it.
+            </div>
+          </div>
+          <div class="bug-card">
+            <div class="bug-card-header"><span class="bug-card-title">Six branch types collapse to three ALU ops</span></div>
+            <div class="bug-card-body">
+              <code>funct3[0]</code> is an "invert the result" bit across every pair (BEQ/BNE,
+              BLT/BGE, BLTU/BGEU), so decode selects only SUB, SLT or SLTU and EX applies the inversion.
+            </div>
+          </div>
+          <div class="bug-card">
+            <div class="bug-card-header"><span class="bug-card-title">Load formatting happens in WB, not MEM</span></div>
+            <div class="bug-card-body">
+              The DMEM read is synchronous, so the loaded word does not exist until it has crossed into
+              MEM/WB &mdash; the BRAM's own output register <em>is</em> that pipeline register.
+              <code>mem_wb_t</code> therefore carries <code>mem_funct3</code> and <code>addr_lsb</code>
+              so WB can do lane select and sign extension.
+            </div>
+          </div>
+          <div class="bug-card">
+            <div class="bug-card-header"><span class="bug-card-title">No cache</span></div>
+            <div class="bug-card-body">
+              The entire memory is on-chip BRAM at single-cycle latency and the Basys3 has no external
+              DRAM. A cache would add tag arrays, miss handling and stall paths for zero speedup.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <hr class="divider" />
+
+      <!-- ══════════ VERIFICATION ══════════ -->
+      <section class="section" id="verification">
+        <h2 class="section-label">verification</h2>
+        <div class="prose reveal">
+          <p>
+            Each block is checked against an <strong>independently written reference model</strong>,
+            with constraints that steer stimulus toward the cases that actually break hardware rather
+            than relying on uniform random. Every testbench also asserts its own
+            <strong>coverage floor</strong> and fails if the interesting scenario did not occur often
+            enough &mdash; a test that silently stops exercising its target is worse than no test.
+          </p>
+        </div>
+
+        <div class="table-wrap reveal" style="margin-top:0.75rem;">
+          <table class="data-table">
+            <thead>
+              <tr><th>TESTBENCH</th><th class="num">TXNS</th><th class="num">CHECKS</th><th>WHAT THE CONSTRAINTS TARGET</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>tb_alu</td><td class="num">5,000</td><td class="num">10,011</td><td>operands weighted to 0, 1, &minus;1 and both signed extremes; all 11 opcodes</td></tr>
+              <tr><td>tb_regfile</td><td class="num">4,000</td><td class="num">8,003</td><td>tiny address space so write-through collisions are constant; <code>x0</code> over-weighted</td></tr>
+              <tr><td>tb_forward_unit</td><td class="num">5,000</td><td class="num">10,001</td><td>~35% of transactions steered so EX/MEM <em>and</em> MEM/WB both hit the same source, to hammer the priority rule</td></tr>
+              <tr><td>tb_hazard_unit</td><td class="num">5,000</td><td class="num">15,002</td><td><code>uses_rs1</code>/<code>uses_rs2</code> randomised independently of addresses, to catch phantom dependencies on immediate bits</td></tr>
+              <tr><td>tb_decode</td><td class="num">6,000</td><td class="num">90,009</td><td>random legal instructions across all 9 encoding classes; <code>rd == x0</code> weighted to 20%</td></tr>
+              <tr><td>tb_execute</td><td class="num">6,000</td><td class="num">30,002</td><td>forwarding selects randomised independently of addresses; operands chosen so signed and unsigned disagree</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="prose reveal" style="margin-top:1.75rem;">
+          <h3>End-to-end programs</h3>
+          <p>
+            <code>tb_top</code> runs four hand-assembled programs &mdash; built by field-level encoder
+            functions rather than hex literals &mdash; with a reset between each:
+          </p>
+          <ul>
+            <li><strong>Hazards.</strong> EX&rarr;EX and MEM&rarr;EX forwarding, regfile write-through, load-use stall, branch/JAL/JALR flushes, <code>x0</code> write suppression, all R- and I-type ALU ops.</li>
+            <li><strong>Branch comparisons.</strong> All six compare types with operands (&minus;1 and 1) chosen so signed and unsigned <em>disagree</em>.</li>
+            <li><strong>Sub-word memory.</strong> SB/SH/SW into every byte and halfword lane, LB/LBU/LH/LHU back out, plus a load feeding a store's data.</li>
+            <li><strong>Penalty measurement.</strong> Counts the cycles EX sits empty after a redirect and the cycles the front end is held for a load-use hazard.</li>
+          </ul>
+          <p>An X-propagation watchdog fails the run if the register file is ever written with unknown bits.</p>
+
+          <h3>Mutation testing</h3>
+          <p>
+            Passing tests only mean something if they can fail. Making <code>SLTU</code> signed in
+            <code>alu.sv</code> fails exactly the three unsigned-comparison checks in
+            <code>tb_top</code> and nothing else; restoring it returns the suite to green.
+          </p>
+        </div>
+      </section>
+
+      <hr class="divider" />
+
+      <!-- ══════════ CODE ══════════ -->
+      <section class="section" id="code">
+        <h2 class="section-label">code</h2>
+        <div class="prose reveal">
+          <p>
+            <code>hazard_unit.sv</code> is the whole of the stall-and-flush policy &mdash; the two
+            behaviours the simulator above visualises, in fifty lines of purely combinational logic.
+          </p>
+        </div>
+        <div class="code-block reveal" style="margin-top:1rem;">
+          <div class="code-block-title"><span class="code-dots"><i></i><i></i><i></i></span> rtl/hazard_unit.sv</div>
+<pre>module hazard_unit
+    import pipeline_pkg::*;
+(
+    // ID stage: which registers the instruction currently in ID will read
+    input  logic [4:0] id_rs1_addr,
+    input  logic [4:0] id_rs2_addr,
+    input  logic       id_uses_rs1,
+    input  logic       id_uses_rs2,
+
+    // EX stage
+    input  id_ex_t     id_ex_reg,
+    input  logic       branch_taken,
+
+    output logic       stall_if,   // hold pc and if_id_reg
+    output logic       bubble_id,  // clear id_ex_reg (load-use)
+    output logic       flush_id    // clear id_ex_reg (branch taken)
+);
+
+    logic load_in_ex;
+    logic rs1_conflict, rs2_conflict;
+    logic load_use;
+
+    assign load_in_ex = id_ex_reg.valid &amp;&amp;
+                        id_ex_reg.mem_read &amp;&amp;
+                        (id_ex_reg.rd_addr != 5'd0);
+
+    assign rs1_conflict = id_uses_rs1 &amp;&amp; (id_ex_reg.rd_addr == id_rs1_addr);
+    assign rs2_conflict = id_uses_rs2 &amp;&amp; (id_ex_reg.rd_addr == id_rs2_addr);
+
+    assign load_use = load_in_ex &amp;&amp; (rs1_conflict || rs2_conflict);
+
+    assign stall_if  = load_use;
+    assign bubble_id = load_use;
+    assign flush_id  = branch_taken;
+
+endmodule: hazard_unit</pre>
+        </div>
+
+        <div class="prose reveal" style="margin-top:1.5rem;">
+          <h3>Running the suite</h3>
+        </div>
+        <div class="code-block reveal">
+          <div class="code-block-title"><span class="code-dots"><i></i><i></i><i></i></span> sim/</div>
+<pre>cd sim &amp;&amp; ./run.sh              # all testbenches
+cd sim &amp;&amp; ./run.sh execute      # just one</pre>
+        </div>
+        <div class="prose reveal">
+          <p>Requires Vivado's simulator on <code>PATH</code>, or set <code>VIVADO_BIN</code>.</p>
+        </div>
+      </section>
+
+      <hr class="divider" />
+
+      <!-- ══════════ LIMITATIONS ══════════ -->
+      <section class="section" id="limitations">
+        <h2 class="section-label">known limitations</h2>
+        <div class="prose reveal">
+          <p>Deliberate, and each one is a trade rather than an oversight.</p>
+        </div>
+        <div data-stagger>
+          <div class="bug-card limit">
+            <div class="bug-card-header"><span class="bug-card-title">No store-data forwarding (MEM&rarr;MEM)</span></div>
+            <div class="bug-card-body">
+              A load immediately followed by a store of the loaded value costs one stall cycle. Keeps
+              the bypass network to two sources.
+            </div>
+          </div>
+          <div class="bug-card limit">
+            <div class="bug-card-header"><span class="bug-card-title">No misaligned-address traps</span></div>
+            <div class="bug-card-body">
+              JALR can produce a target that is 2-mod-4; the spec wants an
+              instruction-address-misaligned exception. Exceptions are out of scope, so fetch silently
+              truncates instead.
+            </div>
+          </div>
+          <div class="bug-card limit">
+            <div class="bug-card-header"><span class="bug-card-title">The hazard unit is conservative on stores</span></div>
+            <div class="bug-card-body">
+              A store's <code>rs2</code> is not needed until MEM, but the stall fires in ID regardless.
+            </div>
+          </div>
+          <div class="bug-card limit">
+            <div class="bug-card-header"><span class="bug-card-title">IMEM and DMEM are declared inline</span></div>
+            <div class="bug-card-body">
+              In <code>fetch.sv</code> and <code>mem_stage.sv</code>. IMEM must move to its own
+              dual-port module before a UART loader can write it.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <hr class="divider" />
+
+      <!-- ══════════ ROADMAP ══════════ -->
+      <section class="section" id="roadmap">
+        <h2 class="section-label">next</h2>
+        <div class="timeline" id="timeline" data-stagger>
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot done"></div><div class="tl-line"></div></div>
+            <div class="tl-content">
+              <div class="tl-title">RTL complete &amp; verified</div>
+              <div class="tl-body">Eleven modules elaborating clean under Vivado 2025.1, 163,090 checks green.</div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div>
+            <div class="tl-content">
+              <div class="tl-title">UART loader for IMEM</div>
+              <div class="tl-body">Needs IMEM split into a dual-port module first.</div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div>
+            <div class="tl-content">
+              <div class="tl-title">XDC constraints, clocking, board bring-up</div>
+              <div class="tl-body">First silicon on the Basys3 Artix-7.</div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot"></div></div>
+            <div class="tl-content">
+              <div class="tl-title">Randomised instruction-stream generation</div>
+              <div class="tl-body">Cross-checked against a reference ISS rather than hand-assembled programs.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="links-row reveal" style="margin-top:2rem;">
+          <a class="project-link" href="https://github.com/Coizi/5-stage-riscv" target="_blank" rel="noopener noreferrer">GitHub repo &#8599;</a>
+          <a class="project-link" href="index.html">&larr; all projects</a>
         </div>
       </section>
 
@@ -345,75 +917,272 @@
   </div>
 
   <script>
-    const wrap = document.getElementById('arch-wrap');
-    const svg  = document.getElementById('arch-svg');
-    const tip  = document.getElementById('a-tooltip');
-    let scale = 1, tx = 0, ty = 0;
-    let dragging = false, startX, startY, startTx, startTy;
-    function applyTransform() { svg.style.transform = `translate(${tx}px,${ty}px) scale(${scale})`; }
-    document.getElementById('zoom-in').addEventListener('click', () => { scale = Math.min(scale * 1.3, 5); applyTransform(); });
-    document.getElementById('zoom-out').addEventListener('click', () => { scale = Math.max(scale / 1.3, 0.35); applyTransform(); });
-    document.getElementById('zoom-reset').addEventListener('click', () => { scale = 1; tx = 0; ty = 0; applyTransform(); });
-    wrap.addEventListener('wheel', (e) => {
-      e.preventDefault();
-      const rect = wrap.getBoundingClientRect();
-      const mx = e.clientX - rect.left, my = e.clientY - rect.top;
-      const delta = e.deltaY > 0 ? 0.88 : 1.14;
-      const ns = Math.min(Math.max(scale * delta, 0.35), 5);
-      tx = mx - (mx - tx) * (ns / scale); ty = my - (my - ty) * (ns / scale);
-      scale = ns; applyTransform();
-    }, { passive: false });
-    wrap.addEventListener('pointerdown', (e) => {
-      if (e.target.closest('.zoom-btn')) return;
-      dragging = true; startX = e.clientX; startY = e.clientY; startTx = tx; startTy = ty;
-      wrap.setPointerCapture(e.pointerId);
-    });
-    wrap.addEventListener('pointermove', (e) => {
-      if (!dragging) return;
-      tx = startTx + (e.clientX - startX); ty = startTy + (e.clientY - startY); applyTransform();
-    });
-    wrap.addEventListener('pointerup', () => { dragging = false; });
-    document.querySelectorAll('.acomp').forEach(el => {
-      el.addEventListener('mouseenter', () => {
-        tip.innerHTML = `<strong>${el.dataset.tip}</strong>${el.dataset.desc}`;
-        tip.classList.add('visible');
+    /* ═══════════ Theme toggle ═══════════ */
+    (function () {
+      var btn = document.getElementById('theme-toggle');
+      var iconEl = document.getElementById('theme-toggle-icon');
+      var textEl = document.getElementById('theme-toggle-text');
+      var SUN = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>';
+      var MOON = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+      function render() {
+        var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+        iconEl.innerHTML = dark ? SUN : MOON;
+        textEl.textContent = dark ? 'light mode' : 'dark mode';
+      }
+      btn.addEventListener('click', function () {
+        var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        try { localStorage.setItem('riscv-theme', next); } catch (e) {}
+        render();
       });
-      el.addEventListener('mousemove', (e) => {
-        const rect = wrap.getBoundingClientRect();
-        let x = e.clientX - rect.left + 14, y = e.clientY - rect.top + 14;
-        if (x + 240 > rect.width) x -= 250;
-        if (y + 120 > rect.height) y -= 130;
-        tip.style.left = x + 'px'; tip.style.top = y + 'px';
-      });
-      el.addEventListener('mouseleave', () => tip.classList.remove('visible'));
-    });
+      render();
+    })();
 
-    // Page transitions
-    const transitionEl = document.getElementById('page-transition');
-    document.querySelectorAll('a[href]').forEach(a => {
-      const href = a.getAttribute('href');
-      if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('http')) return;
-      a.addEventListener('click', (e) => {
-        e.preventDefault();
-        transitionEl.classList.add('active');
-        setTimeout(() => { window.location.href = href; }, 350);
+    /* ═══════════ Pipeline trace simulator ═══════════
+       The schedule below is the cycle-accurate trace of this program on this
+       design: branches resolve in EX (2-cycle flush) and a load-use hazard
+       holds the front end for one cycle. Stage codes per cycle, plus the kind
+       of cell so the colouring can explain *why* a cycle looks like it does. */
+    (function () {
+      var TOTAL = 13;
+
+      // kind: '' normal | 'fwd' operand forwarded | 'stall' held | 'flush' squashed
+      var PROGRAM = [
+        { asm: 'addi x1, x0, 5',      cells: { 1:['IF',''], 2:['ID',''], 3:['EX',''], 4:['MEM',''], 5:['WB',''] } },
+        { asm: 'add  x2, x1, x1',     cells: { 2:['IF',''], 3:['ID',''], 4:['EX','fwd'], 5:['MEM',''], 6:['WB',''] } },
+        { asm: 'lw   x3, 0(x2)',      cells: { 3:['IF',''], 4:['ID',''], 5:['EX','fwd'], 6:['MEM',''], 7:['WB',''] } },
+        { asm: 'add  x4, x3, x1',     cells: { 4:['IF',''], 5:['ID','stall'], 6:['ID','stall'], 7:['EX','fwd'], 8:['MEM',''], 9:['WB',''] } },
+        { asm: 'beq  x4, x4, done',   cells: { 5:['IF',''], 6:['IF','stall'], 7:['ID',''], 8:['EX','fwd'], 9:['MEM',''], 10:['WB',''] } },
+        { asm: 'addi x5, x0, 99',     cells: { 7:['IF',''], 8:['ID',''], 9:['✕','flush'] } },
+        { asm: 'addi x6, x0, 77',     cells: { 8:['IF',''], 9:['✕','flush'] } },
+        { asm: 'done: addi x7, x0, 1', cells: { 9:['IF',''], 10:['ID',''], 11:['EX',''], 12:['MEM',''], 13:['WB',''] } }
+      ];
+
+      var NOTES = {
+        0:  ['IDLE', '', 'Press <b>run</b> to step the program through the pipeline one cycle at a time.'],
+        1:  ['FETCH', '', '<code>addi x1</code> enters IF.'],
+        2:  ['RUN', '', 'The pipe fills. Nothing depends on anything yet.'],
+        3:  ['RUN', '', '<code>addi x1</code> reaches EX. Its result will not be written back until cycle 5.'],
+        4:  ['FORWARD', 'fwd', '<code>add x2</code> is in EX and needs <b>x1</b>, which is still only in EX/MEM. The forwarding unit supplies it directly &mdash; no stall.'],
+        5:  ['STALL', 'stall', 'Load-use hazard: <code>lw x3</code> is in EX, and <code>add x4</code> in ID needs <b>x3</b>. A load produces data at the <em>end</em> of MEM, so it cannot be forwarded in time. Hold IF/ID, drop a bubble into ID/EX.'],
+        6:  ['STALL', 'stall', 'The stall cycle. The front end is frozen and EX runs a bubble. This is the <b>1-cycle load-use penalty</b>.'],
+        7:  ['FORWARD', 'fwd', '<code>add x4</code> reaches EX and takes <b>x3</b> over the MEM/WB path. One cycle lost, correctness preserved.'],
+        8:  ['BRANCH', 'fwd', '<code>beq</code> resolves in EX and is <b>taken</b>. The two instructions fetched behind it are wrong.'],
+        9:  ['FLUSH', 'flush', 'Flush: <code>addi x5</code> and <code>addi x6</code> are squashed &mdash; fetch kills the one entering IF/ID, the hazard unit flushes ID/EX. The target is fetched. This is the <b>2-cycle branch penalty</b>.'],
+        10: ['RUN', '', 'Back to full rate. The branch target decodes.'],
+        11: ['RUN', '', 'Target in EX.'],
+        12: ['RUN', '', 'Target in MEM.'],
+        13: ['DONE', '', 'Program retired in 13 cycles: 8 instructions, 1 stall cycle, 2 flushed slots.']
+      };
+
+      var table   = document.getElementById('trace');
+      var cycleEl = document.getElementById('sim-cycle-num');
+      var phaseEl = document.getElementById('sim-phase');
+      var noteEl  = document.getElementById('sim-note');
+      var btnPlay = document.getElementById('sim-play');
+      var btnStep = document.getElementById('sim-step');
+      var btnReset= document.getElementById('sim-reset');
+
+      var cycle = 0, timer = null, started = false;
+
+      // Build the grid once; cycling only toggles classes.
+      (function build() {
+        var head = document.createElement('tr');
+        head.appendChild(document.createElement('td'));
+        for (var c = 1; c <= TOTAL; c++) {
+          var th = document.createElement('th');
+          th.className = 'cyc';
+          th.textContent = c;
+          th.setAttribute('data-cyc', c);
+          head.appendChild(th);
+        }
+        table.appendChild(head);
+
+        PROGRAM.forEach(function (instr, i) {
+          var tr = document.createElement('tr');
+          tr.setAttribute('data-row', i);
+          var asm = document.createElement('td');
+          asm.className = 'asm';
+          asm.textContent = instr.asm;
+          tr.appendChild(asm);
+          for (var c = 1; c <= TOTAL; c++) {
+            var td = document.createElement('td');
+            td.className = 'cell';
+            var slot = instr.cells[c];
+            if (slot) {
+              td.textContent = slot[0];
+              td.setAttribute('data-kind', slot[1]);
+              td.setAttribute('data-live', '1');
+            }
+            tr.appendChild(td);
+          }
+          table.appendChild(tr);
+        });
+      })();
+
+      function paint() {
+        cycleEl.textContent = cycle;
+        var note = NOTES[cycle] || ['RUN', '', ''];
+        phaseEl.textContent = note[0];
+        phaseEl.className = 'sim-phase' + (note[1] ? ' ' + note[1] : '');
+        noteEl.innerHTML = note[2];
+
+        var ths = table.querySelectorAll('th.cyc');
+        for (var i = 0; i < ths.length; i++) {
+          ths[i].classList.toggle('now', +ths[i].getAttribute('data-cyc') === cycle);
+        }
+
+        var rows = table.querySelectorAll('tr[data-row]');
+        for (var r = 0; r < rows.length; r++) {
+          var cells = rows[r].querySelectorAll('td.cell');
+          var active = false;
+          for (var c = 0; c < cells.length; c++) {
+            var td = cells[c], col = c + 1;
+            if (!td.getAttribute('data-live')) continue;
+            var kind = td.getAttribute('data-kind');
+            var shown = col <= cycle;
+            td.classList.toggle('on', shown);
+            td.classList.toggle('future', !shown);
+            td.classList.toggle('fwd', shown && kind === 'fwd');
+            td.classList.toggle('stall', shown && kind === 'stall');
+            td.classList.toggle('flush', shown && kind === 'flush');
+            td.classList.toggle('now', col === cycle);
+            if (col === cycle) active = true;
+          }
+          rows[r].classList.toggle('active', active);
+        }
+
+        // Light the matching stage in the static pipeline diagram.
+        var live = {};
+        PROGRAM.forEach(function (instr) {
+          var slot = instr.cells[cycle];
+          if (slot) live[slot[0]] = true;
+        });
+        var order = ['IF', 'ID', 'EX', 'MEM', 'WB'];
+        var stages = document.querySelectorAll('#pipeline .pipe-stage');
+        for (var s = 0; s < stages.length; s++) {
+          stages[s].classList.toggle('lit', !!live[order[s]]);
+        }
+      }
+
+      function step() {
+        if (cycle >= TOTAL) { stop(); return; }
+        cycle++;
+        paint();
+        if (cycle >= TOTAL) stop();
+      }
+
+      function stop() {
+        if (timer) { clearInterval(timer); timer = null; }
+        btnPlay.textContent = '▶ run';
+      }
+
+      function play() {
+        if (timer) { stop(); return; }
+        if (cycle >= TOTAL) { cycle = 0; paint(); }
+        btnPlay.textContent = '⏸ pause';
+        timer = setInterval(step, 1100);
+      }
+
+      btnPlay.addEventListener('click', play);
+      btnStep.addEventListener('click', function () { stop(); step(); });
+      btnReset.addEventListener('click', function () { stop(); cycle = 0; paint(); });
+
+      paint();
+
+      // Auto-run once when scrolled into view.
+      if ('IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) {
+            if (e.isIntersecting && !started) {
+              started = true;
+              setTimeout(play, 500);
+              io.disconnect();
+            }
+          });
+        }, { threshold: 0.35 });
+        io.observe(document.getElementById('sim'));
+      }
+    })();
+
+    /* ═══════════ Anime.js entrance + scroll animations ═══════════ */
+    (function () {
+      var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!window.anime || prefersReduced) return;
+      document.documentElement.classList.add('anim');
+
+      var title = document.getElementById('hero-title');
+      title.innerHTML = title.textContent.split(' ').map(function (w) {
+        return '<span class="w"><span>' + w + '</span></span>';
+      }).join(' ');
+
+      anime.set('#hero-title .w > span', { translateY: '110%' });
+      anime.set('.project-chips > *', { opacity: 0, translateY: 10 });
+      var tl = anime.timeline({ easing: 'easeOutCubic' });
+      tl.add({ targets: '.project-tag', opacity: [0, 1], translateY: [18, 0], duration: 500 })
+        .add({ targets: '#hero-title .w > span', translateY: ['110%', '0%'], duration: 700, delay: anime.stagger(90), easing: 'easeOutQuart' }, '-=250')
+        .add({ targets: '.project-sub', opacity: [0, 1], translateY: [18, 0], duration: 600 }, '-=380')
+        .add({ targets: '.project-chips > *', opacity: [0, 1], translateY: [10, 0], duration: 400, delay: anime.stagger(38) }, '-=350')
+        .add({ targets: '.hero-links', opacity: [0, 1], translateY: [12, 0], duration: 450 }, '-=250');
+
+      var revealIO = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (!e.isIntersecting) return;
+          revealIO.unobserve(e.target);
+          var t = e.target;
+          if (t.hasAttribute('data-stagger')) {
+            anime({ targets: t.children, opacity: [0, 1], translateY: [16, 0], duration: 550, delay: anime.stagger(70), easing: 'easeOutCubic' });
+          } else {
+            anime({ targets: t, opacity: [0, 1], translateY: [18, 0], duration: 650, easing: 'easeOutCubic' });
+          }
+        });
+      }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+      document.querySelectorAll('.reveal, [data-stagger]').forEach(function (el) { revealIO.observe(el); });
+
+      var countIO = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (!e.isIntersecting) return;
+          countIO.unobserve(e.target);
+          var el = e.target, end = parseInt(el.getAttribute('data-count'), 10);
+          var obj = { v: 0 };
+          anime({
+            targets: obj, v: end, round: 1, duration: 1200, easing: 'easeOutExpo',
+            update: function () { el.textContent = obj.v.toLocaleString('en-US'); }
+          });
+        });
+      }, { threshold: 0.6 });
+      document.querySelectorAll('[data-count]').forEach(function (el) { countIO.observe(el); });
+
+      // Module card cursor spotlight
+      document.querySelectorAll('.module-card').forEach(function (card) {
+        card.addEventListener('mousemove', function (e) {
+          var r = card.getBoundingClientRect();
+          card.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+          card.style.setProperty('--my', (e.clientY - r.top) + 'px');
+        });
       });
-    });
-    window.addEventListener('pageshow', () => { transitionEl.classList.remove('active'); });
+    })();
   </script>
   <script type="module">
     // Only pay for the shader where it earns its keep: the bundle is not even
-    // fetched under reduced-motion, on small screens (the orbs already dim to
-    // 0.08 there), or on a browser without WebGPU. Any failure leaves the CSS
-    // orbs untouched, so the page never ends up with a blank background.
+    // fetched under reduced-motion, on small screens, or without WebGPU.
     if (
       !matchMedia('(prefers-reduced-motion: reduce)').matches &&
       !matchMedia('(max-width: 768px)').matches &&
       navigator.gpu
     ) {
+      const paletteForTheme = () =>
+        document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+
       import('/assets/bg.js')
-        .then((m) => m.start(document.getElementById('bg-canvas')))
-        .then(() => document.body.classList.add('gpu-bg'))
+        .then((m) => m.start(document.getElementById('bg-canvas'), paletteForTheme()))
+        .then((bg) => {
+          document.body.classList.add('gpu-bg');
+          new MutationObserver(() => bg.setPalette(paletteForTheme())).observe(
+            document.documentElement,
+            { attributes: true, attributeFilter: ['data-theme'] },
+          );
+        })
         .catch(() => {});
     }
   </script>

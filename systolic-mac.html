@@ -25,6 +25,9 @@
       document.documentElement.setAttribute('data-theme', t);
     })();
   </script>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="alternate icon" href="/favicon.png" />
+  <link rel="apple-touch-icon" href="/favicon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -499,7 +502,7 @@
 
         <div style="margin-top:1.5rem;" class="hero-el hero-links">
           <div class="links-row">
-            <a href="https://github.com/Coizi/tt_um_systolicmac" target="_blank" class="project-link">GitHub ↗</a>
+            <a href="https://github.com/Coizi/tt_um_systolicmac" target="_blank" rel="noopener noreferrer" class="project-link">GitHub ↗</a>
           </div>
         </div>
 
@@ -508,7 +511,8 @@
           <div class="gds-viewer-wrap">
             <img
               class="gds-img"
-              src="Chip3D.png"
+              src="Chip3D.webp"
+              width="1600" height="901" decoding="async" fetchpriority="high"
               alt="3D GDS layout render of 4×4 systolic MAC accelerator"
             />
             <div class="scanline"></div>

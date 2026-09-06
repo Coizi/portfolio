@@ -18,6 +18,9 @@
   <meta name="twitter:title" content="Joshua Taylor — ECE @ CMU" />
   <meta name="twitter:description" content="Hardware/software engineer building silicon, FPGAs, and embedded systems. ECE @ CMU 2028." />
   <meta name="twitter:image" content="https://joshuataylor.xyz/og/og-home.png" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="alternate icon" href="/favicon.png" />
+  <link rel="apple-touch-icon" href="/favicon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -315,6 +318,11 @@
       transition: background 0.3s ease;
     }
     .project-card:hover { background: var(--accent-bg); }
+    /* The PCB entry has no detail page, so it must not read as clickable:
+       no pointer cursor, no hover affordance, and no ↗ arrow in the markup. */
+    .project-card.no-link { cursor: default; }
+    .project-card.no-link:hover { background: transparent; }
+    .project-card.no-link:hover .card-title { color: var(--text); }
     .card-top { display: flex; justify-content: space-between; align-items: center; }
     .card-title { font-size: 15px; font-weight: 500; color: var(--text); transition: color 0.3s; }
     .project-card:hover .card-title { color: var(--purple-dark); }
@@ -474,9 +482,9 @@
         <p class="hero-sub fade-in" style="transition-delay:0.4s">Building systems at the boundary of silicon and software &mdash; verification, embedded, and the things in between.</p>
         <div class="hero-badges fade-in" style="transition-delay:0.55s;flex-direction:column;align-items:flex-start;">
           <div style="display:flex;gap:0.6rem;flex-wrap:wrap;margin-bottom:0.6rem;">
-            <a href="J_Taylor_Resume_V.docx.pdf" target="_blank" class="hero-link-btn">résumé &#8599;</a>
-            <a href="https://github.com/Coizi" target="_blank" class="hero-link-btn">GitHub &#8599;</a>
-            <a href="https://www.linkedin.com/in/joshtaylor06/" target="_blank" class="hero-link-btn">LinkedIn &#8599;</a>
+            <a href="J_Taylor_Resume_V.docx.pdf" target="_blank" rel="noopener noreferrer" class="hero-link-btn">résumé &#8599;</a>
+            <a href="https://github.com/Coizi" target="_blank" rel="noopener noreferrer" class="hero-link-btn">GitHub &#8599;</a>
+            <a href="https://www.linkedin.com/in/joshtaylor06/" target="_blank" rel="noopener noreferrer" class="hero-link-btn">LinkedIn &#8599;</a>
           </div>
           <div style="display:flex;gap:0.6rem;flex-wrap:wrap;">
             <span class="badge-dark">Ford SWE &middot; Summer 2026</span>
@@ -492,7 +500,7 @@
         <p class="section-label">experience</p>
         <div class="exp-list">
           <div class="exp-item">
-            <div class="exp-logo"><img src="Ford-Logo.png" alt="Ford" /></div>
+            <div class="exp-logo"><img src="Ford-Logo.webp" alt="Ford" width="96" height="54" loading="lazy" decoding="async" /></div>
             <div>
               <p class="exp-role">Product Development Engineer Intern, Electronic Platforms (EV Digital &amp; Design)</p>
               <p class="exp-company">Ford Motor Company</p>
@@ -501,7 +509,7 @@
             </div>
           </div>
           <div class="exp-item">
-            <div class="exp-logo"><img src="bwxt-logo.png" alt="BWXT" /></div>
+            <div class="exp-logo"><img src="bwxt-logo.webp" alt="BWXT" width="96" height="48" loading="lazy" decoding="async" /></div>
             <div>
               <p class="exp-role">IT Architecture &amp; Systems Engineering Intern</p>
               <p class="exp-company">BWX Technologies</p>
@@ -531,7 +539,7 @@
               </div>
             </div>
             <div class="card-img-wrap">
-              <img class="card-img" src="Chip3D.png" alt="4×4 Systolic Matrix MAC chip render" />
+              <img class="card-img" src="Chip3D-card.webp" alt="4×4 Systolic Matrix MAC chip render" width="400" height="225" loading="lazy" decoding="async" />
             </div>
           </a>
 
@@ -548,7 +556,7 @@
               </div>
             </div>
             <div class="card-img-wrap">
-              <img class="card-img" src="autoreflex.png" alt="AutoReflex aim assist system demo" />
+              <img class="card-img" src="autoreflex-card.webp" alt="AutoReflex aim assist system demo" width="400" height="225" loading="lazy" decoding="async" />
             </div>
           </a>
 
@@ -565,29 +573,29 @@
               </div>
             </div>
             <div class="card-img-wrap">
-              <img class="card-img" src="Chip3D.png" alt="FPGA neural network accelerator" />
+              <img class="card-img" src="Chip3D-card.webp" alt="FPGA neural network accelerator" width="400" height="225" loading="lazy" decoding="async" />
             </div>
           </a>
 
           <a class="project-card" href="riscv.html">
             <div class="card-content">
               <div class="card-top">
-                <h3 class="card-title">8-bit RISC-V Processor</h3>
+                <h3 class="card-title">5-Stage RV32I Pipelined CPU</h3>
                 <div class="card-right"><span class="card-tag">FPGA / RTL</span><span class="card-arrow">&#8599;</span></div>
               </div>
-              <p class="card-desc">Full processor implementation in Verilog on Basys3 FPGA. Includes instruction decoder, testbench, and SystemVerilog FSM design.</p>
-              <div class="card-chips"><span class="chip">SystemVerilog</span><span class="chip">Basys3</span><span class="chip">RISC-V</span></div>
+              <p class="card-desc">Classic five-stage (IF/ID/EX/MEM/WB) RV32I processor in SystemVerilog for the Basys3 Artix-7 — full forwarding, load-use interlocks and branch flushing. Penalties are measured by the testbench, not asserted: 2 cycles on a taken branch, 1 on a load-use stall. 163,090 checks passing across 7 constrained-random testbenches.</p>
+              <div class="card-chips"><span class="chip">SystemVerilog</span><span class="chip">RV32I</span><span class="chip">Basys3</span><span class="chip">Verification</span><span class="chip-accent">163,090 checks</span></div>
             </div>
             <div class="card-img-wrap">
-              <img class="card-img" src="riscv-logo.png" alt="RISC-V logo" />
+              <img class="card-img" src="riscv-logo.webp" alt="5-stage RV32I pipelined CPU" width="400" height="225" loading="lazy" decoding="async" />
             </div>
           </a>
 
-          <div class="project-card">
+          <div class="project-card no-link">
             <div class="card-content">
               <div class="card-top">
                 <h3 class="card-title">PCB Design &amp; Fabrication</h3>
-                <div class="card-right"><span class="card-tag">PCB DESIGN</span><span class="card-arrow">&#8599;</span></div>
+                <div class="card-right"><span class="card-tag">PCB DESIGN</span></div>
               </div>
               <p class="card-desc">Designed and fabricated a PCB with defined test patterns, going end-to-end from schematic to physical board via JLCPCB with full BOM and CPL files.</p>
               <div class="card-chips"><span class="chip">Eagle/Fusion</span><span class="chip">JLCPCB</span><span class="chip">BOM / CPL</span></div>
@@ -618,9 +626,9 @@
             <p class="contact-sub">jtaylor3@andrew.cmu.edu</p>
           </div>
           <div class="contact-btns">
-            <a href="https://www.linkedin.com/in/joshtaylor06/" target="_blank" class="contact-btn">LinkedIn &#8599;</a>
+            <a href="https://www.linkedin.com/in/joshtaylor06/" target="_blank" rel="noopener noreferrer" class="contact-btn">LinkedIn &#8599;</a>
             <a href="mailto:jtaylor3@andrew.cmu.edu" class="contact-btn">email &#8599;</a>
-            <a href="J_Taylor_Resume_V.docx.pdf" target="_blank" class="contact-btn">résumé &#8599;</a>
+            <a href="J_Taylor_Resume_V.docx.pdf" target="_blank" rel="noopener noreferrer" class="contact-btn">résumé &#8599;</a>
           </div>
         </div>
       </section>
@@ -629,7 +637,7 @@
     <div id="page-end"></div>
   </div>
 
-  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  <script>
     function buildDispMap(w, h) {
       const edge = Math.min(w, h) * 0.07;
       const svg = `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">

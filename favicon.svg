@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" role="img" aria-label="Chip die">
+  <g fill="#6c4fd4">
+    <!-- pins -->
+    <rect x="52" y="2" width="11" height="20" rx="3.5"/>
+    <rect x="84.5" y="2" width="11" height="20" rx="3.5"/>
+    <rect x="117" y="2" width="11" height="20" rx="3.5"/>
+    <rect x="52" y="158" width="11" height="20" rx="3.5"/>
+    <rect x="84.5" y="158" width="11" height="20" rx="3.5"/>
+    <rect x="117" y="158" width="11" height="20" rx="3.5"/>
+    <rect x="2" y="52" width="20" height="11" rx="3.5"/>
+    <rect x="2" y="84.5" width="20" height="11" rx="3.5"/>
+    <rect x="2" y="117" width="20" height="11" rx="3.5"/>
+    <rect x="158" y="52" width="20" height="11" rx="3.5"/>
+    <rect x="158" y="84.5" width="20" height="11" rx="3.5"/>
+    <rect x="158" y="117" width="20" height="11" rx="3.5"/>
+    <!-- package -->
+    <rect x="18" y="18" width="144" height="144" rx="30"/>
+  </g>
+  <!-- die -->
+  <rect x="57" y="57" width="66" height="66" rx="13" fill="#fafaf8"/>
+</svg>
