@@ -4,6 +4,20 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FPGA Neural Network Accelerator — Joshua Taylor</title>
+  <meta name="description" content="INT8 MLP running live on a Basys3 Artix-7 FPGA. Draw a digit in the browser; 784 bytes stream over UART and the hardware returns a prediction in ~78ms." />
+  <!-- Open Graph / link preview -->
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content="https://joshuataylor.xyz/nn-accelerator.html" />
+  <meta property="og:title" content="FPGA Neural Network Accelerator — Joshua Taylor" />
+  <meta property="og:description" content="INT8 MLP running live on a Basys3 Artix-7 FPGA. Draw a digit in the browser; 784 bytes stream over UART and the hardware returns a prediction in ~78ms." />
+  <meta property="og:image" content="https://joshuataylor.xyz/og/og-nn-accelerator.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <!-- Twitter card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="FPGA Neural Network Accelerator — Joshua Taylor" />
+  <meta name="twitter:description" content="INT8 MLP running live on a Basys3 Artix-7 FPGA. Draw a digit in the browser; 784 bytes stream over UART and the hardware returns a prediction in ~78ms." />
+  <meta name="twitter:image" content="https://joshuataylor.xyz/og/og-nn-accelerator.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -25,6 +39,24 @@
     .orb-1 { width: 600px; height: 600px; top: -150px; left: -150px; background: radial-gradient(circle, #c4b5f4, transparent); }
     .orb-2 { width: 450px; height: 450px; top: 300px; right: -100px; background: radial-gradient(circle, #9b82e8, transparent); }
     .orb-3 { width: 400px; height: 400px; bottom: 0; left: 30%; background: radial-gradient(circle, #ddd6fe, transparent); }
+
+    /* Shader background (assets/bg.js, same WGSL as the OG images in og/).
+       The .bg-orbs above stay as the fallback: they remain visible unless the
+       shader actually reaches its first frame and sets body.gpu-bg. */
+    #bg-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 1.2s ease;
+    }
+    .bg-orbs { transition: opacity 1.2s ease; }
+    body.gpu-bg #bg-canvas { opacity: 1; }
+    body.gpu-bg .bg-orbs { opacity: 0; }
     .page { position: relative; z-index: 1; }
     .container { max-width: var(--max-w); margin: 0 auto; padding: 0 2rem; }
     .back { display: inline-flex; align-items: center; gap: 0.4rem; font-family: var(--font-mono); font-size: 12px; color: var(--text3); text-decoration: none; padding: 2rem 0 0; transition: color 0.15s; }
@@ -126,6 +158,7 @@
     <div class="orb orb-2"></div>
     <div class="orb orb-3"></div>
   </div>
+  <canvas id="bg-canvas" aria-hidden="true"></canvas>
 
   <div class="page">
     <div class="container">
@@ -401,6 +434,22 @@
       });
     });
     window.addEventListener('pageshow', () => transitionEl.classList.remove('active'));
+  </script>
+  <script type="module">
+    // Only pay for the shader where it earns its keep: the bundle is not even
+    // fetched under reduced-motion, on small screens (the orbs already dim to
+    // 0.08 there), or on a browser without WebGPU. Any failure leaves the CSS
+    // orbs untouched, so the page never ends up with a blank background.
+    if (
+      !matchMedia('(prefers-reduced-motion: reduce)').matches &&
+      !matchMedia('(max-width: 768px)').matches &&
+      navigator.gpu
+    ) {
+      import('/assets/bg.js')
+        .then((m) => m.start(document.getElementById('bg-canvas')))
+        .then(() => document.body.classList.add('gpu-bg'))
+        .catch(() => {});
+    }
   </script>
 </body>
 </html>

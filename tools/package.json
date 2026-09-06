@@ -1,0 +1,15 @@
+{
+  "name": "portfolio-tools",
+  "private": true,
+  "type": "module",
+  "description": "Build-time only. The deployed site is static; nothing here runs on Vercel.",
+  "scripts": {
+    "build": "node build-bg.mjs && node og-render.mjs",
+    "build:bg": "node build-bg.mjs",
+    "build:og": "node og-render.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "vgpu": "^0.4.0"
+  }
+}
