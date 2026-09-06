@@ -20,8 +20,8 @@
   <meta name="twitter:image" content="https://joshuataylor.xyz/og/og-systolic-mac.png" />
   <script>
     (function(){
-      var t = 'dark';
-      try { t = localStorage.getItem('sysmac-theme') || 'dark'; } catch(e) {}
+      var t = 'light';
+      try { t = localStorage.getItem('sysmac-theme') || 'light'; } catch(e) {}
       document.documentElement.setAttribute('data-theme', t);
     })();
   </script>
@@ -32,26 +32,17 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    /* ── Theme: dark (default) ── */
-    :root, [data-theme="dark"] {
-      --bg: #0a0a11; --bg2: #101019; --bg3: #171725;
-      --border: #22223a; --border2: #32324e;
-      --text: #eae8f4; --text2: #a29fb8; --text3: #5f5c7a;
-      --purple-dark: #c0aef7; --purple-mid: #9b82e8; --purple-light: #6c4fd4;
-      --accent-bg: rgba(108,79,212,0.10); --accent-bg2: rgba(108,79,212,0.20); --accent-border: rgba(155,130,232,0.38);
-      --ok-text: #4ade80; --ok-bg: rgba(34,197,94,0.10); --ok-border: rgba(74,222,128,0.30);
-      --warn-text: #fbbf24; --warn-bg: rgba(251,191,36,0.10); --warn-border: rgba(251,191,36,0.30);
-      --grid-line: rgba(155,130,232,0.055);
-      --glow: 0 0 28px rgba(124,92,232,0.18);
-      --glow-strong: 0 0 42px rgba(124,92,232,0.32);
-      --orb-opacity: 0.13;
-      --card-bg: #0e0e17;
+    /* ── Shared tokens (theme-independent) ── */
+    :root {
       --font-sans: 'Syne', sans-serif; --font-mono: 'DM Mono', monospace;
       --max-w: 860px;
-      color-scheme: dark;
     }
-    /* ── Theme: light ── */
-    [data-theme="light"] {
+    /* ── Theme: light (default) ──
+       Light owns bare :root so it is what you get with no data-theme at all
+       (JS disabled, or before the bootstrap runs). The dark block must stay
+       AFTER this one: [data-theme="dark"] and :root have equal specificity,
+       so source order is what lets dark win when it is selected. */
+    :root, [data-theme="light"] {
       --bg: #fafaf8; --bg2: #f3f2ee; --bg3: #eceae4;
       --border: #e0ddd6; --border2: #ccc9c0;
       --text: #1a1916; --text2: #6b6860; --text3: #a8a59e;
@@ -65,6 +56,22 @@
       --orb-opacity: 0.28;
       --card-bg: #fafaf8;
       color-scheme: light;
+    }
+    /* ── Theme: dark ── */
+    [data-theme="dark"] {
+      --bg: #0a0a11; --bg2: #101019; --bg3: #171725;
+      --border: #22223a; --border2: #32324e;
+      --text: #eae8f4; --text2: #a29fb8; --text3: #5f5c7a;
+      --purple-dark: #c0aef7; --purple-mid: #9b82e8; --purple-light: #6c4fd4;
+      --accent-bg: rgba(108,79,212,0.10); --accent-bg2: rgba(108,79,212,0.20); --accent-border: rgba(155,130,232,0.38);
+      --ok-text: #4ade80; --ok-bg: rgba(34,197,94,0.10); --ok-border: rgba(74,222,128,0.30);
+      --warn-text: #fbbf24; --warn-bg: rgba(251,191,36,0.10); --warn-border: rgba(251,191,36,0.30);
+      --grid-line: rgba(155,130,232,0.055);
+      --glow: 0 0 28px rgba(124,92,232,0.18);
+      --glow-strong: 0 0 42px rgba(124,92,232,0.32);
+      --orb-opacity: 0.13;
+      --card-bg: #0e0e17;
+      color-scheme: dark;
     }
 
     html { scroll-behavior: smooth; }
@@ -235,7 +242,7 @@
       background: radial-gradient(ellipse at center, rgba(124,92,232,0.22), transparent 70%);
       filter: blur(20px); pointer-events: none;
     }
-    [data-theme="light"] .chip-hero::before { opacity: 0.5; }
+    :root:not([data-theme="dark"]) .chip-hero::before { opacity: 0.5; }
     .gds-viewer-wrap {
       position: relative; border-radius: 10px; overflow: hidden;
       background: #09090f; border: 0.5px solid var(--accent-border);
@@ -461,7 +468,7 @@
     <div class="orb orb-2"></div>
     <div class="orb orb-3"></div>
   </div>
-  <canvas id="bg-canvas" data-palette="dark" aria-hidden="true"></canvas>
+  <canvas id="bg-canvas" aria-hidden="true"></canvas>
 
   <div class="page">
     <div class="container">
@@ -896,7 +903,7 @@ endmodule : pe</pre>
       var SUN = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>';
       var MOON = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
       function render() {
-        var dark = document.documentElement.getAttribute('data-theme') !== 'light';
+        var dark = document.documentElement.getAttribute('data-theme') === 'dark';
         iconEl.innerHTML = dark ? SUN : MOON;
         textEl.textContent = dark ? 'light mode' : 'dark mode';
       }
@@ -1267,9 +1274,20 @@ endmodule : pe</pre>
       !matchMedia('(max-width: 768px)').matches &&
       navigator.gpu
     ) {
+      const paletteForTheme = () =>
+        document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+
       import('/assets/bg.js')
-        .then((m) => m.start(document.getElementById('bg-canvas')))
-        .then(() => document.body.classList.add('gpu-bg'))
+        .then((m) => m.start(document.getElementById('bg-canvas'), paletteForTheme()))
+        .then((bg) => {
+          document.body.classList.add('gpu-bg');
+          // data-theme is the single source of truth, so watch it rather than
+          // coupling to the toggle button's own click handler.
+          new MutationObserver(() => bg.setPalette(paletteForTheme())).observe(
+            document.documentElement,
+            { attributes: true, attributeFilter: ['data-theme'] },
+          );
+        })
         .catch(() => {});
     }
   </script>

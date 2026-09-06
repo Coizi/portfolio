@@ -57,6 +57,13 @@ export async function start(canvas, paletteName = canvas?.dataset?.palette ?? "l
     await ready;
 
     return {
+      /**
+       * Swaps palette in place, for pages with a theme toggle. The frame loop
+       * already re-sends `params` every frame, so this lands on the next one.
+       */
+      setPalette(name) {
+        Object.assign(params, PALETTES[name] ?? SITE_PALETTE);
+      },
       stop() {
         loop.stop();
         gpu.dispose();
