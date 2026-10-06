@@ -50,6 +50,8 @@
     .prose ul, .prose ol { padding-left: 1.25rem; margin-bottom: 1rem; }
     .prose li { margin-bottom: 0.4rem; }
     .prose code { font-family: var(--font-mono); font-size: 12px; background: var(--bg3); border: 0.5px solid var(--border); padding: 1px 5px; border-radius: 3px; color: var(--purple-dark); }
+    .code-block { background: var(--bg2); border: 0.5px solid var(--border); border-radius: 8px; padding: 1.25rem; overflow-x: auto; margin: 1rem 0; }
+    .code-block pre { font-family: var(--font-mono); font-size: 11px; color: var(--text2); line-height: 1.65; white-space: pre; }
     .table-wrap { border: 0.5px solid var(--border); border-radius: 8px; overflow-x: auto; margin: 0.5rem 0; }
     .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
     .data-table th { font-family: var(--font-mono); font-size: 10px; color: var(--text3); letter-spacing: 0.08em; text-align: left; padding: 6px 12px; border-bottom: 0.5px solid var(--border); background: var(--bg2); }
@@ -114,13 +116,14 @@
       <div class="hero-split">
         <img class="phone-shot" src="liftpod.png" alt="LiftPod workout screen showing a live IMU acceleration trace, rep counter, and recent sets" />
         <div>
-          <p class="project-sub">A native iPhone workout tracker that turns an AirPod into a rep sensor. Strap the AirPod to a dumbbell and LiftPod streams its IMU over Core Motion, learns the movement you're repeating, counts complete reps, groups them into sets, and estimates movement speed &mdash; then optionally hands the set summary to an LLM coach for RIR, rest, and next-set suggestions.</p>
+          <p class="project-sub">A native iPhone workout tracker that turns an AirPod into a rep sensor. Strap the AirPod to a dumbbell and LiftPod streams its IMU over Core Motion, recognizes the exercise, counts reps, groups them into sets, and measures rep speed &mdash; then uses the speed decay to estimate reps in reserve, recommend the next set's weight and rest, and generate coaching through a structured-output LLM.</p>
           <div class="project-chips">
             <span class="chip">Swift</span>
             <span class="chip">SwiftUI</span>
             <span class="chip">Core Motion</span>
             <span class="chip">IMU / 50 Hz</span>
-            <span class="chip">PCA</span>
+            <span class="chip">Theil&ndash;Sen</span>
+            <span class="chip">k-NN</span>
             <span class="chip">OpenAI API</span>
             <span class="chip-accent">Hackathon</span>
           </div>
@@ -133,7 +136,7 @@
         <p class="section-label">overview</p>
         <div class="prose">
           <p>AirPods with head tracking carry a full IMU &mdash; acceleration, rotation rate, gravity, and attitude &mdash; exposed to apps through <code>CMHeadphoneMotionManager</code>. LiftPod repurposes it: instead of tracking your head, it tracks the weight. No extra hardware, just earbuds most people already own.</p>
-          <p>The core design rule is that <strong>the counter owns rep identity</strong>. Speed estimation, phase analysis, exercise classification, and AI coaching all consume counted reps as supporting evidence, but none of them can create or remove a rep on their own. A metric that fails its quality checks simply shows as unavailable.</p>
+          <p>We built it as a full on-device iOS app and demoed it live, counting reps on real dumbbell sets. The pipeline turns raw motion into reps and sets, then closes the loop: measured rep-speed decay feeds a reps-in-reserve (RIR) estimate, a next-set load and rest recommendation, and an LLM coach that pre-fills the next set.</p>
         </div>
       </section>
 
@@ -159,8 +162,8 @@
           <div class="flow-step">
             <div class="flow-num">3</div>
             <div>
-              <p class="flow-title">Learn &amp; match cycles</p>
-              <p class="flow-desc">An exercise-independent detector learns a 64-frame movement pattern, tracks ordered progress through it, and only authorizes a rep once coverage, duration, endpoint agreement, and repeatability all pass. Early qualifying cycles are backfilled once the pattern locks in.</p>
+              <p class="flow-title">Detect exercise &amp; count reps</p>
+              <p class="flow-desc">A generic detector learns a 64-frame movement pattern on the fly and authorizes a rep only once coverage, duration, endpoint agreement, and repeatability pass. Alongside it, an experimental exercise mode recognizes 10 dumbbell movements (curls, lateral raises, rows, presses, squats, RDLs, and more) from the IMU stream while counting.</p>
             </div>
           </div>
           <div class="flow-step">
@@ -174,16 +177,73 @@
             <div class="flow-num">5</div>
             <div>
               <p class="flow-title">Speed &amp; phase metrics</p>
-              <p class="flow-desc">Whole-rep speed comes from a reconstructed 3D path, gated on acceleration bias, endpoint velocity, displacement closure, and boundary sensitivity. After the set, gravity-aligned and PCA cycle proposals are matched one-to-one to counted reps to split average up vs. down speed.</p>
+              <p class="flow-desc">Per-rep speed comes from a reconstructed 3D path, gated on acceleration bias, endpoint velocity, and displacement closure. After the set, gravity-aligned and PCA cycle proposals are matched to counted reps to split average up vs. down speed.</p>
             </div>
           </div>
           <div class="flow-step">
             <div class="flow-num">6</div>
             <div>
-              <p class="flow-title">Coach</p>
-              <p class="flow-desc">An optional compact set summary is sent to the OpenAI Responses API with a structured-JSON schema, returning estimated RIR, a coaching note, rest time, and an editable next-set prefill.</p>
+              <p class="flow-title">Estimate effort &amp; coach</p>
+              <p class="flow-desc">The rep-speed trajectory drives RIR estimation, next-set load and rest recommendations, and a structured-output LLM coach &mdash; detailed below.</p>
             </div>
           </div>
+        </div>
+      </section>
+
+      <hr class="divider" />
+
+      <section class="section" id="rir">
+        <p class="section-label">rir from rep speed</p>
+        <div class="prose">
+          <p>Reps in reserve is estimated from how much the lift slows down across a set, following velocity-based-training research (Gonz&aacute;lez-Badillo 2017; Jukic 2024).</p>
+          <h3>Robust speed loss</h3>
+          <ul>
+            <li>The within-set baseline is the fastest of the first three valid reps &mdash; or the second-fastest if the fastest is more than 25% above it, to reject a startup spike.</li>
+            <li>The last five reps are fit with a <strong>Theil&ndash;Sen</strong> line (median pairwise slope), so one bad reading can't fake fatigue. The fitted final-rep speed vs. baseline gives speed loss, and the slope gives slowdown per rep.</li>
+            <li>Missing speeds keep their original rep index and are never treated as zero; mixed estimator versions or learning epochs are rejected.</li>
+          </ul>
+          <h3>Cold-start prior</h3>
+          <p>With no history, loss maps to the percentage of possible reps completed, then to RIR:</p>
+        </div>
+        <div class="code-block"><pre>p   = -0.00855 &times; loss&sup2; + 1.83311 &times; loss + 5.55281
+RIR = completedReps &times; (100 / p &minus; 1)</pre></div>
+        <div class="prose">
+          <h3>Personalized nearest-neighbor model</h3>
+          <p>When a user confirms a set's final RIR, every earlier rep in that set becomes a labeled example (<code>RIR at rep k = final RIR + total reps &minus; k</code>). New sets are matched against up to 24 prior sets of the same exercise within 25% of the load using a four-feature distance:</p>
+        </div>
+        <div class="code-block"><pre>d&sup2; = (&Delta;loss / 15)&sup2;
+   + (log(v_prior / v_now) / 0.35)&sup2;
+   + (&Delta;slowdown_per_rep / 5)&sup2;
+   + (&Delta;completedReps / 6)&sup2;
+
+RIR = &Sigma; w&middot;RIR_i / &Sigma; w,   w = 1 / (0.25 + d&sup2;)</pre></div>
+        <div class="prose">
+          <p>The closest prefix from each prior set is used (up to six sets, at least two required). The personal model is only promoted after leave-one-session-out validation beats the population prior with a mean absolute error of two reps or less; otherwise the app falls back to the prior. Live, the set is flagged as at target once the whole estimated RIR band drops to the user's chosen RIR.</p>
+        </div>
+      </section>
+
+      <hr class="divider" />
+
+      <section class="section" id="load-rest">
+        <p class="section-label">next-set load &amp; rest</p>
+        <div class="prose">
+          <p><strong>Load</strong> uses a bounded autoregulation controller adapted from RPE-based programs: when a set lands outside the target zone, the desired change is about 4% of the load per rep of RIR error. That target is then mapped onto real dumbbell increments, searching both the adjacent weight and the rep target, so a 30&rarr;35 lb jump (+16.7%) is only suggested when a capacity estimate (reps + RIR, recency-weighted over prior sets) predicts the user still lands in range.</p>
+          <p><strong>Rest</strong> takes the longest of three candidates rather than summing correlated fatigue signals:</p>
+        </div>
+        <div class="code-block"><pre>RIR candidate      = 90s + 30s &times; max(0, 3 &minus; RIR) + 30s if reps &ge; 12
+velocity candidate = 180s at 20% loss &rarr; 300s at 40%+ (linear)
+performance        = prior rest &times; (1 + drop) if capacity fell &ge; 20%
+
+rest = max(...), rounded to 10s, capped at 5 min</pre></div>
+      </section>
+
+      <hr class="divider" />
+
+      <section class="section" id="coach">
+        <p class="section-label">llm coach</p>
+        <div class="prose">
+          <p>After each set the iPhone calls the OpenAI Responses API directly with a <strong>strict JSON schema</strong>. Instead of the raw sensor stream, it sends a compact summary &mdash; prescription, authoritative rep count, an ordered per-rep array of mean/peak speed and duration, and overall speed degradation &mdash; which cut a ten-rep request from about <strong>329 KB to 3.8 KB (98.8% smaller)</strong> and brought it under the account's tokens-per-minute limit.</p>
+          <p>The model returns an estimated completed-set RIR, a short coaching note with per-rep observations, a rest recommendation, and a next-set weight / reps / target RIR that pre-fill the editable next-set fields. The schema itself constrains the answer: weight can only move in valid equipment steps (up to +10 lb or one step down), reps stay in the target range, and observations can only reference reps that were actually recorded. The prompt carries a research context block (rest-interval meta-analyses, RIR&ndash;velocity studies) and forbids claims the data can't support, like form errors or joint angles. The API key lives in the iOS Keychain.</p>
         </div>
       </section>
 
@@ -192,34 +252,7 @@
       <section class="section" id="replay">
         <p class="section-label">recording &amp; replay</p>
         <div class="prose">
-          <p>Every set is recorded as a replayable bundle. The same ordered inputs and frozen configuration drive both live processing and replay, and manifests carry hashes so a replay can be verified bit-for-bit against the original run &mdash; which made it possible to iterate on the detector offline against real recordings.</p>
-        </div>
-        <div class="table-wrap" style="margin-top:1rem;">
-          <table class="data-table">
-            <thead><tr><th>File</th><th>Purpose</th></tr></thead>
-            <tbody>
-              <tr><td>raw-motion.csv</td><td>Original Core Motion callbacks and timestamps</td></tr>
-              <tr><td>processor-transactions.jsonl</td><td>Ordered processor inputs with deterministic hashes</td></tr>
-              <tr><td>prepared-motion.jsonl</td><td>Resampled, filtered frames used by metrics and phase analysis</td></tr>
-              <tr><td>summary.json</td><td>Authorized cycles, metrics, and final processor state</td></tr>
-              <tr><td>post-set-phase-analysis.json</td><td>Derived phase boundaries, directions, and aggregate speeds</td></tr>
-              <tr><td>*-manifest.json</td><td>Counts and hashes used to verify replay integrity</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <hr class="divider" />
-
-      <section class="section" id="limitations">
-        <p class="section-label">limitations</p>
-        <div class="prose">
-          <ul>
-            <li>Rep detection depends on a consistent AirPod mount and reasonably repeatable movement.</li>
-            <li>Speed is measured at the AirPod, not the barbell, and is withheld when drift or orientation checks fail.</li>
-            <li>Exercise classification is experimental and never controls the counter.</li>
-            <li>The simulator can test logic and UI, but real accuracy needs physical recordings across people, tempos, and mounts.</li>
-          </ul>
+          <p>Every set is recorded as a replayable bundle &mdash; raw Core Motion CSV, ordered processor transactions, resampled frames, and summaries. The same ordered inputs and frozen configuration drive both live processing and replay, and manifests carry hashes so a replay can be verified against the original run. That let us record sets on the phone and iterate on detectors and estimators offline, backed by a suite of 300+ unit and integration tests.</p>
         </div>
       </section>
 
