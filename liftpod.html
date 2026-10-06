@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LiftPod — Joshua Taylor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #fafaf8; --bg2: #f3f2ee; --bg3: #eceae4;
+      --border: #e0ddd6; --border2: #ccc9c0;
+      --text: #1a1916; --text2: #6b6860; --text3: #a8a59e;
+      --purple-dark: #4b30a8; --purple-mid: #6c4fd4; --purple-light: #9b82e8;
+      --accent-bg: #f0ecfd; --accent-bg2: #e4dcfb; --accent-border: #c4b5f4;
+      --font-sans: 'Syne', sans-serif; --font-mono: 'DM Mono', monospace;
+      --max-w: 820px;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: var(--font-sans); font-size: 16px; min-height: 100vh; -webkit-font-smoothing: antialiased; }
+    .bg-orbs { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+    .orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.28; }
+    .orb-1 { width: 600px; height: 600px; top: -150px; left: -150px; background: radial-gradient(circle, #c4b5f4, transparent); }
+    .orb-2 { width: 450px; height: 450px; top: 300px; right: -100px; background: radial-gradient(circle, #9b82e8, transparent); }
+    .orb-3 { width: 400px; height: 400px; bottom: 0; left: 30%; background: radial-gradient(circle, #ddd6fe, transparent); }
+    .page { position: relative; z-index: 1; }
+    .container { max-width: var(--max-w); margin: 0 auto; padding: 0 2rem; }
+    .back { display: inline-flex; align-items: center; gap: 0.4rem; font-family: var(--font-mono); font-size: 12px; color: var(--text3); text-decoration: none; padding: 2rem 0 0; transition: color 0.15s; }
+    .back:hover { color: var(--purple-mid); }
+    .project-header { padding: 2rem 0 1.5rem; }
+    .project-tag { font-family: var(--font-mono); font-size: 10px; color: var(--purple-dark); background: var(--accent-bg2); border: 0.5px solid var(--accent-border); padding: 2px 10px; border-radius: 2px; display: inline-block; margin-bottom: 1rem; }
+    .project-title { font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; line-height: 1.1; letter-spacing: -0.03em; color: var(--text); }
+    .project-sub { margin-top: 1rem; font-size: 15px; color: var(--text2); line-height: 1.75; max-width: 600px; }
+    .project-credit { margin-top: 0.75rem; font-family: var(--font-mono); font-size: 12px; color: var(--text3); }
+    .project-credit a { color: var(--purple-mid); text-decoration: none; }
+    .project-credit a:hover { text-decoration: underline; }
+    .project-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 1.25rem; }
+    .chip { font-family: var(--font-mono); font-size: 10px; color: var(--text2); background: var(--bg3); padding: 3px 10px; border-radius: 2px; }
+    .chip-accent { font-family: var(--font-mono); font-size: 10px; color: #a3400a; background: #feecd0; border: 0.5px solid #f59e0b; padding: 3px 10px; border-radius: 2px; }
+    .divider { border: none; border-top: 0.5px solid var(--border); margin: 0; }
+    .section { padding: 2.5rem 0; }
+    .section-label { font-family: var(--font-mono); font-size: 11px; color: #b8a8f0; letter-spacing: 0.12em; margin-bottom: 1.5rem; }
+    .prose { font-size: 14px; color: var(--text2); line-height: 1.8; }
+    .prose p { margin-bottom: 1rem; }
+    .prose p:last-child { margin-bottom: 0; }
+    .prose h3 { font-family: var(--font-sans); font-size: 15px; font-weight: 600; color: var(--text); margin: 1.75rem 0 0.6rem; }
+    .prose strong { color: var(--text); font-weight: 600; }
+    .prose ul, .prose ol { padding-left: 1.25rem; margin-bottom: 1rem; }
+    .prose li { margin-bottom: 0.4rem; }
+    .prose code { font-family: var(--font-mono); font-size: 12px; background: var(--bg3); border: 0.5px solid var(--border); padding: 1px 5px; border-radius: 3px; color: var(--purple-dark); }
+    .table-wrap { border: 0.5px solid var(--border); border-radius: 8px; overflow-x: auto; margin: 0.5rem 0; }
+    .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .data-table th { font-family: var(--font-mono); font-size: 10px; color: var(--text3); letter-spacing: 0.08em; text-align: left; padding: 6px 12px; border-bottom: 0.5px solid var(--border); background: var(--bg2); }
+    .data-table td { padding: 9px 12px; border-bottom: 0.5px solid var(--border); color: var(--text2); font-size: 13px; vertical-align: top; line-height: 1.5; }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table td:first-child { font-family: var(--font-mono); font-size: 12px; color: var(--text); white-space: nowrap; }
+    .links-row { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    .project-link { font-family: var(--font-mono); font-size: 12px; color: var(--purple-dark); border: 0.5px solid var(--accent-border); background: var(--accent-bg); padding: 7px 16px; border-radius: 2px; text-decoration: none; transition: background 0.15s; }
+    .project-link:hover { background: var(--accent-bg2); }
+
+    /* Hero: phone screenshot beside summary */
+    .hero-split { display: grid; grid-template-columns: 260px 1fr; gap: 2.5rem; align-items: start; }
+    .phone-shot { width: 100%; border-radius: 28px; border: 0.5px solid var(--border2); display: block; box-shadow: 0 12px 40px rgba(26,25,22,0.14); }
+    .hero-split .project-sub { margin-top: 0; }
+
+    /* Pipeline flow */
+    .flow { display: flex; flex-direction: column; gap: 0; }
+    .flow-step { display: grid; grid-template-columns: 28px 1fr; gap: 1rem; position: relative; padding-bottom: 1.25rem; }
+    .flow-step:last-child { padding-bottom: 0; }
+    .flow-step::before { content: ''; position: absolute; left: 13.5px; top: 28px; bottom: 0; width: 1px; background: var(--accent-border); }
+    .flow-step:last-child::before { display: none; }
+    .flow-num { width: 28px; height: 28px; border-radius: 50%; background: var(--accent-bg); border: 0.5px solid var(--accent-border); font-family: var(--font-mono); font-size: 11px; color: var(--purple-dark); display: flex; align-items: center; justify-content: center; }
+    .flow-title { font-size: 14px; font-weight: 600; color: var(--text); padding-top: 4px; }
+    .flow-desc { font-size: 13px; color: var(--text2); line-height: 1.65; margin-top: 0.25rem; }
+    .flow-desc code { font-family: var(--font-mono); font-size: 11px; background: var(--bg3); border: 0.5px solid var(--border); padding: 1px 5px; border-radius: 3px; color: var(--purple-dark); }
+
+    .bottom-space { height: 5rem; }
+
+    .page-transition {
+      position: fixed; inset: 0; z-index: 9999;
+      background: var(--bg);
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.35s ease;
+    }
+    .page-transition.active { opacity: 1; pointer-events: all; }
+
+    @media (max-width: 768px) {
+      .orb { opacity: 0.08; }
+      .hero-split { grid-template-columns: 1fr; }
+      .phone-shot { max-width: 260px; margin: 0 auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-transition" id="page-transition"></div>
+  <div class="bg-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <div class="page">
+    <div class="container">
+      <a href="index.html" class="back">&#8592; back</a>
+
+      <header class="project-header">
+        <div class="project-tag">iOS / SIGNAL PROCESSING</div>
+        <h1 class="project-title">LiftPod</h1>
+        <p class="project-credit">Hackathon project &middot; built with <a href="https://github.com/bentonkt" target="_blank">Benton Tameling</a></p>
+      </header>
+
+      <div class="hero-split">
+        <img class="phone-shot" src="liftpod.png" alt="LiftPod workout screen showing a live IMU acceleration trace, rep counter, and recent sets" />
+        <div>
+          <p class="project-sub">A native iPhone workout tracker that turns an AirPod into a rep sensor. Strap the AirPod to a dumbbell and LiftPod streams its IMU over Core Motion, learns the movement you're repeating, counts complete reps, groups them into sets, and estimates movement speed &mdash; then optionally hands the set summary to an LLM coach for RIR, rest, and next-set suggestions.</p>
+          <div class="project-chips">
+            <span class="chip">Swift</span>
+            <span class="chip">SwiftUI</span>
+            <span class="chip">Core Motion</span>
+            <span class="chip">IMU / 50 Hz</span>
+            <span class="chip">PCA</span>
+            <span class="chip">OpenAI API</span>
+            <span class="chip-accent">Hackathon</span>
+          </div>
+        </div>
+      </div>
+
+      <hr class="divider" style="margin-top:2.5rem;" />
+
+      <section class="section" id="overview">
+        <p class="section-label">overview</p>
+        <div class="prose">
+          <p>AirPods with head tracking carry a full IMU &mdash; acceleration, rotation rate, gravity, and attitude &mdash; exposed to apps through <code>CMHeadphoneMotionManager</code>. LiftPod repurposes it: instead of tracking your head, it tracks the weight. No extra hardware, just earbuds most people already own.</p>
+          <p>The core design rule is that <strong>the counter owns rep identity</strong>. Speed estimation, phase analysis, exercise classification, and AI coaching all consume counted reps as supporting evidence, but none of them can create or remove a rep on their own. A metric that fails its quality checks simply shows as unavailable.</p>
+        </div>
+      </section>
+
+      <hr class="divider" />
+
+      <section class="section" id="pipeline">
+        <p class="section-label">signal pipeline</p>
+        <div class="flow">
+          <div class="flow-step">
+            <div class="flow-num">1</div>
+            <div>
+              <p class="flow-title">Capture</p>
+              <p class="flow-desc">Raw AirPod motion callbacks flow through a provider abstraction into <code>CaptureModel</code>, which owns ordered event routing and app lifecycle.</p>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num">2</div>
+            <div>
+              <p class="flow-title">Resample &amp; featurize</p>
+              <p class="flow-desc">Irregular callbacks are resampled onto a deterministic 50 Hz timeline and filtered into world-relative acceleration, rotation, and gravity features. Clock gaps, backward timestamps, or orientation failures cut the evidence epoch so a rep can never span missing data.</p>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num">3</div>
+            <div>
+              <p class="flow-title">Learn &amp; match cycles</p>
+              <p class="flow-desc">An exercise-independent detector learns a 64-frame movement pattern, tracks ordered progress through it, and only authorizes a rep once coverage, duration, endpoint agreement, and repeatability all pass. Early qualifying cycles are backfilled once the pattern locks in.</p>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num">4</div>
+            <div>
+              <p class="flow-title">Group into sets</p>
+              <p class="flow-desc">Manual mode uses Start/End Set boundaries. Automatic mode runs one continuous capture: repeated cycles open a set, sustained quiet becomes rest, and a coordinator seals each set once its boundary resolves.</p>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num">5</div>
+            <div>
+              <p class="flow-title">Speed &amp; phase metrics</p>
+              <p class="flow-desc">Whole-rep speed comes from a reconstructed 3D path, gated on acceleration bias, endpoint velocity, displacement closure, and boundary sensitivity. After the set, gravity-aligned and PCA cycle proposals are matched one-to-one to counted reps to split average up vs. down speed.</p>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num">6</div>
+            <div>
+              <p class="flow-title">Coach</p>
+              <p class="flow-desc">An optional compact set summary is sent to the OpenAI Responses API with a structured-JSON schema, returning estimated RIR, a coaching note, rest time, and an editable next-set prefill.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <hr class="divider" />
+
+      <section class="section" id="replay">
+        <p class="section-label">recording &amp; replay</p>
+        <div class="prose">
+          <p>Every set is recorded as a replayable bundle. The same ordered inputs and frozen configuration drive both live processing and replay, and manifests carry hashes so a replay can be verified bit-for-bit against the original run &mdash; which made it possible to iterate on the detector offline against real recordings.</p>
+        </div>
+        <div class="table-wrap" style="margin-top:1rem;">
+          <table class="data-table">
+            <thead><tr><th>File</th><th>Purpose</th></tr></thead>
+            <tbody>
+              <tr><td>raw-motion.csv</td><td>Original Core Motion callbacks and timestamps</td></tr>
+              <tr><td>processor-transactions.jsonl</td><td>Ordered processor inputs with deterministic hashes</td></tr>
+              <tr><td>prepared-motion.jsonl</td><td>Resampled, filtered frames used by metrics and phase analysis</td></tr>
+              <tr><td>summary.json</td><td>Authorized cycles, metrics, and final processor state</td></tr>
+              <tr><td>post-set-phase-analysis.json</td><td>Derived phase boundaries, directions, and aggregate speeds</td></tr>
+              <tr><td>*-manifest.json</td><td>Counts and hashes used to verify replay integrity</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <hr class="divider" />
+
+      <section class="section" id="limitations">
+        <p class="section-label">limitations</p>
+        <div class="prose">
+          <ul>
+            <li>Rep detection depends on a consistent AirPod mount and reasonably repeatable movement.</li>
+            <li>Speed is measured at the AirPod, not the barbell, and is withheld when drift or orientation checks fail.</li>
+            <li>Exercise classification is experimental and never controls the counter.</li>
+            <li>The simulator can test logic and UI, but real accuracy needs physical recordings across people, tempos, and mounts.</li>
+          </ul>
+        </div>
+      </section>
+
+      <hr class="divider" />
+
+      <section class="section" id="links">
+        <p class="section-label">links</p>
+        <div class="links-row">
+          <a href="https://github.com/bentonkt/LiftPod" target="_blank" class="project-link">GitHub &#8599;</a>
+        </div>
+      </section>
+
+    </div>
+    <div class="bottom-space"></div>
+  </div>
+
+  <script>
+    // Page transitions
+    const transitionEl = document.getElementById('page-transition');
+    document.querySelectorAll('a[href]').forEach(a => {
+      const href = a.getAttribute('href');
+      if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('http')) return;
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        transitionEl.classList.add('active');
+        setTimeout(() => { window.location.href = href; }, 350);
+      });
+    });
+    window.addEventListener('pageshow', () => { transitionEl.classList.remove('active'); });
+  </script>
+</body>
+</html>
